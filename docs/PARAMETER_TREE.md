@@ -32,6 +32,18 @@ npm ci
 npm run dev
 ```
 
+### 1枚の HTML ファイルとして持ち出す
+
+Node が使えない環境や、そのまま人に渡したい場合は単一ファイル版を作れます。
+グラフ・逆コンパイル結果・コードをすべて埋め込むため、**サーバーも通信も不要**で、
+ダブルクリックするだけで開きます。
+
+```bash
+cd app
+npm ci
+npm run build:single      # → app/dist-single/mss54hp-parameter-tree.html (約5.4MB)
+```
+
 ### GitHub Pages で公開する場合
 
 ビルドは常に CI で走りますが、**デプロイは明示的に有効化するまで動きません**。
@@ -141,6 +153,18 @@ from the actual binary). This tool joins them on addresses and mnemonics.
 
 ```bash
 cd app && npm ci && npm run dev
+```
+
+### Taking it away as one HTML file
+
+Where Node is not available, or to hand the whole thing to someone else, build
+the single-file version. The graph, all 644 decompiled listings and the code are
+embedded, so it opens straight from the filesystem with **no server and no
+network**.
+
+```bash
+cd app && npm ci && npm run build:single
+# -> app/dist-single/mss54hp-parameter-tree.html (about 5.4 MB)
 ```
 
 ### Publishing to GitHub Pages

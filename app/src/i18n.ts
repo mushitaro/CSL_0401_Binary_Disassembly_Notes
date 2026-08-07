@@ -33,8 +33,8 @@ const STRINGS = {
   openGerman: { ja: "独語原本", en: "German original" },
   openEnglish: { ja: "英訳（機械翻訳）", en: "English (machine translated)" },
   noDocs: {
-    ja: "このパラメータに言及する Funktionsrahmen は見つかりませんでした。",
-    en: "No Funktionsrahmen page mentions this parameter.",
+    ja: "この項目に言及する Funktionsrahmen は見つかりませんでした。",
+    en: "No Funktionsrahmen page mentions this.",
   },
 
   // tree

@@ -113,7 +113,7 @@ export function ValueTable({ node, lang }: { node: GraphNode; lang: Lang }) {
               <tr key={r}>
                 <th>{fmt(ys[r] ?? r)}</th>
                 {row.map((v, c) => (
-                  <td key={c} style={{ background: heatColour(v, min, max) }}>
+                  <td key={c} className="heat" style={{ background: heatColour(v, min, max) }}>
                     {fmt(v)}
                   </td>
                 ))}
@@ -147,7 +147,7 @@ export function ValueTable({ node, lang }: { node: GraphNode; lang: Lang }) {
             <tr>
               <th>{y.units ?? "y"}</th>
               {ys.map((v, i) => (
-                <td key={i} style={{ background: heatColour(v, min, max) }}>
+                <td key={i} className="heat" style={{ background: heatColour(v, min, max) }}>
                   {fmt(v)}
                 </td>
               ))}
@@ -272,12 +272,27 @@ function DecompiledCode({ node, lang }: { node: GraphNode; lang: Lang }) {
   const [code, setCode] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
-  const path = `${import.meta.env.BASE_URL}data/decomp/${node.bank}/${node
-    .addr!.toString(16)
-    .padStart(6, "0")}.txt`;
+  const key = `${node.bank}/${node.addr!.toString(16).padStart(6, "0")}`;
+  const path = `${import.meta.env.BASE_URL}data/decomp/${key}.txt`;
 
   useEffect(() => {
     if (!open || code !== null) return;
+    // Same arrangement as the graph: the single-file build carries every
+    // listing inline, the normal build fetches one on demand.
+    const bundle = document.getElementById("decomp-data")?.textContent;
+    if (bundle) {
+      try {
+        const map = JSON.parse(bundle) as Record<string, string>;
+        if (map[key] !== undefined) {
+          setCode(map[key]);
+          return;
+        }
+      } catch {
+        /* fall through to the network path */
+      }
+      setFailed(true);
+      return;
+    }
     let live = true;
     fetch(path)
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
@@ -286,7 +301,7 @@ function DecompiledCode({ node, lang }: { node: GraphNode; lang: Lang }) {
     return () => {
       live = false;
     };
-  }, [open, code, path]);
+  }, [open, code, path, key]);
 
   return (
     <section>

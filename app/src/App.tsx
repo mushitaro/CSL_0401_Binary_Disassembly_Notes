@@ -7,14 +7,32 @@ import { type Lang, pickLocalised, t } from "./i18n";
 const LANG_KEY = "mss54.lang";
 const ORIGIN_KEY = "mss54.origins";
 
+/** localStorage throws in sandboxed frames and in private mode on some
+ *  browsers; losing the preference is acceptable, taking the page down is not. */
+function readStored(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStored(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* preference simply does not persist here */
+  }
+}
+
 function useStoredLang(): [Lang, (l: Lang) => void] {
   const [lang, setLang] = useState<Lang>(() => {
-    const stored = localStorage.getItem(LANG_KEY);
+    const stored = readStored(LANG_KEY);
     if (stored === "ja" || stored === "en") return stored;
     return navigator.language.startsWith("ja") ? "ja" : "en";
   });
   useEffect(() => {
-    localStorage.setItem(LANG_KEY, lang);
+    writeStored(LANG_KEY, lang);
     document.documentElement.lang = lang;
   }, [lang]);
   return [lang, setLang];
@@ -89,16 +107,34 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showDense, setShowDense] = useState(false);
   const [origins, setOrigins] = useState<Set<EdgeOrigin>>(() => {
-    const stored = localStorage.getItem(ORIGIN_KEY);
-    if (stored) return new Set(JSON.parse(stored) as EdgeOrigin[]);
+    const stored = readStored(ORIGIN_KEY);
+    if (stored) {
+      try {
+        return new Set(JSON.parse(stored) as EdgeOrigin[]);
+      } catch {
+        /* fall through to the default */
+      }
+    }
     return new Set<EdgeOrigin>(["xref", "fr"]);
   });
 
   useEffect(() => {
-    localStorage.setItem(ORIGIN_KEY, JSON.stringify([...origins]));
+    writeStored(ORIGIN_KEY, JSON.stringify([...origins]));
   }, [origins]);
 
   useEffect(() => {
+    // The single-file build embeds the graph in a <script type="application/json">
+    // so the page works with no server and no network at all; the normal build
+    // fetches it so the 4 MB payload can be cached separately from the code.
+    const embedded = document.getElementById("graph-data")?.textContent;
+    if (embedded) {
+      try {
+        setGraph(index(JSON.parse(embedded) as Graph));
+      } catch (e) {
+        setError(`embedded graph data is unreadable: ${e}`);
+      }
+      return;
+    }
     fetch(`${import.meta.env.BASE_URL}data/graph.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`graph.json: HTTP ${r.status}`);
