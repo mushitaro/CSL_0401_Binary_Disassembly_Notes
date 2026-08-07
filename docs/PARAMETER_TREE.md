@@ -32,6 +32,16 @@ npm ci
 npm run dev
 ```
 
+### GitHub Pages で公開する場合
+
+ビルドは常に CI で走りますが、**デプロイは明示的に有効化するまで動きません**。
+`actions/deploy-pages` はリポジトリで Pages が有効になっていないと 404 を返し、
+これはワークフロー側からは設定できないためです。
+
+1. Settings → Pages → Build and deployment → Source を **GitHub Actions** にする
+2. Settings → Secrets and variables → Actions → Variables で
+   リポジトリ変数 **`ENABLE_PAGES` = `true`** を追加する
+
 ### 出典の区別 — ここが一番大事
 
 ツリーの各エッジには必ず出典が付きます。**混ぜていません。**
@@ -132,6 +142,16 @@ from the actual binary). This tool joins them on addresses and mnemonics.
 ```bash
 cd app && npm ci && npm run dev
 ```
+
+### Publishing to GitHub Pages
+
+The build always runs in CI; **deployment stays off until you switch it on**,
+because `actions/deploy-pages` 404s while Pages is disabled and no workflow can
+enable it for you.
+
+1. Settings → Pages → Build and deployment → Source: **GitHub Actions**
+2. Settings → Secrets and variables → Actions → Variables: add
+   **`ENABLE_PAGES` = `true`**
 
 ### Sources are never blurred
 
