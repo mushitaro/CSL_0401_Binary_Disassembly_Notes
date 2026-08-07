@@ -309,6 +309,7 @@ export default function App() {
                     lang={lang}
                     rootAgreement={rootAgreement}
                     onSelect={select}
+                    direction={direction}
                   />
                 )}
               </section>

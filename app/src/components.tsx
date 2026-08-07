@@ -186,6 +186,7 @@ export interface TreeViewProps {
   lang: Lang;
   rootAgreement: Map<string, Set<EdgeOrigin>>;
   onSelect: (id: string) => void;
+  direction?: "downstream" | "upstream";
 }
 
 function TreeRow({ tree, g, lang, rootAgreement, onSelect }: TreeViewProps) {
@@ -247,7 +248,13 @@ function TreeRow({ tree, g, lang, rootAgreement, onSelect }: TreeViewProps) {
 
 export function TreeView(props: TreeViewProps) {
   if (props.tree.children.length === 0) {
-    return <p className="empty-note">{t(props.lang, "noRelations")}</p>;
+    // Calibration data is never written by the code, so an empty upstream is
+    // the expected answer rather than a missing one.
+    const key =
+      props.direction === "upstream" && props.tree.node.t === "param"
+        ? "noUpstreamForParam"
+        : "noRelations";
+    return <p className="empty-note">{t(props.lang, key)}</p>;
   }
   return (
     <ul className="tree">

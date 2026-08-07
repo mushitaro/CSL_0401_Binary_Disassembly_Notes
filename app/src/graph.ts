@@ -115,21 +115,30 @@ export function expand(g: Indexed, rootId: string, opts: ExpandOptions): TreeNod
   const root = g.byId.get(rootId);
   if (!root) return null;
 
+  // Expansion is breadth-first on purpose.  A node reachable by several paths
+  // is only expanded once, and depth-first would hand that expansion to
+  // whichever path happened to be walked first - often a deep one - leaving a
+  // dead "(already shown)" stub in a shallower branch where the reader was
+  // looking.  Breadth-first always expands at the shallowest occurrence.
   const seen = new Set<string>([rootId]);
 
-  const walk = (id: string, depth: number, edge?: GraphEdge): TreeNode => {
-    const node = g.byId.get(id)!;
-    const self: TreeNode = {
-      node,
-      edge,
-      depth,
-      children: [],
-      repeated: false,
-      truncated: false,
-    };
-    if (depth >= opts.maxDepth) return self;
+  const make = (id: string, depth: number, edge?: GraphEdge, repeated = false): TreeNode => ({
+    node: g.byId.get(id)!,
+    edge,
+    depth,
+    children: [],
+    repeated,
+    truncated: false,
+  });
 
-    const candidates = step(g, id, opts);
+  const rootNode = make(rootId, 0);
+  const queue: TreeNode[] = [rootNode];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (current.repeated || current.depth >= opts.maxDepth) continue;
+
+    const candidates = step(g, current.node.id, opts);
     // Stable, useful order: measured references first, then documentation.
     candidates.sort((a, b) => {
       const rank = (o: EdgeOrigin) => (o === "xref" ? 0 : o === "scan" ? 1 : 2);
@@ -140,29 +149,22 @@ export function expand(g: Indexed, rootId: string, opts: ExpandOptions): TreeNod
     for (const c of candidates) {
       if (emitted.has(c.next)) continue;
       emitted.add(c.next);
-      if (self.children.length >= opts.maxChildren) {
-        self.truncated = true;
+      if (current.children.length >= opts.maxChildren) {
+        current.truncated = true;
         break;
       }
       if (seen.has(c.next)) {
-        const repeat = g.byId.get(c.next)!;
-        self.children.push({
-          node: repeat,
-          edge: c.edge,
-          depth: depth + 1,
-          children: [],
-          repeated: true,
-          truncated: false,
-        });
+        current.children.push(make(c.next, current.depth + 1, c.edge, true));
         continue;
       }
       seen.add(c.next);
-      self.children.push(walk(c.next, depth + 1, c.edge));
+      const child = make(c.next, current.depth + 1, c.edge);
+      current.children.push(child);
+      queue.push(child);
     }
-    return self;
-  };
+  }
 
-  return walk(rootId, 0);
+  return rootNode;
 }
 
 /** Nodes joined to `id` by both a measured reference and the documentation. */

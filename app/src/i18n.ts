@@ -53,6 +53,10 @@ const STRINGS = {
     ja: "選択した出典では関連が見つかりませんでした。出典フィルタを広げてみてください。",
     en: "No relations under the selected sources. Try enabling more sources.",
   },
+  noUpstreamForParam: {
+    ja: "このパラメータはフラッシュ上の設定値なので、コードが書き込む上流はありません。ここが入力そのものです。軸の値と、下流で読み出す関数をご覧ください。",
+    en: "This is a calibration value in flash, so no code writes it - it is the input. Look at its axes and at what reads it downstream instead.",
+  },
   agreementBoth: { ja: "仕様一致", en: "matches docs" },
   agreementFrOnly: { ja: "仕様のみ・未確認", en: "documented, unconfirmed" },
 
