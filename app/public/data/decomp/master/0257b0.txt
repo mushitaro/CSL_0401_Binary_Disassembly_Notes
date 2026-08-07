@@ -1,0 +1,12 @@
+
+void llr_init(void)
+
+{
+  LLR_FLAGS = 0;
+  LLR_ZUSTAND = 1;
+  llr_qvs_roh_calc();
+  LLR_QVS = LLR_QVS_ROH;
+  llr_qsoll_calc();
+  return;
+}
+

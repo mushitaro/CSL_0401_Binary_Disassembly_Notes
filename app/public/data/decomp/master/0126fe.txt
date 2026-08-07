@@ -1,0 +1,12 @@
+
+uint tpu_set_channel_service_queue(byte param_1,byte param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = TPU_HSQR_0;
+  uVar1 = (uint)param_2 << ((uint)param_1 * 2 & 0x3f) | uVar1 & ~(3 << ((uint)param_1 * 2 & 0x3f));
+  TPU_HSQR_0 = uVar1;
+  return uVar1;
+}
+

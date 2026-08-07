@@ -1,0 +1,15 @@
+
+void memset(byte value,byte *ptr,char num)
+
+{
+  ushort uVar1;
+  
+  uVar1 = (ushort)(byte)(num - 1);
+  do {
+    *ptr = value;
+    uVar1 = uVar1 - 1;
+    ptr = ptr + 1;
+  } while (uVar1 != 0xffff);
+  return;
+}
+

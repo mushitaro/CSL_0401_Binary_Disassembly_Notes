@@ -1,0 +1,20 @@
+
+void obd_readiness_reset(void)
+
+{
+  byte bVar1;
+  undefined2 *puVar2;
+  
+  FF_DCY_CNT = 0;
+  FF_WUC_CNT = 0;
+  bVar1 = 0;
+  puVar2 = &FF_RD1;
+  do {
+    *puVar2 = 0;
+    bVar1 = bVar1 + 1;
+    puVar2 = puVar2 + 1;
+  } while (bVar1 < 0x10);
+  OBD_ACT_MASK = 0;
+  return;
+}
+

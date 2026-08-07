@@ -1,0 +1,54 @@
+
+void can_tx_316(struct_rx_tx_frame *tx_frame_struct)
+
+{
+  byte b0;
+  byte b1;
+  byte b2;
+  byte b3;
+  byte b4;
+  byte b5;
+  byte b6;
+  byte b7;
+  
+  b2 = 0;
+  b3 = 0;
+  b4 = 0;
+  b5 = 0;
+  b6 = 0;
+  b7 = 0;
+  b0 = (SCHALT_S_ST & 0x20) != 0;
+  if (((CAN_ED_ASC & 0x40) == 0) && ((ASC_ED & 0x40) == 0)) {
+    b0 = b0 | 4;
+  }
+  if ((((cfg_m_getriebetyp & 0x30) == 0x30) || (cfg_m_getriebetyp == 0x10)) ||
+     (cfg_m_getriebetyp == 0x40)) {
+    b0 = b0 | 8;
+  }
+  if ((KKOS_ST_TREIBER & 0x40) != 0) {
+    b0 = b0 | 0x40;
+  }
+  b0 = (MD_ST_EINGRIFF & 3) << 4 | b0;
+                    /* In 1801 the below condition references HFM */
+  if (rf_diag_ed_st != '\0') {
+    b0 = b0 | 0x80;
+  }
+  b1 = MD_IND_NE_IST;
+  if ((LFR_ST & 1) == 0) {
+    CAN_LFR_N_ALT = (ushort)(((uint)N << 6) / 10);
+  }
+  else {
+    CAN_LFR_N_ALT = IIR_Filter_US((ushort)(((uint)N << 6) / 10),CAN_LFR_N_ALT,CAN_LFR_N_FIL_K);
+  }
+  b2 = (byte)CAN_LFR_N_ALT;
+  b3 = (byte)(CAN_LFR_N_ALT >> 8);
+  b4 = MD_IND_IST;
+  b5 = MD_REIB;
+  if ((SCHALT_M_ST & 1) != 0) {
+    b6 = b6 | 4;
+  }
+  b7 = MD_IND_LM_IST;
+  can_a_tx_frame_data(&b0,tx_frame_struct);
+  return;
+}
+

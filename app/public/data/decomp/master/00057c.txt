@@ -1,0 +1,13 @@
+
+void bootloader_qsr_init(void)
+
+{
+  QSM_QSMCR = 8;
+  QSM_QILR = 0x13;
+  QSM_QIVR = 0x12;
+  QSM_PORTQS = 0xf8;
+  QSM_DDRQS = 0x7e;
+  QSM_PQSPAR = 0x7b;
+  return;
+}
+

@@ -1,0 +1,14 @@
+
+void NW_Sync_Request_Cancel_Master(void)
+
+{
+  byte bVar1;
+  
+  if (NW_SYNCREQUEST_M != 0) {
+    NW_SYNCREQUEST_M = 0;
+    bVar1 = SIM_PFPAR._1_1_;
+    SIM_PFPAR._1_1_ = bVar1 & 0xdf;
+  }
+  return;
+}
+

@@ -1,0 +1,55 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001c5f0) */
+/* WARNING: Removing unreachable block (ram,0x0001c662) */
+/* WARNING: Removing unreachable block (ram,0x0001c674) */
+
+void ti_start_factor(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  if (((ZUSTAND_MOTOR & S) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    TI_F_START = 0x400;
+    return;
+  }
+  uVar1 = klu_bint(&KL_TI_N_KS.sizeX,N40);
+  TI_F_N_KS = (byte)uVar1;
+  if ((START_ST & B_HS) == 0) {
+    uVar1 = klu_wint(&KL_TI_TMOT_KS.sizeX,(ushort)TMOT);
+    TI_F_TMOT_KS = (ushort)uVar1;
+    if ((TI_ST_START & 2) != 0) {
+      uVar1 = klu_wint(&KL_TI_NO.sizeX,NO_ZAEHLER_S._2_2_);
+      if ((START_ST & B_WKS) == 0) {
+        iVar2 = (uint)TI_F_N_KS * (uint)TI_F_TMOT_KS;
+      }
+      else {
+        iVar2 = (uint)TI_F_TMOT_KS * ((int)((uint)TI_F_N_KS * (uint)K_TI_WKS_B2) >> 7);
+      }
+      iVar2 = (uVar1 & 0xffff) * (iVar2 >> 7);
+      if (iVar2 < 0) {
+        iVar2 = iVar2 + 0x3ff;
+      }
+      TI_F_START = (short)(iVar2 >> 10);
+      TI_F_NO_ZAEHLER = (short)uVar1;
+      return;
+    }
+    if ((START_ST & B_WKS) == 0) {
+      TI_F_START = TI_F_TMOT_KS;
+      return;
+    }
+    iVar2 = (uint)K_TI_WKS_B1 * (uVar1 & 0xffff);
+  }
+  else {
+    uVar1 = klu_wint(&KL_TI_TAN_HS.sizeX,(ushort)TAN);
+    TI_F_TAN_HS = (undefined2)uVar1;
+    if ((TI_ST_START & 2) == 0) {
+      TI_F_START = TI_F_TAN_HS;
+      return;
+    }
+    iVar2 = (uint)TI_F_N_KS * (uVar1 & 0xffff);
+  }
+  TI_F_START = (short)(iVar2 >> 7);
+  return;
+}
+

@@ -1,0 +1,12 @@
+
+void md_10ms(void)
+
+{
+  md_verbraucher();
+  md_dsc();
+  md_res_calc();
+  MD_Torque_Interventions_Ignition_Angle_and_TL_Coordination_of_Limits_FUN_000166bc();
+  MD_Interface_to_ASC_DSC();
+  return;
+}
+

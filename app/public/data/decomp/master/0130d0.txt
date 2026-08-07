@@ -1,0 +1,31 @@
+
+void task_segm(void)
+
+{
+  TPU_SEGM_INDEX_TASK = TPU_SEGM_INDEX_M;
+  saug_calc();
+  wdk_segm_calc();
+  aq_rel_calc();
+  rf_soll_calc();
+  km_tel_calc();
+  km_evaluate_knock();
+  knock_related_3_();
+  knock_related_4_();
+  tz_related_2_();
+  if (((CFG_RAM_SG_TYP & 2) != 0) && (K_DA_CONTROL != '\0')) {
+    DA_related_();
+  }
+  avan_2_ed_related();
+  p_saug_calc();
+  if (k_rg_m_cfg == 0) {
+    rg_m_lookup();
+  }
+  else {
+    p_egbp_calc();
+    rg_m_calc();
+  }
+  m_calc();
+  rf_calc();
+  return;
+}
+

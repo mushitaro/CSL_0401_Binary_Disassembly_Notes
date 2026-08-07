@@ -1,0 +1,28 @@
+
+void qadc_init(void)
+
+{
+  char counter;
+  undefined2 *ptr_qadc_ccw;
+  undefined2 *ptr_qadc_ccw_cfg_table;
+  
+  counter = 40;
+  ptr_qadc_ccw = &QADC_CCW;
+  ptr_qadc_ccw_cfg_table = &qadc_ccw_cfg_table;
+  do {
+    *ptr_qadc_ccw = *ptr_qadc_ccw_cfg_table;
+    counter = counter + -1;
+    ptr_qadc_ccw = ptr_qadc_ccw + 1;
+    ptr_qadc_ccw_cfg_table = ptr_qadc_ccw_cfg_table + 1;
+  } while (0 < counter);
+  QADC_QADCMCR = 0xe;
+  QADC_QADCINT = 0x60;
+  QADC_PORTQA = 0;
+  QADC_PORTQB = 0;
+  QADC_DDRQA = 0;
+  QADC_QACR0 = 0x115;
+  QADC_QACR1 = 0x100;
+  QADC_QACR2 = 0x1183;
+  return;
+}
+

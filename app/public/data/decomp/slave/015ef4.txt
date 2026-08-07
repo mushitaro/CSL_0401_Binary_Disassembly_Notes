@@ -1,0 +1,43 @@
+
+void ask_flap_closed_calibration_unused(void)
+
+{
+  char cVar1;
+  
+                    /* Extra in 0401? */
+  cVar1 = ask_flap_closed_calibration_timer;
+  if (DAT_00ffdc8f == 0) {
+    DAT_00ffdc90 = 0;
+  }
+  switch(DAT_00ffdc90) {
+  case '\0':
+    DAT_00ffdc8f = DAT_00ffdc8f | 1;
+    ask_flap_closed_calibration_init();
+    DAT_00ffdc90 = 1;
+    return;
+  case '\x01':
+    ask_flap_closed_calibration_timer = k_ask_flap_pot_self_test_time;
+    ask_flap_driver_write(k_flap_closed_calibration_driver_value);
+    DAT_00ffdc90 = DAT_00ffdc90 + '\x01';
+    return;
+  case '\x02':
+    ask_flap_closed_calibration_timer = ask_flap_closed_calibration_timer + -1;
+    if (cVar1 == '\0') {
+      DAT_00ffdc90 = 3;
+      return;
+    }
+    break;
+  case '\x03':
+    cVar1 = ask_flap_pot_measure_closed_position();
+    if (cVar1 == 0) {
+      ask_flap_closed_calibration_timer = k_flap_closed_calibration_settle_time;
+      DAT_00ffdc90 = 4;
+      return;
+    }
+    break;
+  default:
+    DAT_00ffdc8f = 0x80;
+  }
+  return;
+}
+

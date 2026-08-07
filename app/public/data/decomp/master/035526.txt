@@ -1,0 +1,33 @@
+
+void obd_arm_drive_cycle_monitors(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte *pbVar3;
+  byte *pbVar4;
+  struct_ed_fil *psVar5;
+  
+  bVar1 = 1;
+  psVar5 = ed_fil_base;
+  pbVar3 = &k_ed_fil_base[1].K_ED_FIL_CTL;
+  do {
+    psVar5 = psVar5 + 1;
+    if ((((psVar5->ED_FIL_OBD & 8) != 0) && ((psVar5->ED_FIL_ART & 0x40) != 0)) &&
+       ((*pbVar3 & 0x20) != 0)) {
+      bVar2 = 0;
+      pbVar4 = &DAT_00ffd202;
+      do {
+        if (bVar1 == *pbVar4) {
+          pbVar4[1] = pbVar4[1] | 0x10;
+        }
+        pbVar4 = pbVar4 + 0x16;
+        bVar2 = bVar2 + 1;
+      } while (bVar2 < 0x20);
+    }
+    pbVar3 = pbVar3 + 0xe;
+    bVar1 = bVar1 + 1;
+  } while (bVar1 < 0x7f);
+  return;
+}
+

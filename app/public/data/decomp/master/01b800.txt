@@ -1,0 +1,46 @@
+
+void tmot_init(void)
+
+{
+  ushort xValue;
+  uint uVar1;
+  int iVar2;
+  
+  TMOT_STA = 0;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    TMOT_ABSTELL = 0x80;
+  }
+  TMOT = 0;
+  TMOT_ST1 = 0;
+  TMOT_ST2 = 0;
+  DAT_00ffed56 = 0;
+  TMOT_MODELL = 0;
+  TMOT_TIME_FEHLER_MIN = 0;
+  TMOT_DIAG_SA_TIME = 0;
+  TMOT_DIAG_LL_MAX = 0;
+  TMOT_DIAG_LL_WAIT = 0;
+  TMOT_TKA_START = 0xff;
+  xValue = tmot_ad;
+  uVar1 = klu_wint(&KL_TMOT_NTC.sizeX,xValue);
+  TMOT_ROH = (ushort)uVar1;
+  tmot_filter = FUN_0001b8f4(TMOT_ROH);
+  uVar1 = (uint)tmot_filter;
+  iVar2 = uVar1 + 0x40;
+  if (SCARRY4(uVar1,0x40)) {
+    iVar2 = uVar1 + 0xbf;
+  }
+  TMOT = (undefined1)(iVar2 >> 7);
+  if (((TMOT_ED & 0x40) == 0) && ((TMOT_ST1 & 0x10) == 0)) {
+    uVar1 = (tmot_filter + 0x30) / 0x60;
+    tmot_can = (undefined1)uVar1;
+    if (0xfe < (ushort)uVar1) {
+      tmot_can = 0xfe;
+    }
+  }
+  else {
+    tmot_can = 0xff;
+  }
+  TMOT_START = TMOT;
+  return;
+}
+

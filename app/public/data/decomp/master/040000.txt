@@ -1,0 +1,9 @@
+
+void sys_task_scheduler_variables_init(void)
+
+{
+  sys_pending_tasks_bitfield = 1;
+  sys_executing_tasks_bitfield = 1;
+  return;
+}
+

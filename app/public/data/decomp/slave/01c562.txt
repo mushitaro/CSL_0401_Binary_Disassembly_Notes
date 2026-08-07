@@ -1,0 +1,8 @@
+
+void ti_base_load_factor(void)
+
+{
+  TI_F_GA = K_TI_GA;
+  return;
+}
+

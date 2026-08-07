@@ -1,0 +1,23 @@
+
+void ll_sync_state_2_measurement(void)
+
+{
+  ushort uVar1;
+  
+  uVar1 = LL_N_ANZ;
+  if (LL_CASE == '\x02') {
+    if (LU_TS != 0) {
+      LL_N_ANZ = LL_N_ANZ + 1;
+      if (uVar1 < LL_NZYL_ANZ) {
+        (&LL_T_Z_1OF8_)[(short)(ushort)LU_ZYL] =
+             (uint)LU_TS + (&LL_T_Z_1OF8_)[(short)(ushort)LU_ZYL];
+        return;
+      }
+      LL_CASE = 1;
+      return;
+    }
+    LL_CASE = '\0';
+  }
+  return;
+}
+

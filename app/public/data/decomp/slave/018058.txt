@@ -1,0 +1,9 @@
+
+void ldp_i_roh_calc(void)
+
+{
+  LDP_I_ROH = IIR_Filter_US(DAT_00fff2c4 << 4,LDP_I_ROH,(ushort)K_LDP_TP_I_ROH);
+  LDP_UB_FILT = IIR_Filter_US(DAT_00fff2c8 << 4,LDP_UB_FILT,(ushort)K_LDP_TP_UB);
+  return;
+}
+

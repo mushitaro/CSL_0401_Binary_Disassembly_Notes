@@ -1,0 +1,13 @@
+
+void wdk_doppel_ed(void)
+
+{
+  undefined4 uVar1;
+  
+  if (((OBD_STATE & 1) != 0) && (4 < WDK_MODE)) {
+    uVar1 = ed_report(DTC_79_THROTTLE_POT_BOTH_FAIL,2);
+    WDK_DOPPEL_ED = (undefined1)uVar1;
+  }
+  return;
+}
+

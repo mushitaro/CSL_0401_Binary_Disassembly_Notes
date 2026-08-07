@@ -1,0 +1,72 @@
+
+uint can_rx_153(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  byte bVar2;
+  byte local_c;
+  byte local_b;
+  byte local_a;
+  byte local_5;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    can_a_rx_frame_data(&local_c,rx_frame_struct);
+    asc_abbruch_calc(&local_c);
+    bVar2 = (local_c & 4) == 4;
+    if (K_FDYN_CONTROL == 0) {
+      if ((bool)bVar2) {
+        SCHALT_M_ST = SCHALT_M_ST | 1;
+      }
+      else {
+        SCHALT_M_ST = SCHALT_M_ST & 0xfe;
+      }
+    }
+    if ((local_5 & 2) == 2) {
+      bVar2 = bVar2 | 2;
+    }
+    if ((local_c & 0x80) == 0x80) {
+      bVar2 = bVar2 | 4;
+    }
+    if ((local_b & 1) == 1) {
+      bVar2 = bVar2 | 8;
+    }
+    if ((local_b & 2) == 2) {
+      bVar2 = bVar2 | 0x10;
+    }
+    ASC_SCHALTER = bVar2 | ASC_SCHALTER & 0xe0;
+    ASC_BLS = local_c >> 4 & 1;
+    if ((local_b & 4) == 0) {
+      V_ST = V_ST & 0xbf;
+      V_ASC = (ushort)local_a * 0x20 + (ushort)(local_b >> 3);
+    }
+    else {
+      V_ST = V_ST | 0x40;
+    }
+    DSC_L_DDS = local_5 >> 4 & 3;
+    uVar1 = local_5 >> 4 & 0xffffff03;
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 1;
+    if (CAN_ED_ASC != '\0') {
+      uVar1 = ed_report(DTC_84_DSC_CAN_TIMEOUT,0);
+      CAN_ED_ASC = (char)uVar1;
+    }
+  }
+  else {
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+    ASC_SCHALTER = ASC_SCHALTER & 0xe0;
+    ASC_BLS = 0;
+    if (K_V_CONTROL == '\x02') {
+      V_ST = V_ST | 0x40;
+    }
+    V_ASC = V_DIREKT;
+    ASC_ABBRUCH = 1;
+    uVar1 = CONCAT22((short)((uint)in_D0 >> 0x10),CAN_TEL_ST) & 0xffff0001;
+    if ((CAN_TEL_ST & 1) != 0) {
+      uVar1 = ed_report(DTC_84_DSC_CAN_TIMEOUT,4);
+      CAN_ED_ASC = (char)uVar1;
+    }
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xfffe;
+  }
+  return uVar1;
+}
+

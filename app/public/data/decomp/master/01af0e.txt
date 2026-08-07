@@ -1,0 +1,9 @@
+
+void p_umg_hoehe_calc(void)
+
+{
+  P_UMG_HOEHE = kls_wint(&KL_P_UMG_HOEHE.sizeX,
+                         (ushort)(((uint)P_UMG_FILTER << 10) / (uint)K_P_UMG_WETTER));
+  return;
+}
+

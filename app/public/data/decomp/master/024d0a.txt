@@ -1,0 +1,13 @@
+
+/* EGAS Safety Concept Computer Core Test Task 4 - Characteristic interpolation of type unsigned
+   char */
+
+uint SK_TR_Test_4(int param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = klu_bint(&KL_SK_TR_UB_M.sizeX,*(byte *)(param_1 + 1));
+  return uVar1;
+}
+

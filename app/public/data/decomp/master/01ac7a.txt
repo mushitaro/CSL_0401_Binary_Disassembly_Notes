@@ -1,0 +1,52 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void aq_rel_calc(void)
+
+{
+  uint aq_abs_wdk;
+  int iVar1;
+  int iVar2;
+  uint temp1;
+  uint temp2;
+  ushort xValue;
+  
+  xValue = WDK_SEGM;
+  if ((EGAS_SOLL == 0) && (WDK_SEGM < k_aq_rel_wdk_segm_nullage)) {
+    xValue = 0;
+  }
+  AQ_REL_OLD = AQ_REL;
+  aq_abs_wdk = klu_wint(&KL_AQ_ABS_WDK.sizeX,xValue);
+  AQ_ABS = AQ_ABS_LLS + (short)aq_abs_wdk;
+  if (K_AQ_ABS_MIN < AQ_ABS) {
+    AQ_REL = (word)((int)(((uint)AQ_ABS - (uint)K_AQ_ABS_MIN) * 0x8000) /
+                   (int)((uint)K_AQ_ABS_MAX - (uint)K_AQ_ABS_MIN));
+  }
+  else {
+    AQ_REL = 0;
+  }
+  _AQ_REL_DELTA = AQ_REL - AQ_REL_OLD;
+  iVar1 = (uint)aq_rel_rf_fakt * (uint)RF_PT_KORR;
+  iVar2 = iVar1 + 0x800;
+  if (iVar1 < -0x800) {
+    iVar2 = iVar1 + 0x17ff;
+  }
+  _aq_rel_rf_pt_fakt = (ushort)(iVar2 >> 0xc);
+  if (_aq_rel_rf_pt_fakt == 0) {
+    _aq_rel_rf_pt_fakt = 1;
+  }
+  if (aq_rel_rf_fakt != 0) {
+    temp1 = ((uint)AQ_REL << 0xf) / (uint)aq_rel_rf_fakt;
+    if (0xffff < temp1) {
+      temp1 = 0xffff;
+    }
+    aq_rel_rf = (undefined2)temp1;
+    temp2 = ((uint)AQ_REL << 0xf) / (uint)_aq_rel_rf_pt_fakt;
+    if (0xffff < temp2) {
+      temp2 = 0xffff;
+    }
+    aq_rel_rf_pt_fakt_ds2 = (undefined2)temp2;
+  }
+  return;
+}
+

@@ -1,0 +1,62 @@
+
+/* possibly the 20ms task? This is maybe the angle synch task as injector driver status is read out
+   every 720 degrees? TEFC says this is the 200ms task? */
+
+void task_100ms(void)
+
+{
+  FUN_0001310e();
+  FUN_00010f72();
+  FUN_0002dbc4();
+  FUN_00016f2c();
+  FUN_00019e26();
+  FUN_0001cb48();
+  FUN_0001c756();
+  FUN_00019f80();
+  FUN_0001a164();
+  FUN_00024bca();
+  FUN_00025c6c();
+  FUN_0002c8c2();
+  FUN_0002ce8e();
+  FUN_0002c38c();
+  FUN_0002c95e();
+  FUN_00011d02();
+  FUN_00041898();
+  FUN_00033fe6();
+  FUN_0001f2ac();
+  FUN_0001e0ce();
+  FUN_0002013e();
+  FUN_0002c10c();
+  FUN_00020ddc();
+  FUN_00020a6e();
+  FUN_00022a9a();
+  FUN_000216a2();
+  FUN_0001eb18();
+  FUN_00014ff4();
+  FUN_0001439c();
+  FUN_00014a8c();
+  FUN_0001827a();
+  if (((ZUSTAND_MOTOR & S) != 0) || ((ZUSTAND_MOTOR & KI.15 aus) != 0)) {
+    FUN_0001781c();
+  }
+  FUN_0003dc68();
+  FUN_0003e06c();
+  if (cfg_s_getriebetyp == '@') {
+    smg_can_reinforcement_and_clutch_capacity_update();
+    FUN_0002939a();
+  }
+  FUN_000110a0();
+  ask_st_calc();
+  FUN_00028216();
+  FUN_0002d81c();
+  FUN_0002544a();
+  FUN_0002d66a();
+  FUN_000276c0();
+  tefc();
+  DAT_00ffe5cc = DAT_00ffe5cc + '\x01';
+  FUN_00037482();
+  FUN_0002e7f8();
+  FUN_00034d16();
+  return;
+}
+

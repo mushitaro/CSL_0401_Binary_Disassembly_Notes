@@ -1,0 +1,13 @@
+
+void sa_init(void)
+
+{
+  SA_WE_ST = 0;
+  SA_DYN_HANDSHAKE = 0;
+  DAT_00ffda98 = 0;
+  DAT_00ffda9a = SYS_TIMERTICS_COUNTER;
+  SA_N40_KKOS = 0;
+  sa_rpm_thresholds_calc();
+  return;
+}
+

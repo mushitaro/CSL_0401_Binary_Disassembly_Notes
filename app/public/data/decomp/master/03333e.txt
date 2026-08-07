@@ -1,0 +1,52 @@
+
+uint ed_fil_table_restore_from_flash(char *param_1)
+
+{
+  undefined3 extraout_var;
+  uint32_t uVar1;
+  char cVar3;
+  uint32_t uVar2;
+  uint uVar4;
+  uint uVar5;
+  struct_ed_fil *psVar6;
+  uint8_t *a5;
+  uint8_t local_a [3];
+  byte bStack_7;
+  byte local_5;
+  
+  DAT_00ffd187 = 0x80;
+  uVar1 = flash_command_dispatch(FLASH_CMD_MEMCPY,(uint8_t *)(param_1 + 0x54c),&local_5,1);
+  if (uVar1 == 0) {
+    cVar3 = checksum_b(param_1,0x54c);
+    if (CONCAT31(extraout_var,cVar3) == (uint)local_5) {
+      uVar1 = flash_command_dispatch
+                        (FLASH_CMD_MEMCPY,(uint8_t *)param_1,(uint8_t *)&DAT_00ffd200,0x2ca);
+      uVar2 = flash_command_dispatch
+                        (FLASH_CMD_MEMCPY,(uint8_t *)(param_1 + 0x2ca),(uint8_t *)&FF_RDY,0x76);
+      uVar4 = uVar2 | uVar1;
+      uVar5 = 1;
+      psVar6 = ed_fil_base;
+      a5 = (uint8_t *)(param_1 + 0x340);
+      do {
+        psVar6 = psVar6 + 1;
+        _local_a = 0;
+        uVar1 = flash_command_dispatch(FLASH_CMD_MEMCPY,a5,local_a,4);
+        uVar4 = uVar1 | uVar4;
+        psVar6->ED_FIL_ART = bStack_7;
+        psVar6->ED_FIL_OBD = (byte)((uint)_local_a >> 8);
+        psVar6->ED_FIL_XT = (byte)((uint)_local_a >> 0x10);
+        psVar6->ED_FIL_ST = (byte)((uint)_local_a >> 0x18);
+        uVar5 = uVar5 + 1;
+        a5 = a5 + 4;
+      } while (uVar5 < 0x80);
+      goto LAB_0003342a;
+    }
+  }
+  uVar4 = uVar1 | 1;
+LAB_0003342a:
+  if (uVar4 != 0) {
+    DAT_00ffd187 = 0;
+  }
+  return uVar4;
+}
+

@@ -1,0 +1,71 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint can_a_rx_frame_data(byte *payload_data,struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined *puVar1;
+  byte bVar2;
+  undefined1 *puVar3;
+  uint uVar4;
+  uint slot_id_uint;
+  undefined1 *puVar5;
+  undefined1 *extraout_D0;
+  uint uVar6;
+  undefined4 unaff_D2;
+  char cVar7;
+  byte *pbVar8;
+  byte slot_id_temp;
+  
+  slot_id_temp = rx_frame_struct->slot_id;
+  slot_id_uint = (uint)slot_id_temp;
+  puVar3 = (undefined1 *)(slot_id_uint * 0x10 + 0xff0000);
+  puVar1 = rx_frame_struct->slot_state_table_entry_ptr;
+  puVar5 = puVar3;
+  if ((CAN_ED_TSPERR == 0) && (bVar2 = rx_frame_struct->slot_cfg_table_entry_ptr[8], bVar2 != 0)) {
+    puVar1[1] = puVar1[1] + 1;
+    puVar5 = (undefined1 *)CONCAT31((int3)((uint)puVar3 >> 8),puVar1[1]);
+    if (bVar2 <= (byte)puVar1[1]) {
+      *puVar3 = 0x7f;
+      puVar1[2] = puVar1[2] & 0xfd;
+      _DAT_00ffef40 = 1 << (slot_id_temp & 0x3f) | _DAT_00ffef40;
+      can_a_rx_ed((ushort)CONCAT31((int3)((uint)unaff_D2 >> 8),slot_id_temp));
+      puVar5 = extraout_D0;
+    }
+  }
+  uVar6 = (uint)puVar5 & 0xffffff00;
+  if ((can_a_control_message_table.control_block.un4 & 8) != 0) {
+    puVar1[2] = puVar1[2] | 1;
+  }
+  if (slot_id_temp < 15) {
+    while( true ) {
+      can_a_control_message_table.message_block[slot_id_uint - 1].slot_control_2 = 0xf5;
+      cVar7 = 8;
+      pbVar8 = payload_data;
+      do {
+        uVar4 = uVar6 >> 8;
+        uVar6 = uVar6 & 0xffffff00;
+        *pbVar8 = can_a_control_message_table.control_block.un4;
+        cVar7 = cVar7 + -1;
+        pbVar8 = pbVar8 + 1;
+      } while (cVar7 != 0);
+      uVar6 = CONCAT31((int3)uVar4,
+                       can_a_control_message_table.message_block[slot_id_uint - 1].slot_control_2);
+      if ((can_a_control_message_table.control_block.un4 & 1) != 0) break;
+      puVar1[2] = puVar1[2] | 1;
+    }
+  }
+  else {
+    cVar7 = 8;
+    pbVar8 = can_a_control_message_table.message_block[slot_id_uint - 1].data_payload;
+    do {
+      uVar6 = CONCAT31((int3)(uVar6 >> 8),*pbVar8);
+      *payload_data = can_a_control_message_table.control_block.un4;
+      cVar7 = cVar7 + -1;
+      pbVar8 = pbVar8 + 1;
+      payload_data = payload_data + 1;
+    } while (cVar7 != 0);
+  }
+  return uVar6;
+}
+

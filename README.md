@@ -3,6 +3,24 @@ CSL '0401' Binary Disassembly Notes
 ## Welcome
 Welcome to this project which seeks to progress the understanding of the CSL '0401' program binary.
 
+## Parameter Relation Tree Viewer / パラメータ関連ツリービューア
+
+A browser viewer that joins the XDF, the Funktionsrahmen and the Ghidra project
+into one searchable relation tree: pick a calibration parameter and see which
+code reads it, what that code computes, and which factory document describes it.
+No Ghidra or Java needed to use it.
+
+XDF・Funktionsrahmen・Ghidra の3資料を突き合わせ、パラメータを起点に「これを変えると
+何に効くか / これは何から決まるか」を辿れるビューアです。利用するだけなら Ghidra も
+Java も不要です。
+
+```bash
+cd app && npm ci && npm run dev
+```
+
+See **[docs/PARAMETER_TREE.md](docs/PARAMETER_TREE.md)** (日本語 / English) for how the
+sources are joined, what the coverage actually is, and how to regenerate the data.
+
 ## How to Contribute
 To contribute to this project please use the "Issues" feature to report discoveries of new information and bugs (issues identified with existing information). If you have general questions or would like to discuss particular items in general please use the "Discussions" feature.
 

@@ -1,0 +1,28 @@
+
+void fsp_entry_update_art_and_ff(byte param_1,byte param_2,char param_3)
+
+{
+  bool bVar1;
+  byte bVar2;
+  byte *pbVar3;
+  
+  bVar1 = false;
+  bVar2 = 0;
+  pbVar3 = &DAT_00ffd202;
+  do {
+    if (param_1 == *pbVar3) {
+      bVar1 = true;
+      break;
+    }
+    pbVar3 = pbVar3 + 0x16;
+    bVar2 = bVar2 + 1;
+  } while (bVar2 < 0x20);
+  if (bVar1) {
+    if (param_3 == '\0') {
+      fsp_capture_freeze_frame(bVar2,param_1,param_2);
+    }
+    (&DAT_00ffd203)[(uint)bVar2 * 0x16] = param_2;
+  }
+  return;
+}
+

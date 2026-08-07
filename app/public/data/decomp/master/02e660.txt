@@ -1,0 +1,60 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void tog_init(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  tog_ed_threshold_counter = 0;
+  TOG_CAN_ST = 0;
+  TOG_HEIZ = 0;
+  TOG_COUNT = 0;
+  TOG_ST = 0;
+  DAT_00ffeaca = 0;
+  TOG_T_FLAG = 0;
+  TOG_LEVEL_SUM = 0;
+  TOG_NIVEAU = 0x46;
+  TOG_IMP_COUNT = 0;
+  TOG_IMP_SUM = 0;
+  TOG_N_SUM = 0;
+  TOG_N = 0;
+  tog_n40_previous = (undefined1)(LFR_N_N_SOLL / 0x28);
+  uVar2 = (ushort)TAN;
+  if ((ushort)(TMOT_ABSTELL - uVar2) == 0) {
+    TOEL = TAN;
+  }
+  else {
+    TOEL_MAX = TAN + (char)(((int)(short)(TMOT - uVar2) * (int)(short)(TOEL_ABSTELL - uVar2)) /
+                           (int)(short)(TMOT_ABSTELL - uVar2));
+    TOEL = TOEL_MAX;
+  }
+  TOG_FLAG = 2;
+  TOEL_W = (ushort)TOEL << 8;
+  TOEL_RAW = TMOT;
+  TOG_SEC_COUNTER = 0;
+  TOG_A_SPERR_COUNT = 0;
+  _TOG_T_START = 300;
+  TOG_TMOT = TMOT;
+  TOG_TKA = TKA;
+  TOG_TOEL = TMOT;
+  TOG_TKA_D = 0;
+  TOG_TMOT_D = 0;
+  TOG_TOEL_D = 0;
+  TOG_P_COUNT = (ushort)K_TOG_P_COUNT;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    TOG_TEMP_NIVEAU = 100;
+    TOEL_ABSTELL = 0x6c;
+    tog_level_sum_last = 0x6e;
+    DAT_00ffeacc = CAN_KM_STAND;
+  }
+  tog_rp_sperr_counter = k_tog_rp_sperr;
+  TOG_TOEL_ALT = TOEL_W;
+  uVar1 = klu_bint(&kl_tog_level_can.sizeX,tog_level_sum_last);
+  tog_level_pre_can = (byte)uVar1;
+  tog_level_can = tog_level_pre_can | 0xc0;
+  tog_level_to_step_index();
+  return;
+}
+

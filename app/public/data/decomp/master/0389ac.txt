@@ -1,0 +1,48 @@
+
+void obd_clear_cycle_counters(void)
+
+{
+  byte bVar1;
+  undefined2 *puVar2;
+  undefined2 *puVar3;
+  
+  bVar1 = 0;
+  puVar2 = &DAT_00ff8346;
+  puVar3 = &DAT_00ff8374;
+  do {
+    *puVar2 = 0;
+    *puVar3 = 0;
+    bVar1 = bVar1 + 1;
+    puVar2 = puVar2 + 1;
+    puVar3 = puVar3 + 1;
+  } while (bVar1 < 10);
+  DAT_00ff8344 = 0;
+  DAT_00ff8372 = 0;
+  DAT_00ff8345 = 0;
+  DAT_00ff8373 = 0;
+  bVar1 = 0;
+  puVar2 = &DAT_00ff835a;
+  do {
+    *(undefined1 *)puVar2 = 0;
+    bVar1 = bVar1 + 1;
+    puVar2 = (undefined2 *)((int)puVar2 + 1);
+  } while (bVar1 < 0x18);
+  bVar1 = 0;
+  puVar2 = &DAT_00ff8388;
+  do {
+    *(undefined1 *)puVar2 = 0;
+    bVar1 = bVar1 + 1;
+    puVar2 = (undefined2 *)((int)puVar2 + 1);
+  } while (bVar1 < 0x18);
+  if (CPU_Identifier == 'M') {
+    DAT_00ffd18a = 0;
+    DAT_00ffd190 = 0;
+    DAT_00ffd188 = 0;
+    DAT_00ffd18e = 0;
+    DAT_00ffd18c = 0;
+    DAT_00ffd192 = 0;
+    DAT_00ffd194 = 0;
+  }
+  return;
+}
+

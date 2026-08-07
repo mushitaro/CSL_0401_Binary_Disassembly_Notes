@@ -1,0 +1,108 @@
+
+/* The SLP driver HIP81 from Harris can diagnose the following errors:
+   - open load = interruption
+   - Short circuit to UB
+   - Short circuit to ground
+   - Overtemperature
+   The driver status is read out synchronously with the angle (every 720 °CA) and "averaged" over
+   100 msec. In the
+   background task, the driver status is checked for errors and the error evaluation routine is
+   called.
+   This routine is called ed_report(unsigned char error, unsigned char errortype).
+   The routine enters the error into the error memory after a certain error frequency.
+   
+   The transfer parameters for the error type to ed_report are the following values:
+   0x00: no mistake
+   0x01: short to battery
+   0x02: short to ground
+   0x04: open load
+   0x08: overtemperature */
+
+void lsh_ELU_Driver_Diagnostics(void)
+
+{
+  undefined4 uVar1;
+  byte TransferParameter;
+  
+  if ((LSHV1_TR_ED & 0x40) != 0) {
+    if ((LSHV1_TR_ED & 0x10) != 0) {
+      if ((LSHV1_TR_ED & 0xf) == 0) {
+        if ((LSHV1_TR_ED & 0x20) == 0) {
+          LSHV1_TR_ED = LSHV1_TR_ED | 0x20;
+        }
+      }
+      else {
+        if ((LSHV1_TR_ED & 1) == 0) {
+          if ((LSHV1_TR_ED & 2) == 0) {
+            if ((LSHV1_TR_ED & 4) == 0) goto LAB_000238de;
+            TransferParameter = 4;
+          }
+          else {
+            TransferParameter = 2;
+          }
+        }
+        else {
+          TransferParameter = 1;
+        }
+        uVar1 = ed_report(DTC_25_O2_HEATER_FRONT_BANK1,TransferParameter);
+        LSHV1_ED = (byte)uVar1;
+      }
+    }
+LAB_000238de:
+    if ((LSHV1_TR_ED & 7) == 0) {
+      if ((LSHV_DIAG_R1 < K_LSHV1_DIAG_RU) || (K_LSHV1_DIAG_RO < LSHV_DIAG_R1)) {
+        TransferParameter = 8;
+      }
+      else {
+        if (((LSHV1_TR_ED & 0x20) == 0) || ((LSHV1_ED & 0xe0) == 0)) goto LAB_0002392a;
+        TransferParameter = 0;
+      }
+      uVar1 = ed_report(DTC_25_O2_HEATER_FRONT_BANK1,TransferParameter);
+      LSHV1_ED = (byte)uVar1;
+    }
+LAB_0002392a:
+    LSHV1_TR_ED = LSHV1_TR_ED & 0xa0;
+  }
+  if ((LSHV2_TR_ED & 0x40) == 0) {
+    return;
+  }
+  if ((LSHV2_TR_ED & 0x10) != 0) {
+    if ((LSHV2_TR_ED & 0xf) == 0) {
+      if ((LSHV2_TR_ED & 0x20) == 0) {
+        LSHV2_TR_ED = LSHV2_TR_ED | 0x20;
+      }
+    }
+    else {
+      if ((LSHV2_TR_ED & 1) == 0) {
+        if ((LSHV2_TR_ED & 2) == 0) {
+          if ((LSHV2_TR_ED & 4) == 0) goto LAB_0002397c;
+          TransferParameter = 4;
+        }
+        else {
+          TransferParameter = 2;
+        }
+      }
+      else {
+        TransferParameter = 1;
+      }
+      uVar1 = ed_report(DTC_26_O2_HEATER_FRONT_BANK2,TransferParameter);
+      LSHV2_ED = (byte)uVar1;
+    }
+  }
+LAB_0002397c:
+  if ((LSHV2_TR_ED & 7) == 0) {
+    if ((LSHV_DIAG_R2 < K_LSHV2_DIAG_RU) || (K_LSHV2_DIAG_RO < LSHV_DIAG_R2)) {
+      TransferParameter = 8;
+    }
+    else {
+      if (((LSHV2_TR_ED & 0x20) == 0) || ((LSHV2_ED & 0xe0) == 0)) goto LAB_000239c0;
+      TransferParameter = 0;
+    }
+    uVar1 = ed_report(DTC_26_O2_HEATER_FRONT_BANK2,TransferParameter);
+    LSHV2_ED = (byte)uVar1;
+  }
+LAB_000239c0:
+  LSHV2_TR_ED = LSHV2_TR_ED & 0xa0;
+  return;
+}
+

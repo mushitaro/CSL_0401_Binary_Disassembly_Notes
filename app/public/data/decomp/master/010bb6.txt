@@ -1,0 +1,36 @@
+
+undefined4 qadc_diag(void)
+
+{
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  byte bVar1;
+  char cVar2;
+  char cVar3;
+  short *psVar4;
+  short *psVar5;
+  
+  cVar2 = '\0';
+  cVar3 = '(';
+  psVar4 = &qadc_ccw_cfg_table;
+  psVar5 = &QADC_CCW;
+  do {
+    cVar2 = (-(*psVar5 != *psVar4) & 1U) + cVar2;
+    cVar3 = cVar3 + -1;
+    psVar4 = psVar4 + 1;
+    psVar5 = psVar5 + 1;
+  } while ('\0' < cVar3);
+  if ('\0' < cVar2) {
+    bVar1 = set_status_register(0x2700);
+    QADC_QADCMCR = 0x800e;
+    QADC_QADCMCR = 0xe;
+    qadc_init();
+    set_status_register((ushort)CONCAT31(extraout_var,bVar1));
+    if (QADC_ERR_COUNT != -1) {
+      QADC_ERR_COUNT = QADC_ERR_COUNT + '\x01';
+    }
+    return CONCAT31(extraout_var_00,cVar2);
+  }
+  return 0;
+}
+

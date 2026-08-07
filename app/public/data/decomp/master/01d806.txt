@@ -1,0 +1,113 @@
+
+byte schalt_m_st_calc(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  byte bVar4;
+  
+  bVar4 = SIM_PORTF0;
+  bVar3 = QSM_PORTQS;
+  bVar1 = bVar3 & 0x40 | bVar4 & 0x18;
+  bVar4 = SCHALT_M_ST & (DAT_00ffedbc | DAT_00ffedbb | bVar1 | 0xa7);
+  bVar3 = DAT_00ffedbc & DAT_00ffedbb & bVar1;
+  DAT_00ffedbc = DAT_00ffedbb;
+  DAT_00ffedbb = bVar1;
+  if ((((bVar3 | bVar4) & 8) != 0) && ((bVar4 & 4) == 0)) {
+    SCHALT_START_BEGIN = 1;
+  }
+  bVar1 = bVar3 | bVar4 & 0xfb;
+  bVar2 = (byte)((int)(bVar1 & 8) >> 1);
+  if ((((((SCHALT_S_ST & 4) == 0) && ((K_S_BLS_CFG & 1) == 0)) || ((SCHALT_S_ST & 0x10) != 0)) ||
+      ((bVar1 & 0x40) != 0)) || ((ASC_BLS == '\x01' && ((K_S_BLS_CFG & 2) == 0)))) {
+    SCHALT_M_ST = bVar2 | bVar1 | 0x80;
+  }
+  else {
+    SCHALT_M_ST = bVar2 | bVar3 | bVar4 & 0x7b;
+  }
+  if (S_BLS_TIME_LA != 0) {
+    S_BLS_TIME_LA = S_BLS_TIME_LA - 1;
+  }
+  if ((int)(SCHALT_M_ST & 0x80) >> 2 != (SCHALT_M_ST & 0x20)) {
+    if ((uint)K_S_BLS_TIME_LA_DELTA + (uint)S_BLS_TIME_LA < (uint)K_S_BLS_TIME_LA_MAX) {
+      S_BLS_TIME_LA = K_S_BLS_TIME_LA_DELTA + S_BLS_TIME_LA;
+    }
+    else {
+      S_BLS_TIME_LA = K_S_BLS_TIME_LA_MAX;
+    }
+  }
+  if ((K_S_BLS_TIME_LA_OK < S_BLS_TIME_LA) || ((S_BLS_TIME_LA_ST != '\0' && (S_BLS_TIME_LA != 0))))
+  {
+    S_BLS_TIME_LA_ST = 1;
+  }
+  else {
+    S_BLS_TIME_LA_ST = 0;
+  }
+  bVar3 = (byte)((int)((SCHALT_M_ST & 0xdf) & 0x80) >> 2);
+  bVar4 = bVar3 | SCHALT_M_ST & 0xdf;
+  switch(K_FDYN_CONTROL) {
+  case 0:
+    break;
+  case 1:
+    bVar4 = bVar4 | 1;
+    break;
+  default:
+    bVar4 = bVar3 | SCHALT_M_ST & 0xde;
+    break;
+  case 3:
+    if ((ZUSTAND_MOTOR & KI.15 aus) == 0) {
+      if ((SCHALT_M_ST & 0x10) == 0) {
+        DAT_00ffead2 = DAT_00ffead2 + 1;
+        SCHALT_M_ST = bVar4;
+      }
+      else if ((SCHALT_M_ST & 2) == 0) {
+        DAT_00ffead2 = 0;
+        SCHALT_M_ST = bVar4;
+      }
+      else {
+        SCHALT_M_ST = bVar4;
+        if (DAT_00ffead2 <= k_tog_sport_schalt_schwelle) {
+          SCHALT_M_ST = bVar4 ^ 1;
+        }
+      }
+      bVar4 = SCHALT_M_ST & 0xfd;
+      if ((SCHALT_M_ST & 0x10) == 0) {
+        bVar4 = SCHALT_M_ST & 0xfd | 2;
+      }
+      break;
+    }
+    goto LAB_0001d972;
+  case 4:
+    if ((ZUSTAND_MOTOR & KI.15 aus) == 0) {
+      bVar4 = DAT_00ffedba & 1 | bVar4;
+      if (((SCHALT_M_ST & 0x10) == 0) && ((SCHALT_M_ST & 2) != 0)) {
+        bVar4 = bVar4 ^ 1;
+      }
+      SCHALT_M_ST = bVar4;
+      DAT_00ffedba = (byte)((int)((SCHALT_M_ST & 0xfd) & 0x10) >> 3) | SCHALT_M_ST & 0xfd;
+      bVar4 = DAT_00ffedba;
+      break;
+    }
+LAB_0001d972:
+    bVar4 = bVar3 | SCHALT_M_ST & 0xdc;
+  }
+  SCHALT_M_ST = bVar4;
+  bVar4 = cfg_m_baureihe & 0xf8;
+  if ((bVar4 == 8) && (bVar4 = cfg_m_motortyp & 0xef, bVar4 != 0x20)) {
+    if ((SCHALT_M_ST & 1) == 0) {
+      CTM4_PWM5B = 0;
+    }
+    else {
+      CTM4_PWM5B = 400;
+    }
+    if ((LDP_ED_DECKEL & 0x60) != 0) {
+      CTM4_PWM7B = 400;
+      return LDP_ED_DECKEL & 0x60;
+    }
+    CTM4_PWM7B = 0;
+    bVar4 = 0;
+  }
+  return bVar4;
+}
+

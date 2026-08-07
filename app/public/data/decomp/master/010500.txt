@@ -1,0 +1,70 @@
+
+void SIM_Init(void)
+
+{
+  SIM_PICR = 0x411;
+  if ((CFG_RAM_SG_TYP & 2) == 0) {
+    SIM_CSPAR0 = 0x2fff;
+    SIM_CSPAR1 = 0x20a;
+    SIM_CSBARBT = 7;
+    SIM_CSORBT = 0x6830;
+    SIM_CSBAR0 = 7;
+    SIM_CSOR0 = 0;
+    SIM_CSBAR1 = 0x13f8;
+    SIM_CSOR1 = 0;
+    SIM_CSBAR2 = 0x13f8;
+    SIM_CSOR2 = 0;
+    SIM_CSBAR3 = 0x804;
+    SIM_CSOR3 = 0;
+    SIM_CSBAR4 = 0xffc0;
+    SIM_CSOR4 = 0;
+    SIM_CSBAR5 = 0xff80;
+    SIM_CSOR5 = 0x7870;
+    SIM_CSBAR6 = 0xff00;
+    SIM_CSOR6 = 0x78b0;
+    SIM_CSBAR7 = 0xff20;
+    SIM_CSOR7 = 0x7830;
+    SIM_CSBAR8 = 0xfff8;
+    SIM_CSOR8 = 0x7801;
+    SIM_CSBAR9 = 0;
+    SIM_CSOR9 = 0;
+    SIM_CSBAR10 = 0xff10;
+    SIM_CSOR10 = 0;
+  }
+  else {
+    SIM_CSPAR0 = 0x2fff;
+    SIM_CSPAR1 = 0x20a;
+    SIM_CSBARBT = 6;
+    SIM_CSORBT = 0x7830;
+    SIM_CSBAR0 = 6;
+    SIM_CSOR0 = 0;
+    SIM_CSBAR1 = 0x13f8;
+    SIM_CSOR1 = 0x3830;
+    SIM_CSBAR2 = 0x13f8;
+    SIM_CSOR2 = 0x5830;
+    SIM_CSBAR3 = 0x804;
+    SIM_CSOR3 = 0x2870;
+    SIM_CSBAR4 = 0x804;
+    SIM_CSOR4 = 0x4870;
+    SIM_CSBAR5 = 0xff80;
+    SIM_CSOR5 = 0x7870;
+    SIM_CSBAR6 = 0xff00;
+    SIM_CSOR6 = 0x78b0;
+    SIM_CSBAR7 = 0xff20;
+    SIM_CSOR7 = 0x7830;
+    SIM_CSBAR8 = 0xfff8;
+    SIM_CSOR8 = 0x7801;
+    SIM_CSBAR9 = 0;
+    SIM_CSOR9 = 0;
+    SIM_CSBAR10 = 0xff10;
+    SIM_CSOR10 = 0x78b0;
+  }
+  SIM_PORTE0 = 0xc0;
+  SIM_DDRE = 0xfc;
+  SIM_PEPAR = 0;
+  SIM_PORTF0 = 0;
+  SIM_DDRF = 1;
+  SIM_PFPAR._1_1_ = 0;
+  return;
+}
+

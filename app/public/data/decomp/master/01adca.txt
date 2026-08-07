@@ -1,0 +1,35 @@
+
+void p_umg_calc(void)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  int iVar3;
+  short sVar4;
+  
+  uVar1 = p_umg_ad;
+  P_UMG_ROH = (ushort)((int)((uint)K_P_UMG_OFFSET + (uint)K_P_UMG_STEIGUNG * (uint)uVar1 + 8) >> 4);
+  p_umg_filter_calc(P_UMG_ROH);
+  P_UMG = (char)((int)(P_UMG_FILTER - 0x3e50) / 0x60);
+  if ((P_UMG_ED & 0x40) != 0) {
+    p_umg_can = 0xff;
+    return;
+  }
+  uVar2 = (uint)P_UMG_FILTER;
+  iVar3 = uVar2 - 0x4aa0;
+  if (uVar2 < 0x4aa0) {
+    iVar3 = uVar2 - 0x4a61;
+  }
+  sVar4 = (short)(iVar3 >> 6);
+  if (sVar4 < 1) {
+    p_umg_can = 1;
+    return;
+  }
+  if (0xfe < sVar4) {
+    p_umg_can = 0xfe;
+    return;
+  }
+  p_umg_can = (char)(iVar3 >> 6);
+  return;
+}
+

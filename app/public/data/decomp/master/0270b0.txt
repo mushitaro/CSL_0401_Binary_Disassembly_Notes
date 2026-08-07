@@ -1,0 +1,91 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void egas_compute_throttle_target(void)
+
+{
+  int rf_rel_korr;
+  int iVar1;
+  int fra_ml_adaption_local;
+  ushort uVar3;
+  undefined4 egas_wdk_ask;
+  uint uVar2;
+  int egas_wdk_kh;
+  int egas_wdk_kh_faktor;
+  int ml_soll_local;
+  ushort egas_wdk;
+  
+  pcntrl_m = pcntrl_m | 0x200;
+  rf_rel_korr = (uint)FR_REGLER * (uint)MD_RF_SOLL;
+  if (rf_rel_korr < 0) {
+    rf_rel_korr = rf_rel_korr + 0x7fff;
+  }
+  MD_RF_KORR = (undefined2)(rf_rel_korr >> 0xf);
+  iVar1 = (uint)ml_mot * (uint)N;
+  if (iVar1 < 0) {
+    iVar1 = iVar1 + 0x3ff;
+  }
+  uVar2 = iVar1 >> 10;
+  fra_ml_adaption_local = (int)FRA_ML_ADAPTION;
+  if (fra_ml_adaption_local < 0) {
+    fra_ml_adaption_local = fra_ml_adaption_local + 0x1f;
+  }
+  ml_soll_local =
+       (int)((uVar2 & 0xffff) * (rf_rel_korr >> 0xf & 0xffffU)) / 1000 +
+       (fra_ml_adaption_local >> 5);
+  if (ml_soll_local < 0) {
+    ml_soll_local = 0;
+  }
+  if (0xffff < ml_soll_local) {
+    ml_soll_local = 0xffff;
+  }
+  _ML_SOLL_DPR = (ushort)ml_soll_local;
+  if (_ML_SOLL_DPR < ML_SOLL_MAX_LLS) {
+    uVar3 = 0;
+    ML_SOLL_LLS = _ML_SOLL_DPR;
+  }
+  else {
+    ML_SOLL_LLS = ML_SOLL_MAX_LLS;
+    uVar3 = _ML_SOLL_DPR - ML_SOLL_MAX_LLS;
+  }
+  ML_SOLL = _ML_SOLL_DPR;
+  if (((KATH_ST & 0xf) != 0) && (ML_SOLL_WDK <= uVar3)) {
+    uVar3 = PT1_Filter_US(uVar3,ML_SOLL_WDK,K_EGAS_WDK_TAU);
+  }
+  ML_SOLL_WDK = uVar3;
+  if ((short)uVar2 != 0) {
+    RF_SOLL_WDK = (ushort)(((uint)ML_SOLL_WDK * 1000) / (uVar2 & 0xffff));
+  }
+                    /* If Snorkel Flap is closed */
+  if ((ask_zustand_dpr & 1) == 0) {
+    uVar2 = kfu_wint(&KF_EGAS_WDK.sizeX,N,RF_SOLL_WDK);
+    egas_wdk = (ushort)uVar2;
+    if ((AVAN1_ST & 0x10) != 0) {
+      egas_wdk_kh = kfu_wint(&KF_EGAS_WDK_KH.sizeX,N,RF_SOLL_WDK);
+      egas_wdk_kh_faktor = (int)AVAN1_SOLL_FAKTOR * (egas_wdk_kh - (uVar2 & 0xffff));
+      if (egas_wdk_kh_faktor < 0) {
+        egas_wdk_kh_faktor = egas_wdk_kh_faktor + 0x3fff;
+      }
+      egas_wdk = (short)(egas_wdk_kh_faktor >> 0xe) + egas_wdk;
+    }
+  }
+  else {
+                    /* Else if Snorkel Flap is open then there is a different EGAS_WDK table to use
+                        */
+    egas_wdk_ask = kfu_wint(&kf_egas_wdk_ask.sizeX,N,RF_SOLL_WDK);
+    egas_wdk = (ushort)egas_wdk_ask;
+  }
+  EGAS_BEGR_FLAG = EGAS_MAX_WDK < egas_wdk;
+  if ((bool)EGAS_BEGR_FLAG) {
+    egas_wdk = EGAS_MAX_WDK;
+  }
+  if (1000 < egas_wdk) {
+    egas_wdk = 1000;
+  }
+  WDK_SOLL = egas_wdk;
+  if (cfg_m_egas == 0) {
+    lls_tv_calc(ML_SOLL_LLS);
+  }
+  return;
+}
+

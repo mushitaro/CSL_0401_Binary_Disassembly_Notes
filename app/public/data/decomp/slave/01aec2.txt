@@ -1,0 +1,33 @@
+
+void ti_set_startbereich(void)
+
+{
+  uint ti_wks_ms_tmot;
+  
+  if (TMOT < K_TI_TMOT_KS) {
+    ti_wks_ms_tmot = klu_bint(&KL_TI_WKS_MS_TMOT.sizeX,TMOT);
+    if ((ti_wks_ms_tmot & 0xff) <= (uint)T_MOTOR_STEHT) {
+      START_ST = START_ST | B_KS;
+      return;
+    }
+    if ((START_ST & B_FLAG_WKS) == 0) {
+      START_ST = START_ST | B_KS;
+    }
+    else {
+      START_ST = START_ST | B_WKS;
+    }
+    if ((START_ST & B_FLAG_WNS) != 0) {
+      TI_ST_START = TI_ST_START | 0x10;
+      return;
+    }
+  }
+  else {
+    if (TMOT <= K_TI_TMOT_HS) {
+      START_ST = START_ST | B_NS;
+      return;
+    }
+    START_ST = START_ST | B_HS;
+  }
+  return;
+}
+

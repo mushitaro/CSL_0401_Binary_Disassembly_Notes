@@ -1,0 +1,27 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void dpr_sync(void)
+
+{
+                    /* Syncronise from the DPR (Dual-Ported RAM) */
+  _N_DPR = (uint)N;
+  _N40_DPR = (ushort)N40;
+  _TL_DPR = (uint)TL;
+  _ML_DPR = (uint)ML;
+  _RF_DPR = (uint)RF;
+  _RF5_DPR = (ushort)RF5;
+  _TAN_DPR = (ushort)TAN;
+  _TMOT_DPR = (ushort)TMOT;
+  _TOEL_DPR = (ushort)TOEL;
+  _TKATM_DPR = TKATM;
+  _SCHALT_M_ST_DPR = (ushort)SCHALT_M_ST;
+  _ASC_ST_DPR = (ushort)ASC_ST;
+  _CAN_FST_DPR = (ushort)CAN_FST;
+  SCHALT_S_ST = (char)SCHALT_S_ST_DPR;
+  UB = (char)UB_DPR;
+  TKA = (char)TKA_DPR;
+  LDP_ED_DECKEL = (char)LDP_ED_DECKEL_DPR;
+  return;
+}
+

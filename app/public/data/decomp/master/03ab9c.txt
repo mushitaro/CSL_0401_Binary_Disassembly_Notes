@@ -1,0 +1,56 @@
+
+byte * can_b_rx_handler(void)
+
+{
+  struct_slot_message_block_entry *psVar1;
+  byte bVar2;
+  undefined3 uVar3;
+  undefined4 in_D0;
+  byte *puVar5;
+  byte bVar4;
+  byte *pbVar5;
+  struct_rx_tx_frame rx_frame_struct;
+  
+  bVar2 = can_b_control_message_table.control_block.un4;
+  uVar3 = (undefined3)((uint)in_D0 >> 8);
+  puVar5 = (byte *)CONCAT31(uVar3,can_b_control_message_table.message_block[4].unk6);
+  if (can_b_control_message_table.control_block.un4 != 0) {
+    if (can_b_control_message_table.control_block.un4 == 1) {
+      puVar5 = (byte *)(CONCAT31(uVar3,can_b_tx_status) & 0xffffff3f);
+      can_b_tx_status = can_b_tx_status & 0x3f;
+    }
+    else {
+      if (can_b_control_message_table.control_block.un4 == 2) {
+        bVar4 = 0xf;
+      }
+      else {
+        bVar4 = can_b_control_message_table.control_block.un4 - 2;
+      }
+      psVar1 = can_b_control_message_table.message_block + (bVar4 - 1);
+      if (prg_can_b_num_slots < bVar4) {
+        psVar1->slot_control_1 = 0x7d;
+        puVar5 = &psVar1->slot_control_1;
+      }
+      else {
+        rx_frame_struct.slot_index = bVar4 + 0xe;
+        rx_frame_struct.slot_cfg_table_entry_ptr =
+             (undefined *)(can_a_slot_cfg_table + rx_frame_struct.slot_index);
+        rx_frame_struct.slot_state_table_entry_ptr =
+             &can_slot_status_table[rx_frame_struct.slot_index].recv_count;
+        ((struct_can_slot_state *)rx_frame_struct.slot_state_table_entry_ptr)->recv_count = 0;
+        pbVar5 = &can_slot_status_table[rx_frame_struct.slot_index].transfer_flags;
+        *pbVar5 = *pbVar5 | 8;
+        rx_frame_struct.slot_id = bVar4;
+        puVar5 = (byte *)(*(code *)can_a_slot_cfg_table[rx_frame_struct.slot_index].message_handler)
+                                   (&rx_frame_struct);
+        *pbVar5 = *pbVar5 & 0xf7;
+        psVar1->slot_control_1 = 0xfd;
+        if (bVar2 == 2) {
+          can_b_control_message_table.message_block[bVar4 - 1].slot_control_2 = 0x7d;
+        }
+      }
+    }
+  }
+  return puVar5;
+}
+

@@ -1,0 +1,15 @@
+
+void nw_ed(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = ed_report(DTC_A2_UNKOWN_TABLE_IDX_20,0x80);
+  NW_ED_M = (byte)uVar1 & 0xe0;
+  if ((uVar1 & 0xe0) != 0) {
+    NW_ST_M = 8;
+    TPU_ST_M = TPU_ST_M | keine NW;
+  }
+  return;
+}
+

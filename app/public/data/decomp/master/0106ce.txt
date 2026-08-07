@@ -1,0 +1,46 @@
+
+/* WARNING: Removing unreachable block (ram,0x00010712) */
+/* WARNING: Removing unreachable block (ram,0x0001074e) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void sram_init(void)
+
+{
+  byte bVar1;
+  int iVar2;
+  int iVar3;
+  int *piVar4;
+  
+  SRAM_RAMBAH = 0xffe000;
+  SRAM_RAMMCR = 0;
+  bVar1 = RESET_STATUS;
+  if ((bVar1 & 0xc0) == 0) {
+    iVar2 = 0xfd0;
+  }
+  else {
+    iVar2 = 0xff6;
+  }
+  iVar2 = iVar2 >> 2;
+  piVar4 = (int *)&DAT_00ffe000;
+  for (iVar3 = iVar2; iVar3 != 0; iVar3 = iVar3 + -1) {
+    *piVar4 = iVar3;
+    piVar4 = piVar4 + 1;
+  }
+  POR = POR_MUSTER != -0x5a5a5a5b;
+  if ((bool)POR) {
+    POR_MUSTER = -0x5a5a5a5b;
+  }
+                    /* I think this is a magic number and it's put in the lowest 4 bytes of the
+                       stack (e.g. it's to detect a stack overrun event) */
+  _DAT_00ffe000 = 0x31415926;
+  piVar4 = &DAT_00ffe004;
+  while (iVar2 = iVar2 + -1, iVar2 != 0) {
+    if (iVar2 != *piVar4) {
+      _DAT_00ffe000 = 0;
+    }
+    *piVar4 = 0;
+    piVar4 = piVar4 + 1;
+  }
+  return;
+}
+

@@ -1,0 +1,54 @@
+
+void can_a_rx_unused_1(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  byte local_c [3];
+  byte local_9;
+  byte local_5;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    can_a_rx_frame_data(local_c,rx_frame_struct);
+    if (cfg_m_getriebetyp == 0x70) {
+      if (((local_c[0] & 0xc0) == 0x80) && ((local_c[0] & 7) != 0)) {
+        S_KRAFTSCHLUSS = 1;
+      }
+      else {
+        S_KRAFTSCHLUSS = 0;
+      }
+    }
+    GANG = local_c[0] & 7;
+    EGS_MD_GETRIEBE = (undefined2)((uint)local_5 * (uint)MD_NORM >> 8);
+    EGS_MD_IND_GS = (ushort)((uint)local_9 * (uint)MD_NORM >> 8);
+    if (EGS_MD_IND_GS < MD_IND_MIN_GES) {
+      EGS_MD_IND_GS = 0;
+    }
+    if ((local_c[0] & 8) == 8) {
+      if (EGS_MD_IND_GS == 0) {
+        EGS_STATUS = EGS_STATUS | 4;
+      }
+      else {
+        EGS_STATUS = EGS_STATUS & 0xfb;
+      }
+      EGS_STATUS = EGS_STATUS | 1;
+    }
+    else {
+      EGS_STATUS = 0;
+    }
+    if ((local_c[0] & 0x20) == 0x20) {
+      EGS_STATUS = EGS_STATUS | 2;
+    }
+    else {
+      EGS_STATUS = EGS_STATUS & 0xfd;
+    }
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 0x10;
+  }
+  else {
+    EGS_STATUS = 0;
+    EGS_MD_IND_GS = 0;
+    EGS_MD_GETRIEBE = 0;
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xffef;
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+  }
+  return;
+}
+

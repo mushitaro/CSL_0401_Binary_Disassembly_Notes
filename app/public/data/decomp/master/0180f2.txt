@@ -1,0 +1,11 @@
+
+void md_sk_wdk_calc(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = klu_wint(&KL_MD_SK_WDK.sizeX,N);
+  md_sk_wdk = (short)uVar1;
+  return;
+}
+

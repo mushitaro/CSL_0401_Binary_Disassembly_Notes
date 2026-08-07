@@ -1,0 +1,27 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint32_t flash_erase_sector(uint16_t *sector)
+
+{
+  uint32_t uVar1;
+  
+  *sector = 0xf0;
+  _DAT_0000aaaa = 0xaa;
+  _DAT_00005554 = 0x55;
+  *sector = 0x30;
+  do {
+    SIM_SWSR = 0x55;
+    SIM_SWSR = 0xaa;
+    if ((char)*sector < '\0') goto LAB_00003636;
+  } while ((*sector & 0x20) == 0);
+  if ((char)*sector < '\0') {
+LAB_00003636:
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 6;
+  }
+  return uVar1;
+}
+

@@ -1,0 +1,224 @@
+
+undefined4 ed_report(MSS54_DTC error,byte errortype)
+
+{
+  byte *pbVar1;
+  ushort uVar2;
+  int iVar3;
+  byte bVar5;
+  byte bVar6;
+  MSS54_DTC MVar4;
+  byte bVar7;
+  byte bVar8;
+  byte err;
+  
+  if (ed_fil_base[0].ED_FIL_FIL == 0) {
+    return 0;
+  }
+  bVar7 = errortype & 0xf;
+  err = (byte)error & 0x7f;
+  bVar8 = (byte)error & 0x7f;
+                    /* 0x8f012 is two bytes before the start of the first DTC. because the control
+                       byte is the 13th byte the idea is that with the error * 0xe (14) you arrive
+                       at the control byte for the relevant error.
+                       
+                       In this case if the control byte is zero then we ignore the error and return
+                        */
+  if ((k_ed_fil_base[err].K_ED_FIL_CTL & 1) == 0) {
+    return 0;
+  }
+  if (0x7f < errortype) {
+    bVar7 = ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART;
+  }
+  else {
+    ED_COUNT = ED_COUNT + 1;
+  }
+  if ((((((errortype & 0xf) == 0) &&
+        ((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART & 0x40) == 0)) &&
+       (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL == 0)) &&
+      ((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) != 0)) || (0x7f < errortype)
+     ) goto LAB_00033c8e;
+  if ((errortype & 0xf) != 0) {
+    ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART =
+         errortype & 0xf | ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART & 0xf0;
+  }
+  if ((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART & 0x40) == 0) {
+    if ((errortype & 0xf) == 0) {
+      if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+         (((OBD_STATE & 1) != 0 || ((OBD_STATE & 8) != 0)))) {
+        uVar2 = (ushort)k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_IN_INC +
+                (ushort)ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_CNT;
+        if (uVar2 < k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_SIN) {
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_CNT = (byte)uVar2;
+        }
+        else {
+          if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+             (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT != 0xff)) {
+            ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT =
+                 ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT + 1;
+          }
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD =
+               ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD | 0x20;
+        }
+      }
+      if (k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_IN_DEC <
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL) {
+        ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL =
+             ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL -
+             k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_IN_DEC;
+      }
+      else {
+        ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL = 0;
+      }
+      goto LAB_00033c8e;
+    }
+    if (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ST != 0xff) {
+      ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ST =
+           ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ST + 1;
+    }
+    uVar2 = (ushort)k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_IN_INC +
+            (ushort)ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL;
+    if (k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_SIN <= uVar2) {
+      bVar6 = ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD;
+      if ((bVar6 & 0x10) == 0) {
+        if (((bVar6 & 3) == 0) &&
+           ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 0x10) == 0)) {
+          bVar5 = bVar6 | 1;
+        }
+        else {
+          bVar5 = bVar6 | 3;
+          if ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 4) != 0) {
+            bVar5 = bVar6 | 0xf;
+          }
+          if ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 4) != 0) {
+            if (((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 0x20) != 0) &&
+               (((OBD_STATE & 1) != 0 ||
+                (((OBD_STATE & 8) != 0 &&
+                 ((((err == 0x32 || (err == 0x1c)) || (err == 0x2b)) || (err == 0x2e)))))))) {
+              ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART =
+                   ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART | 0x10;
+            }
+            fsp_entry_update_art_and_ff
+                      (bVar8,ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART,'\0');
+          }
+        }
+        if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+           (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT != 0xff)) {
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT =
+               ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT + 1;
+        }
+        if ((DAT_00ff8148 & 0x40) == 0) {
+          bVar6 = bVar5 & 0x7f | 0x30;
+        }
+        else {
+          bVar6 = bVar5 | 0xb0;
+        }
+      }
+      ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD = bVar6;
+      ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART =
+           ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART | 0x40;
+LAB_000338c4:
+      ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL = 0;
+      fsp_fault_table_log_entry(bVar8,ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART);
+      goto LAB_00033c8e;
+    }
+  }
+  else {
+    if ((errortype & 0xf) != 0) {
+      if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+         (((OBD_STATE & 1) != 0 || ((OBD_STATE & 8) != 0)))) {
+        uVar2 = (ushort)k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_IN_INC +
+                (ushort)ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_CNT;
+        if (uVar2 < k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_SIN) {
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_CNT = (byte)uVar2;
+        }
+        else {
+          bVar6 = ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD;
+          if ((bVar6 & 0x10) == 0) {
+            if (((bVar6 & 3) == 0) &&
+               ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 0x10) == 0)) {
+              bVar5 = bVar6 | 1;
+            }
+            else {
+              bVar5 = bVar6 | 3;
+              if ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 4) != 0) {
+                bVar5 = bVar6 | 0xf;
+              }
+              if ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 4) != 0) {
+                if (((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 0x20) != 0) &&
+                   (((OBD_STATE & 1) != 0 ||
+                    (((OBD_STATE & 8) != 0 &&
+                     ((((err == 0x32 || (err == 0x1c)) || (err == 0x2b)) || (err == 0x2e)))))))) {
+                  ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART =
+                       ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART | 0x10;
+                }
+                fsp_entry_update_art_and_ff
+                          (bVar8,ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART,'\0');
+              }
+            }
+            if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+               (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT != 0xff)) {
+              ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT =
+                   ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT + 1;
+            }
+            if ((DAT_00ff8148 & 0x40) == 0) {
+              bVar6 = bVar5 & 0x7f | 0x30;
+            }
+            else {
+              bVar6 = bVar5 | 0xb0;
+            }
+          }
+          ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD = bVar6;
+        }
+      }
+      pbVar1 = &ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ST;
+      if (*pbVar1 != 0xff) {
+        *pbVar1 = *pbVar1 + 1;
+      }
+      pbVar1 = &ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL;
+      if (k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_OUT_DEC < *pbVar1) {
+        *pbVar1 = *pbVar1 - k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_OUT_DEC;
+      }
+      else {
+        *pbVar1 = 0;
+      }
+      goto LAB_00033c8e;
+    }
+    uVar2 = (ushort)k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_OUT_INC +
+            (ushort)ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL;
+    if (k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_SOUT <= uVar2) {
+      if (((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) &&
+         (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT != 0xff)) {
+        ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT =
+             ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_XT + 1;
+      }
+      MVar4 = error & DTC_MAX_INDEX_MASTER_7F;
+      ed_fil_base[MVar4].ED_FIL_OBD = ed_fil_base[MVar4].ED_FIL_OBD | 0x20;
+      ed_fil_base[MVar4].ED_FIL_ART = ed_fil_base[MVar4].ED_FIL_ART & 0xbf;
+      ed_fil_base[MVar4].ED_FIL_ART = ed_fil_base[MVar4].ED_FIL_ART | 0x80;
+      goto LAB_000338c4;
+    }
+  }
+  ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL = (byte)uVar2;
+LAB_00033c8e:
+  bVar7 = ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART & 0x40 | bVar7 & 0x7f;
+  if ((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 0x20) == 0) {
+    bVar7 = bVar7 | 0x80;
+  }
+  if (((((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_OBD & 8) != 0) &&
+       ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 4) != 0)) &&
+      ((k_ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].K_ED_FIL_CTL & 0x20) != 0)) &&
+     (((OBD_STATE & 1) != 0 ||
+      (((OBD_STATE & 8) != 0 &&
+       ((((err == 0x32 || (err == 0x1c)) || (err == 0x2b)) || (err == 0x2e)))))))) {
+    bVar7 = bVar7 | 0x10;
+  }
+  iVar3 = (error & DTC_MAX_INDEX_MASTER_7F) * 3;
+  if ((ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_FIL != 0) ||
+     (iVar3 = (error & DTC_MAX_INDEX_MASTER_7F) * 3,
+     (ed_fil_base[error & DTC_MAX_INDEX_MASTER_7F].ED_FIL_ART & 0x40) != 0)) {
+    bVar7 = bVar7 | 0x20;
+  }
+  return CONCAT31((int3)((uint)iVar3 >> 8),bVar7);
+}
+

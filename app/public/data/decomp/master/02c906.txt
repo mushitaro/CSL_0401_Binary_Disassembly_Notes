@@ -1,0 +1,14 @@
+
+void avan_2_ed_related(void)
+
+{
+  if (TPU_ZOT_ZYL_M == '\x04') {
+    if (DAT_00ffec2a == '\0') {
+      AVAN2_ED_HALL = AVAN2_ED_HALL | 1;
+    }
+    DAT_00ffec2a = '\0';
+    AVAN2_ED_HALL = AVAN2_ED_HALL | 0x10;
+  }
+  return;
+}
+

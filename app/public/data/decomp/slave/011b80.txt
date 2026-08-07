@@ -1,0 +1,82 @@
+
+undefined4 nw_cam_sync_state_update(void)
+
+{
+  byte bVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 0;
+  if ((NW_ST_S & 1) == 0) {
+    if ((NW_ST_S & 2) == 0) {
+      if ((NW_ST_S & 4) != 0) {
+        if ((DAT_00ffe8e7 == '\x01') && (DAT_00ffe8e6 != '\x01')) {
+          if (DAT_00ffe8ea != 0) {
+            DAT_00ffe8ea = DAT_00ffe8ea - 1;
+          }
+        }
+        else {
+          DAT_00ffe8ea = DAT_00ffe8ea + 1;
+          if (K_NW_MAX_FAIL_S <= DAT_00ffe8ea) {
+            DAT_00ffe8ea = K_NW_MAX_FAIL_S;
+            NW_ST_S = 8;
+            TPU_ST_S = TPU_ST_S | 1;
+          }
+        }
+        goto LAB_00011c9e;
+      }
+      if ((NW_ST_S & 8) == 0) {
+        NW_ST_S = 8;
+      }
+      else {
+        bVar1 = TPU_NW_POS_S;
+        if (0x3b < TPU_NW_POS_S) {
+          bVar1 = TPU_NW_POS_S - 0x3c;
+        }
+        if (((DAT_00ffe8e7 == '\x01') && (K_NW_MFMIN_S <= bVar1)) && (bVar1 <= K_NW_MFMAX_S)) {
+          DAT_00ffe8e9 = DAT_00ffe8e9 + 1;
+          if (DAT_00ffe8e9 < K_NW_DETECT_S) goto LAB_00011c9e;
+          if (0x3b < TPU_NW_POS_S) goto LAB_00011bd0;
+          goto LAB_00011bc0;
+        }
+      }
+      DAT_00ffe8e9 = 0;
+      goto LAB_00011c9e;
+    }
+    if ((DAT_00ffe8e7 == '\x01') && (DAT_00ffe8e6 != '\x01')) {
+      NW_ST_S = 4;
+      goto LAB_00011c9e;
+    }
+    TPU_ST_S = TPU_ST_S | 1;
+LAB_00011be4:
+    NW_ST_S = 8;
+  }
+  else {
+    DAT_00ffe8e9 = 0;
+    DAT_00ffe8ea = 0;
+    if ((DAT_00ffe8e7 != '\x01') || (DAT_00ffe8e6 != '\0')) {
+      if (DAT_00ffe8e7 != '\0') goto LAB_00011be4;
+LAB_00011bd0:
+      uVar2 = 1;
+      tpu_host_service_request(1,2);
+    }
+LAB_00011bc0:
+    TPU_ST_S = TPU_ST_S & 0xfe;
+    NW_ST_S = 2;
+  }
+LAB_00011c9e:
+  if ((((NW_ST_S & 8) != 0) && (DAT_00ffe8e7 == '\0')) && (0x14 < NO_ZAEHLER_VSP_S)) {
+    FUN_00011db6();
+  }
+  if ((NW_SYNCREQUEST_S != '\0' || NW_SYNCREQUEST_M != '\0') && (DAT_00ffe8e7 != DAT_00ffe8e8)) {
+    FUN_00011dd0();
+  }
+  DAT_00ffe8e7 = 0;
+  DAT_00ffe8e8 = 0;
+  DAT_00ffe8e6 = 0;
+  NO_ZAEHLER_S = NO_ZAEHLER_S + 1;
+  if (NO_ZAEHLER_VSP_S != 0xffff) {
+    NO_ZAEHLER_VSP_S = NO_ZAEHLER_VSP_S + 1;
+  }
+  return uVar2;
+}
+

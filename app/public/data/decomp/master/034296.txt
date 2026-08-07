@@ -1,0 +1,18 @@
+
+void ed_time_counter(void)
+
+{
+  short sVar1;
+  
+  sVar1 = CONCAT11(DAT_00ffd4c4,DAT_00ffd4c5);
+  if ((ed_fil_base[0].ED_FIL_FIL != 0) &&
+     (DAT_00ffd4c6 = DAT_00ffd4c6 + 1, sVar1 = CONCAT11(DAT_00ffd4c4,DAT_00ffd4c5),
+     DAT_00ffd4c6._2_2_ / 0xe10 != 0)) {
+    sVar1 = CONCAT11(DAT_00ffd4c4,DAT_00ffd4c5) + 1;
+    DAT_00ffd4c6 = 0;
+  }
+  DAT_00ffd4c4 = (undefined1)((ushort)sVar1 >> 8);
+  DAT_00ffd4c5 = (undefined1)sVar1;
+  return;
+}
+

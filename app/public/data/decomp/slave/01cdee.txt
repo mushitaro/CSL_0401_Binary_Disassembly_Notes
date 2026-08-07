@@ -1,0 +1,42 @@
+
+void ti_full_load_per_cyl(void)
+
+{
+  uint uVar1;
+  
+  if ((ZUSTAND_MOTOR & VL) == 0) {
+    TI_F_ZYL4 = 0x80;
+    TI_F_ZYL3 = 0x80;
+    TI_F_ZYL2 = 0x80;
+    TI_F_ZYL1 = 0x80;
+    TI_F_ZYL8 = 0x80;
+    TI_F_ZYL7 = 0x80;
+    TI_F_ZYL6 = 0x80;
+    TI_F_ZYL5 = 0x80;
+  }
+  else {
+    uVar1 = klu_wint(&KL_TI_N_VL_ZYL1.sizeX,N);
+    TI_F_ZYL1 = (undefined1)uVar1;
+    uVar1 = klu_wint(&KL_TI_N_VL_ZYL2.sizeX,N);
+    TI_F_ZYL2 = (undefined1)uVar1;
+    uVar1 = klu_wint(&KL_TI_N_VL_ZYL3.sizeX,N);
+    TI_F_ZYL3 = (undefined1)uVar1;
+    uVar1 = klu_wint(&KL_TI_N_VL_ZYL4.sizeX,N);
+    TI_F_ZYL4 = (undefined1)uVar1;
+    if (((cfg_s_motortyp & 0xf7) == 4) || ((cfg_s_motortyp & 0xef) == 0x20)) {
+      uVar1 = klu_wint(&KL_TI_N_VL_ZYL5.sizeX,N);
+      TI_F_ZYL5 = (undefined1)uVar1;
+      uVar1 = klu_wint(&KL_TI_N_VL_ZYL6.sizeX,N);
+      TI_F_ZYL6 = (undefined1)uVar1;
+      if ((cfg_s_motortyp & 0xef) == 0x20) {
+        uVar1 = klu_wint(&KL_TI_N_VL_ZYL7.sizeX,N);
+        TI_F_ZYL7 = (undefined1)uVar1;
+        uVar1 = klu_wint(&KL_TI_N_VL_ZYL8.sizeX,N);
+        TI_F_ZYL8 = (char)uVar1;
+        return;
+      }
+    }
+  }
+  return;
+}
+

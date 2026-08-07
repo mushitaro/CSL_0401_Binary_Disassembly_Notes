@@ -1,0 +1,52 @@
+
+uint llr_qvs_roh_calc(void)
+
+{
+  enum_ZUSTAND_MOTOR eVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  ushort uVar4;
+  KL_5_1byte_1byte *curve;
+  
+  eVar1 = ZUSTAND_MOTOR;
+  if ((ZUSTAND_MOTOR & (Nachlauf|Start|S)) == 0) {
+    uVar3 = kfus_bint(&KF_LLR_QVS_GRUND.sizeX,N,(ushort)TMOT);
+    uVar4 = (ushort)uVar3 & 0xff;
+  }
+  else {
+    uVar2 = klu_bint(&KL_LLR_QVS_START_TMOT.sizeX,TMOT);
+    uVar4 = (ushort)uVar2 & 0xff;
+    uVar2 = klu_bint(&KL_LLR_QVS_START_N.sizeX,N40);
+    uVar4 = uVar4 + ((ushort)uVar2 & 0xff);
+    LLR_FLAGS = LLR_FLAGS | 1;
+  }
+  uVar4 = uVar4 << 7;
+  uVar2 = CONCAT11((char)(uVar4 >> 8),eVar1) & 0xffffff1c;
+  if ((eVar1 & (VL|TL|LL)) == 0) {
+    LLR_TAU_QVS = 0;
+  }
+  else {
+    if ((LLR_FLAGS & 1) == 0) {
+      if (LLR_QVS < uVar4) {
+        LLR_QVS_ROH = uVar4;
+        LLR_TAU_QVS = K_LLR_TAU_VS_AUFREG;
+        return uVar2;
+      }
+      curve = (KL_5_1byte_1byte *)&KL_LLR_TAU_VS_ABREG;
+    }
+    else {
+      uVar2 = abs((uint)LLR_QVS - (uint)uVar4);
+      if (((int)uVar2 < 0x100) || (LLR_QVS < uVar4)) {
+        LLR_QVS_ROH = uVar4;
+        LLR_FLAGS = LLR_FLAGS & 0xfe;
+        return uVar2;
+      }
+      curve = &KL_LLR_TAU_VS_NST;
+    }
+    uVar2 = klu_bint(&curve->sizeX,TMOT);
+    LLR_TAU_QVS = (undefined1)uVar2;
+  }
+  LLR_QVS_ROH = uVar4;
+  return uVar2;
+}
+

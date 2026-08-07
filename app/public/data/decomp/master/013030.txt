@@ -1,0 +1,32 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void task_pdr_m(void)
+
+{
+  byte bVar1;
+  
+                    /* if PDR_Status = PDR Completed */
+  if ((PDR_STATUS & 0x80) != 0) {
+    sys_cancel_task(0xe);
+    _DAT_00ffda84 = SYS_TIMERTICS_COUNTER;
+    PDR_STATUS = 0x80;
+    EGAS_IPK = EGAS_IPK & 0xfe;
+    PDR_PHASE = 4;
+    EDK_DS2_ADAPT_STAT = EDK_DS2_ADAPT_STAT & 0xfd;
+    return;
+  }
+  if ((((ZUSTAND_MOTOR & S) == 0) || (bVar1 = RESET_STATUS, (bVar1 & 0xc0) == 0)) && (1 < PDR_PHASE)
+     ) {
+    sys_cancel_task(0xe);
+    PDR_STATUS = 0x80;
+    EDK_STATUS = EDK_STATUS & 0xfd;
+    EGAS_IPK = EGAS_IPK & 0xfe;
+    PDR_PHASE = 4;
+    FUN_00022854();
+    return;
+  }
+  pdr_m();
+  return;
+}
+

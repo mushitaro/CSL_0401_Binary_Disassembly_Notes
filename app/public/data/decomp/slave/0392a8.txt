@@ -1,0 +1,29 @@
+
+void smg_engine_speed_reg_entry_with_slip_guard(ushort param_1)
+
+{
+  short sVar1;
+  
+  DAT_00ffdbb2 = 7;
+  if (param_1 == 0) {
+    DAT_00ffdbe2 = K_SMG_MOT_NL_T_MAX;
+    DAT_00ffe636 = 0;
+    DAT_00ffdbbe = DAT_00ffdb5a;
+  }
+  sVar1 = DAT_00ffe636;
+  if ((DAT_00ffdb73 != '\0') && (DAT_00ffe636 == 0)) {
+    if ((param_1 < K_SMG_____DAT_0008a824) ||
+       ((int)(uint)K_SMG_____DAT_0008a898 < (int)((uint)N_BEGRENZER - (uint)N))) {
+      DAT_00ffdbb6 = DAT_00ffdb5a;
+    }
+    else {
+      DAT_00ffdbb6 = 0;
+    }
+    smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,0x80);
+    return;
+  }
+  DAT_00ffe636 = DAT_00ffe636 + 1;
+  smg_engine_speed_regulator_step(sVar1);
+  return;
+}
+

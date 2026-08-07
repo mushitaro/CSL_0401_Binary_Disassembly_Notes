@@ -1,0 +1,65 @@
+
+/* This function schedules a task for future execution by adding it to the task schedule table.
+   It arms the task with an initial delay from its definition in sys_task_pointer_table.
+   If the task is already active, it simply reloads its countdown timer. */
+
+uint sys_schedule_task_with_delay(byte task_id)
+
+{
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  byte original_sr;
+  char free_slot_search;
+  undefined1 return_status;
+  struct_task_schedule_table_entry *schedule_entry;
+  undefined3 in_stack_00000004;
+  undefined *task_def_ptr;
+  
+  return_status = 0;
+  task_def_ptr = (&sys_task_pointer_table)[task_id];
+                    /* Save and mask interrupts (set SR = 0x2700 disables interrupts) */
+  original_sr = set_status_register(0x2700);
+                    /* Pointer to beginning of schedule table (8-slot FIFO) */
+  schedule_entry = sys_task_schedule_table;
+  if ((*(byte *)(sys_task_control_bytes + task_id) & 1) == 0) {
+                    /* Check if task is not already scheduled (bit 0 clear in control byte) */
+    free_slot_search = 7;
+    do {
+      if (schedule_entry->task_id == 0) break;
+      schedule_entry = schedule_entry + 1;
+      free_slot_search = free_slot_search + -1;
+    } while (-1 < free_slot_search);
+                    /* If no free slot was found */
+    if (free_slot_search < 0) {
+                    /* error code: schedule table full */
+      return_status = 0x21;
+                    /* log error with code 0x100 */
+      syserror(_in_stack_00000004,0x100);
+    }
+    else {
+                    /* Store task ID and its initial countdown timer */
+      schedule_entry->task_id = task_id;
+      schedule_entry->countdown_timer_tics = *(short *)(task_def_ptr + 8);
+                    /* Mark the task as scheduled by setting bit 0 */
+      *(byte *)(sys_task_control_bytes + task_id) = *(byte *)(sys_task_control_bytes + task_id) | 1;
+    }
+  }
+  else {
+                    /* If already scheduled, rearm its countdown (find its entry) */
+    free_slot_search = 7;
+    do {
+      if (task_id == schedule_entry->task_id) break;
+      schedule_entry = schedule_entry + 1;
+      free_slot_search = free_slot_search + -1;
+    } while (-1 < free_slot_search);
+                    /* If task was found in table, update the countdown with alternate offset */
+    if (-1 < free_slot_search) {
+      schedule_entry->countdown_timer_tics = *(short *)(task_def_ptr + 6);
+    }
+  }
+                    /* Restore original status register */
+  set_status_register((ushort)CONCAT31(extraout_var,original_sr));
+                    /* Return 0 if successful, or 0x21 if schedule table full */
+  return CONCAT31(extraout_var_00,return_status);
+}
+

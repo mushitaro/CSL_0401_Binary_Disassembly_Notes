@@ -1,0 +1,20 @@
+
+void edk_ht_max_calc(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = klu_bint(&KL_EDK_KORR_U.sizeX,UB);
+  EDK_KORR_FAK = (char)uVar1;
+  if (((SK_EDK_CONTR & 1) == 0) && ((DAT_00ffda36 & 1) == 0)) {
+    if ((EDK_STATUS & 0x40) != 0) {
+      EDK_HT_MAX = K_EDK_A100_HT_MAX;
+      return;
+    }
+    EDK_HT_MAX = K_EDK_HT_MAX;
+    return;
+  }
+  EDK_HT_MAX = K_EDK_SK_HT_MAX;
+  return;
+}
+

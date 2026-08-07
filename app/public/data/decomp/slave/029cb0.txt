@@ -1,0 +1,74 @@
+
+void SMG_CAN_411_FUN_00029cb0(int param_1)
+
+{
+  byte bVar1;
+  byte local_c;
+  enum_smg_can_istgang local_b;
+  byte local_a;
+  byte local_9;
+  undefined1 local_8;
+  byte local_7;
+  byte local_6;
+  enum_smg_can_fahrzustand local_5;
+  
+  if (**(char **)(param_1 + 6) == '\0') {
+    FUN_0003d20c(&local_c,param_1);
+    DAT_00ffdb05 = local_c;
+    bVar1 = local_6 & 0xf;
+    DAT_00ffdb06 = ~(bVar1 + (local_5 & (Anfahrhilfe(TractionAid)|Racestart)) +
+                             (local_9 & 0xf) + (local_b & Reverse) + (local_b >> 3 & 7));
+    if ((local_c == DAT_00ffdb06) && (DAT_00ffdb1b < bVar1)) {
+      DAT_00ffdb07 = 0;
+    }
+    else if ((DAT_00ffdb07 < 5) && (DAT_00ffdb07 = DAT_00ffdb07 + 1, 1 < DAT_00ffdb07)) {
+      FUN_0003cba8('\0');
+    }
+    smg_can_istgang = local_b & Reverse;
+    smg_can_gewuenschter_gang = local_b >> 3 & 7;
+    DAT_00ffdb12__SMGCAN_PROGRAMMINFO_ = local_a & 7;
+    DAT_00ffdb00 = DAT_00ffdb00 & 1st |
+                   (enum_smg_can_istgang)((int)(local_a & 0xf8) >> 2) | local_b & 0x80;
+    DAT_00ffdb13__SMGCAN_GANGANZIEGE_ = local_9 & 0xf;
+    DAT_00ffdb11__SMGCAN_VARIOUS_STATES_ = local_9 >> 4;
+    DAT_00ffdb1a__SMGCAN_M_KUPPL_max_transmittable_torque_ = local_8;
+    DAT_00ffdb16__SMGCAN_Power_at_clutch_ = local_7;
+    if (local_7 == 0xff) {
+      DAT_00ffdb01 = DAT_00ffdb01 | 1;
+    }
+    else {
+      DAT_00ffdb01 = DAT_00ffdb01 & 0xfe;
+    }
+    DAT_00ffdb18 = (undefined2)((uint)local_7 * (uint)DAT_00ffdb9a + 0x80 >> 8);
+    if ((local_6 & 0x10) == 0) {
+      DAT_00ffdb6c = DAT_00ffdb6c & 0xfff7;
+    }
+    else {
+      DAT_00ffdb6c = DAT_00ffdb6c | 8;
+    }
+    if ((local_6 & 0x80) != 0) {
+      DAT_00ffdb00 = DAT_00ffdb00 | 0x40;
+    }
+    smg_can_fahrzustand = local_5 & (Anfahrhilfe(TractionAid)|Racestart);
+    DAT_00ffdb1d__SMGCAN_WAEHLHEBELANZEIGE_ = local_5 >> 4;
+    CAN_SMG_EMPF = CAN_SMG_EMPF | 2;
+    DAT_00ffdb1b = bVar1;
+  }
+  else {
+    **(undefined1 **)(param_1 + 6) = 0;
+    CAN_SMG_EMPF = CAN_SMG_EMPF & 0xfd;
+    DAT_00ffdb1a__SMGCAN_M_KUPPL_max_transmittable_torque_ = K_SMG_KUPP_M_NORM;
+    smg_can_fahrzustand = Other;
+    DAT_00ffdb16__SMGCAN_Power_at_clutch_ = 0;
+    DAT_00ffdb18 = 0;
+    smg_can_istgang = Neutral;
+    smg_can_gewuenschter_gang = 0;
+    DAT_00ffdb13__SMGCAN_GANGANZIEGE_ = 8;
+    DAT_00ffdb1d__SMGCAN_WAEHLHEBELANZEIGE_ = 0;
+    DAT_00ffdb12__SMGCAN_PROGRAMMINFO_ = 0;
+    DAT_00ffdb00 = DAT_00ffdb00 & 0x41;
+    DAT_00ffdb01 = DAT_00ffdb01 | 1;
+  }
+  return;
+}
+

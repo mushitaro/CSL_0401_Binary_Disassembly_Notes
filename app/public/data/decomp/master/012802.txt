@@ -1,0 +1,9 @@
+
+void nw_edge_event_handler(void)
+
+{
+  nw_edge_event_count = nw_edge_event_count + '\x01';
+  nw_edge_capture_handler();
+  return;
+}
+

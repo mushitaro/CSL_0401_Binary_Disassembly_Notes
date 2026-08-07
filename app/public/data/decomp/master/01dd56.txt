@@ -1,0 +1,35 @@
+
+void dwf_st_init(void)
+
+{
+  DWF_TIMER = 0;
+  if (K_DWF_TOEL_0SEG < TOEL) {
+    DWF_ST = 0;
+  }
+  else if (K_DWF_TOEL_1SEG < TOEL) {
+    DWF_ST = 1;
+  }
+  else if (K_DWF_TOEL_2SEG < TOEL) {
+    DWF_ST = 2;
+  }
+  else if (K_DWF_TOEL_3SEG < TOEL) {
+    DWF_ST = 3;
+  }
+  else if ((cfg_m_motortyp == '\f') && (TOEL <= K_DWF_TOEL_4SEG)) {
+    if (K_DWF_TOEL_5SEG < TOEL) {
+      DWF_ST = 5;
+    }
+    else if ((K_DWF_TOEL_6SEG < TOEL) || (cfg_m_getriebetyp == '@')) {
+      DWF_ST = 6;
+    }
+    else {
+      DWF_ST = 7;
+    }
+  }
+  else {
+    DWF_ST = 4;
+  }
+  DWF_ST_DPR = DWF_ST;
+  return;
+}
+

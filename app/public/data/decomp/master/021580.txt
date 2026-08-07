@@ -1,0 +1,16 @@
+
+void p_saug_init(void)
+
+{
+                    /* 0401 Specific */
+  p_saug = P_UMG_FILTER;
+  p_saug_m = P_UMG_FILTER;
+  if (p_saug_error < k_p_saug_error_min) {
+    p_saug_error = 0;
+  }
+  if (k_p_saug_error_max < p_saug_error) {
+    p_saug_error = 0;
+  }
+  return;
+}
+

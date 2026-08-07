@@ -1,0 +1,18 @@
+
+ushort IIR_Filter_US(ushort param_1,ushort param_2,ushort param_3)
+
+{
+  int iVar1;
+  ushort uVar2;
+  
+  if (param_3 != 0) {
+    iVar1 = (uint)param_1 - (uint)param_2;
+    uVar2 = (ushort)(iVar1 / (int)(uint)param_3);
+    if ((iVar1 / (int)(uint)param_3 == 0) && (uVar2 = (ushort)(0 < iVar1), iVar1 < 0)) {
+      uVar2 = 0xffff;
+    }
+    param_1 = param_2 + uVar2;
+  }
+  return param_1;
+}
+

@@ -1,0 +1,38 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void kva_t_memory_calc(void)
+
+{
+  undefined3 extraout_var;
+  byte bVar1;
+  
+  bVar1 = set_status_register(0x2700);
+  if ((((TI_ST_PSP & 4) != 0) && ((TI_EV_DS2 & 1) == 0)) &&
+     (_PSP1_HIGH_TIME = TI_TPU_1OF8_, TPU_ZOT_ZYL_S == '\x01')) {
+    KVA_T_MEMORY = (uint)TI1 + KVA_T_MEMORY;
+  }
+  if ((((TI_ST_PSP & 8) != 0) && ((TI_EV_DS2 & 2) == 0)) &&
+     (_PSP2_HIGH_TIME = TI_TPU_2OF8_, TPU_ZOT_ZYL_S == '\x02')) {
+    KVA_T_MEMORY = (uint)TI2 + KVA_T_MEMORY;
+  }
+  if ((((TI_ST_PSP & 0x10) != 0) && ((TI_EV_DS2 & 4) == 0)) &&
+     (_PSP3_HIGH_TIME = TI_TPU_3OF8_, TPU_ZOT_ZYL_S == '\x03')) {
+    KVA_T_MEMORY = (uint)TI3 + KVA_T_MEMORY;
+  }
+  if ((((TI_ST_PSP & 0x20) != 0) && ((TI_EV_DS2 & 8) == 0)) &&
+     (_PSP4_HIGH_TIME = TI_TPU_4OF8_, TPU_ZOT_ZYL_S == '\x04')) {
+    KVA_T_MEMORY = (uint)TI4 + KVA_T_MEMORY;
+  }
+  if ((((TI_ST_PSP & 0x40) != 0) && ((TI_EV_DS2 & 0x10) == 0)) &&
+     (_PSP5_HIGH_TIME = TI_TPU_5OF8_, TPU_ZOT_ZYL_S == '\x05')) {
+    KVA_T_MEMORY = (uint)TI5 + KVA_T_MEMORY;
+  }
+  if ((((TI_ST_PSP & 0x80) != 0) && ((TI_EV_DS2 & 0x20) == 0)) &&
+     (_PSP6_HIGH_TIME = TI_TPU_6OF8_, TPU_ZOT_ZYL_S == '\x06')) {
+    KVA_T_MEMORY = (uint)TI6 + KVA_T_MEMORY;
+  }
+  set_status_register((short)CONCAT31(extraout_var,bVar1));
+  return;
+}
+

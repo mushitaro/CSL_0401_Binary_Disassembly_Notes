@@ -1,0 +1,55 @@
+
+/* WARNING: This function may have set the stack pointer */
+
+void sys_main(void)
+
+{
+  int iVar1;
+  bool bVar2;
+  
+  _SIM_SIMCR = 0xc046;
+  SIM_SYNCR = 0x9700;
+  SIM_SYPCR = 0xbd;
+  SIM_SWSR = 0x55;
+  SIM_SWSR = 0xaa;
+  iVar1 = 630;
+  do {
+    bVar2 = iVar1 != 0;
+    iVar1 = iVar1 + -1;
+  } while (bVar2);
+  SIM_SYNCR = 0xd700;
+  sram_init();
+  SIM_PORTC = 0x60;
+  SIM_CSPAR0 = 0x2fff;
+  SIM_CSPAR1 = 0x20a;
+  SIM_CSBAR1 = 0x13f8;
+  SIM_CSOR1 = 0x3830;
+  SIM_CSBAR2 = 0x13f8;
+  SIM_CSOR2 = 0x5830;
+  DAT_00ffe4fc = 0x10498;
+  FUN_00011882();
+  DAT_00ffe4fc = 0x1049e;
+  SIM_Init();
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    DAT_00ffe4fc = 0x104ae;
+    delay_20us();
+    DAT_00ffe4fc = 0x104b4;
+    vers_st_m_calc();
+  }
+  DAT_00ffe4fc = 0x104ba;
+  tpu_ram_init();
+  DAT_00ffe4fc = 0x104c0;
+  qadc_init();
+  DAT_00ffe4fc = 0x104c6;
+  tpu_init();
+  DAT_00ffe4fc = 0x104cc;
+  CTM4_Init();
+  DAT_00ffe4fc = 0x104d2;
+  sys_qsm_init();
+  DAT_00ffe4fc = 0x104f6;
+  init_cpu();
+  DAT_00ffe4fc = 0x104fc;
+  task_bgnd();
+  return;
+}
+

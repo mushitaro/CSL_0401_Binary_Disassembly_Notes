@@ -1,0 +1,64 @@
+
+ushort qsm_start_transfer(int *qsm_transfer_descriptor)
+
+{
+  ushort *puVar1;
+  ushort *source;
+  undefined4 *puVar2;
+  int iVar3;
+  byte num;
+  ushort uVar4;
+  uint uVar5;
+  uint extraout_D0;
+  undefined4 unaff_D2;
+  undefined4 uVar6;
+  undefined1 *puVar7;
+  byte abStackY_35 [9];
+  
+  puVar7 = &stack0xffffffe0;
+  qsm_active_transfer = qsm_transfer_descriptor;
+  puVar1 = (ushort *)*qsm_transfer_descriptor;
+  puVar2 = (undefined4 *)qsm_transfer_descriptor[1];
+  source = (ushort *)*puVar2;
+  num = *(byte *)(puVar2 + 3);
+  uVar6 = CONCAT31((int3)((uint)unaff_D2 >> 8),num);
+  uVar5 = *puVar1 & 0x3c00;
+  if (uVar5 == 0x2000) {
+    qsm_transfer_flags = qsm_transfer_flags | 0x40;
+  }
+  else {
+    qsm_transfer_flags = qsm_transfer_flags & 0xbf;
+  }
+  if (source != (ushort *)0x0) {
+    if ((qsm_transfer_flags & 0x40) == 0) {
+      puVar7 = &stack0xffffffd4;
+      memcpy_us(source,(ushort *)QSM_TR,num);
+      uVar5 = extraout_D0;
+    }
+    else {
+      puVar7 = &stack0xffffffd4;
+      uVar5 = memcpy_b_us((byte *)source,(ushort *)QSM_TR,num);
+    }
+  }
+  iVar3 = puVar2[2];
+  if (iVar3 == 0) {
+    *(undefined4 *)(puVar7 + -4) = uVar6;
+    *(undefined **)(puVar7 + -8) = QSM_CR;
+    *(uint *)(puVar7 + -0xc) = CONCAT31((int3)(uVar5 >> 8),*(undefined1 *)(puVar1 + 3));
+    *(undefined4 *)(puVar7 + -0x10) = 0x405e6;
+    memset(puVar7[-9],*(byte **)(puVar7 + -8),puVar7[-1]);
+  }
+  else {
+    *(undefined4 *)(puVar7 + -4) = uVar6;
+    *(undefined **)(puVar7 + -8) = QSM_CR;
+    *(int *)(puVar7 + -0xc) = iVar3;
+    *(undefined4 *)(puVar7 + -0x10) = 0x405f4;
+    memcpy_b(*(byte **)(puVar7 + -0xc),*(byte **)(puVar7 + -8),puVar7[-1]);
+  }
+  QSM_SPCR0 = *puVar1;
+  uVar4 = puVar1[2] | (ushort)num * 0x100 - 0x100;
+  QSM_SPCR2 = uVar4;
+  QSM_SPCR1 = puVar1[1];
+  return uVar4;
+}
+

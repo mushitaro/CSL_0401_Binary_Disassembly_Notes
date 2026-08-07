@@ -1,0 +1,47 @@
+
+void can_a_message_slot_init(char slot_id,struct_slot_message_block_entry *message_slot_ptr)
+
+{
+  byte bVar1;
+  byte direction;
+  ushort arbid;
+  byte slot_index;
+  
+  slot_index = slot_id - 1;
+  arbid = can_a_slot_cfg_table[slot_index].arbid;
+  if ((can_a_slot_cfg_table[slot_index].slot_config & 0x20) == 0) {
+    can_slot_status_table[slot_index].transfer_flags = 0;
+    bVar1 = 0x7f;
+  }
+  else {
+    can_slot_status_table[slot_index].transfer_flags = 2;
+    bVar1 = 0xbf;
+  }
+  if ((can_a_slot_cfg_table[slot_index].slot_config & 1) == 0) {
+    direction = rx;
+    bVar1 = bVar1 & 0xd9;
+  }
+  else {
+    if ((can_a_slot_cfg_table[slot_index].slot_config & 4) != 0) {
+      can_slot_status_table[slot_index].transfer_flags =
+           can_slot_status_table[slot_index].transfer_flags | 4;
+    }
+    direction = tx;
+    if ((can_a_slot_cfg_table[slot_index].slot_config & 2) == 0) {
+      slot_index = 0xdf;
+    }
+    else {
+      slot_index = 0xef;
+    }
+    bVar1 = slot_index & 0xf5 & bVar1;
+  }
+  message_slot_ptr->arbid_rs3_high = (byte)((int)(uint)arbid >> 3);
+  message_slot_ptr->arbid_ls5_low = (char)arbid << 5;
+  message_slot_ptr->unk3 = 0;
+  message_slot_ptr->unk4 = 0;
+  message_slot_ptr->direction = direction;
+  message_slot_ptr->slot_control_1 = bVar1;
+  message_slot_ptr->slot_control_2 = 0x55;
+  return;
+}
+

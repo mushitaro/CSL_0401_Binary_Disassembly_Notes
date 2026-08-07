@@ -1,0 +1,32 @@
+
+/* WARNING: Removing unreachable block (ram,0x00040a20) */
+
+uint kls_wint(byte *curve,ushort xValue)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  ushort *puVar3;
+  ushort *puVar4;
+  
+  uVar2 = (ushort)*curve;
+  puVar3 = (ushort *)(curve + (short)uVar2 * 2 + 2);
+  if (*(ushort *)(curve + 2) < xValue) {
+    if (xValue < *(ushort *)(curve + (short)uVar2 * 2)) {
+      do {
+        puVar4 = puVar3;
+        puVar3 = puVar4 + -1;
+      } while (xValue < *puVar3);
+      uVar1 = tableLookup(((uint)(ushort)(xValue - *puVar3) << 8) /
+                          (uint)(ushort)(*puVar4 - *puVar3),puVar3[(short)uVar2]);
+    }
+    else {
+      uVar1 = (uint)puVar3[(short)uVar2 + -1];
+    }
+  }
+  else {
+    uVar1 = (uint)*puVar3;
+  }
+  return uVar1;
+}
+

@@ -1,0 +1,58 @@
+
+void asc_abbruch_calc(byte *param_1)
+
+{
+  bool bVar1;
+  undefined4 uVar2;
+  
+  ASC_ALIVE = 0;
+  if (((((((*param_1 & 1) == 0) && ((*param_1 & 2) == 0)) && (param_1[3] == 0xff)) &&
+       (param_1[4] == 0)) ||
+      (((((*param_1 & 1) == 1 && ((*param_1 & 2) == 0)) && (param_1[3] != 0xff)) &&
+       (((K_ASC_ALIVE != '\0' && (param_1[4] == (byte)~param_1[3])) ||
+        ((K_ASC_ALIVE == '\0' && (param_1[4] == 0)))))))) ||
+     ((((*param_1 & 1) == 0 && ((*param_1 & 2) == 2)) &&
+      (((K_ASC_ALIVE != '\0' && (param_1[3] == (byte)~param_1[4])) ||
+       ((K_ASC_ALIVE == '\0' && (param_1[3] == (byte)~param_1[4])))))))) {
+    bVar1 = true;
+  }
+  else {
+    bVar1 = false;
+  }
+  if (bVar1) {
+    if ((*param_1 & 1) == 0) {
+      if ((*param_1 & 2) == 0) {
+        MD_IND_ASC = 0xff;
+        MD_IND_ASC_LM = 0xff;
+        MD_IND_MSR = 0;
+      }
+      else {
+        MD_IND_ASC = 0xff;
+        MD_IND_ASC_LM = 0xff;
+        MD_IND_MSR = param_1[4];
+      }
+    }
+    else {
+      MD_IND_ASC = param_1[3];
+      MD_IND_MSR = 0;
+      MD_IND_ASC_LM = param_1[6];
+      if (param_1[6] < MD_IND_ASC) {
+        MD_IND_ASC_LM = MD_IND_ASC;
+      }
+    }
+    ASC_ST = (*param_1 >> 1 & 1) * '\x02' + (*param_1 & 1);
+    ASC_ABBRUCH = 0;
+    if (ASC_ED != '\0') {
+      uVar2 = ed_report(DTC_83_DSC_IMPLAUS,0);
+      ASC_ED = (char)uVar2;
+      return;
+    }
+  }
+  else {
+    uVar2 = ed_report(DTC_83_DSC_IMPLAUS,8);
+    ASC_ED = (char)uVar2;
+    ASC_ABBRUCH = 1;
+  }
+  return;
+}
+

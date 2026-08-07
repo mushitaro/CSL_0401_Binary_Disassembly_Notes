@@ -1,0 +1,12 @@
+
+void ti_update_active_channels(void)
+
+{
+  if (((TPU_ST_S & 0x80) == 0) && (TI_AUSBLEND_SOLL == '\0')) {
+    TI_ST_SOLL = MD_SK_TI_ST & ~AUSS_ZYL_OFF & DAT_00ff8234;
+    return;
+  }
+  TI_ST_SOLL = 0;
+  return;
+}
+

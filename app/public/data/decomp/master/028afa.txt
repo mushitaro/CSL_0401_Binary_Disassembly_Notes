@@ -1,0 +1,147 @@
+
+uint km_diag(void)
+
+{
+  char cVar1;
+  uint uVar2;
+  uint uVar3;
+  uint3 uVar4;
+  uint unaff_D2;
+  byte bVar5;
+  byte bVar6;
+  bool bVar7;
+  undefined4 unaff_D4;
+  byte *pbVar8;
+  word *pwVar9;
+  undefined4 uVar10;
+  uint uVar11;
+  KL_9_1byte_1byte *curve;
+  byte bVar12;
+  
+  uVar3 = KM_CFG & 0x1d;
+  if ((KM_CFG & 0x1d) != 0) {
+    if (((((KM_ST & 4) == 0) || (uVar3 = (uint)N, N < K_KM_DIAG_NMIN)) ||
+        (uVar3 = (uint)RF, RF < K_KM_DIAG_RFMIN)) ||
+       (uVar3 = (uint)CONCAT11((char)(RF >> 8),TMOT), TMOT <= K_KM_DIAG_TMOT)) {
+      KM_DIAG_CNT = K_KM_DIAG_INTER;
+      return uVar3;
+    }
+    if ((KM_ST & 0x20) != 0) {
+      bVar7 = true;
+      uVar2 = unaff_D2 & 0xffffff00;
+      uVar3 = CONCAT31((int3)((uint)unaff_D4 >> 8),zyl_count);
+      pwVar9 = KM_TEL_ST;
+      while( true ) {
+        uVar4 = (uint3)(uVar2 >> 8);
+        if (zyl_count <= (byte)uVar2) break;
+        if ((*pwVar9 & 0x4000) == 0) {
+          bVar7 = false;
+        }
+        uVar2 = CONCAT31(uVar4,(byte)uVar2 + 1);
+        pwVar9 = pwVar9 + 1;
+      }
+      if (!bVar7) {
+        cVar1 = KM_DIAG_CNT + -1;
+        uVar2 = (uint)KM_DIAG_CNT;
+        KM_DIAG_CNT = cVar1;
+        if (-0xb < (int)uVar2) {
+          return uVar2;
+        }
+      }
+      KM_ST_ED = 0;
+      if (bVar7) {
+        FUN_00027bbc(2,0,4);
+        uVar11 = (uint)uVar4 << 8;
+        pbVar8 = KM_ED_BAUS;
+        do {
+          if ((*pbVar8 & 0x14) == 0x14) {
+            uVar2 = FUN_00027a72(0,uVar11);
+          }
+          else {
+            uVar2 = FUN_00027bbc(0,uVar11,4);
+          }
+          *pbVar8 = *pbVar8 & 0xef;
+          bVar5 = (char)uVar11 + 1;
+          uVar11 = CONCAT31((int3)(uVar11 >> 8),bVar5);
+          pbVar8 = pbVar8 + 1;
+        } while (bVar5 < 2);
+        pwVar9 = KM_TEL_MW[0] + 1;
+        pbVar8 = KM_ST_ZYL;
+        for (bVar5 = 0; bVar5 < zyl_count; bVar5 = bVar5 + 1) {
+          bVar6 = *(byte *)(DAT_00ffe756 + 9 + (uint)bVar5);
+          uVar2 = uVar3 >> 8;
+          uVar3 = uVar3 & 0xffffff00;
+          if (bVar6 < 4) {
+            uVar3 = CONCAT31((int3)uVar2,*(undefined1 *)(DAT_00ffe756 + 0x11 + (uint)bVar6));
+            if ((KM_ST & 0x80) == 0) {
+              KM_ST_ED = KM_ED_SENS[bVar6] | KM_ST_ED;
+              bVar12 = 1;
+              if (K_KM_DIAG_MAX < *pwVar9) {
+                uVar10 = 3;
+                uVar2 = uVar3;
+                goto LAB_00028c6a;
+              }
+              uVar11 = 3;
+              uVar2 = uVar3;
+            }
+            else {
+              KM_ST_ED = KM_ED_LAUT | KM_ST_ED;
+              bVar12 = 2;
+              if (*pwVar9 < K_KM_DIAG_MIN) {
+                uVar10 = 1;
+                uVar2 = (uint)bVar6;
+LAB_00028c6a:
+                FUN_00027a72(uVar10,uVar2);
+                goto LAB_00028cb0;
+              }
+              uVar11 = 1;
+              uVar2 = (uint)bVar6;
+            }
+            FUN_00027bbc(uVar11,uVar2,bVar12);
+          }
+LAB_00028cb0:
+          *pbVar8 = *pbVar8 & 0xc;
+          uVar2 = 10;
+          pwVar9 = pwVar9 + 5;
+          pbVar8 = pbVar8 + 1;
+        }
+      }
+      else {
+        uVar2 = FUN_00027a72(2,0);
+      }
+      bVar5 = zyl_count;
+      if ((KM_ST_ED & 0x40) == 0) {
+        KM_ST = KM_ST & 0xbf;
+      }
+      else {
+        KM_ST = KM_ST | 0x40;
+      }
+      KM_DIAG_CNT = K_KM_DIAG_INTER;
+      pwVar9 = KM_TEL_ST;
+      for (bVar6 = 0; bVar6 < bVar5; bVar6 = bVar6 + 1) {
+        *pwVar9 = *pwVar9 & 0x9fff;
+        pwVar9 = pwVar9 + 1;
+      }
+      KM_ST = KM_ST & 0xdf;
+      return uVar2;
+    }
+    KM_DIAG_CNT = KM_DIAG_CNT + -1;
+    if (KM_DIAG_CNT == '\0') {
+      DAT_00ffe700 = K_KM_FHIP_DIAG;
+      DAT_00ffe701 = K_KM_GHIP_DIAG;
+      if ((KM_ST & 0x80) == 0) {
+        KM_ST = KM_ST | 0x80;
+        curve = &KL_KM_IHIP_DIAG_S;
+      }
+      else {
+        KM_ST = KM_ST & 0x7f;
+        curve = &KL_KM_IHIP_DIAG_M;
+      }
+      uVar3 = klu_bint(&curve->sizeX,N40);
+      DAT_00ffe702 = (undefined1)uVar3;
+      KM_ST = KM_ST | 0x20;
+    }
+  }
+  return uVar3;
+}
+

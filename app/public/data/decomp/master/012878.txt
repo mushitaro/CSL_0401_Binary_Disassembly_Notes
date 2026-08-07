@@ -1,0 +1,83 @@
+
+undefined4 nw_cam_sync_state_update(void)
+
+{
+  byte bVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 0;
+  if ((NW_ST_M & 1) == 0) {
+    if ((NW_ST_M & 2) == 0) {
+      if ((NW_ST_M & 4) != 0) {
+        if ((nw_edge_detected == '\x01') && (nw_edge_invalid_flag != '\x01')) {
+          if (nw_edge_invalid_counter != 0) {
+            nw_edge_invalid_counter = nw_edge_invalid_counter - 1;
+          }
+        }
+        else {
+          nw_edge_invalid_counter = nw_edge_invalid_counter + 1;
+          if (K_NW_MAX_FAIL_M <= nw_edge_invalid_counter) {
+            nw_edge_invalid_counter = K_NW_MAX_FAIL_M;
+            NW_ST_M = 8;
+            TPU_ST_M = TPU_ST_M | keine NW;
+          }
+        }
+        goto LAB_00012996;
+      }
+      if ((NW_ST_M & 8) == 0) {
+        NW_ST_M = 8;
+      }
+      else {
+        bVar1 = TPU_NW_POS_M;
+        if (0x3b < TPU_NW_POS_M) {
+          bVar1 = TPU_NW_POS_M - 0x3c;
+        }
+        if (((nw_edge_detected == '\x01') && (K_NW_MFMIN_M <= bVar1)) && (bVar1 <= K_NW_MFMAX_M)) {
+          nw_edge_valid_counter = nw_edge_valid_counter + 1;
+          if (nw_edge_valid_counter < K_NW_DETECT_M) goto LAB_00012996;
+          if (0x3b < TPU_NW_POS_M) goto LAB_000128c8;
+          goto LAB_000128b8;
+        }
+      }
+      nw_edge_valid_counter = 0;
+      goto LAB_00012996;
+    }
+    if ((nw_edge_detected == '\x01') && (nw_edge_invalid_flag != '\x01')) {
+      NW_ST_M = 4;
+      goto LAB_00012996;
+    }
+    TPU_ST_M = TPU_ST_M | keine NW;
+LAB_000128dc:
+    NW_ST_M = 8;
+  }
+  else {
+    nw_edge_valid_counter = 0;
+    nw_edge_invalid_counter = 0;
+    if ((nw_edge_detected != '\x01') || (nw_edge_invalid_flag != '\0')) {
+      if (nw_edge_detected != '\0') goto LAB_000128dc;
+LAB_000128c8:
+      uVar2 = 1;
+      tpu_host_service_request(1,2);
+    }
+LAB_000128b8:
+    TPU_ST_M = TPU_ST_M & ~keine NW;
+    NW_ST_M = 2;
+  }
+LAB_00012996:
+  if ((((NW_ST_M & 8) != 0) && (nw_edge_detected == '\0')) && (0x14 < NO_ZAEHLER_VSP_M)) {
+    NW_Sync_Request_Master();
+  }
+  if ((NW_SYNCREQUEST_S != 0 || NW_SYNCREQUEST_M != 0) && (nw_edge_detected != nw_edge_event_count))
+  {
+    NW_Sync_Request_Cancel_Master();
+  }
+  nw_edge_detected = 0;
+  nw_edge_event_count = 0;
+  nw_edge_invalid_flag = 0;
+  NO_ZAEHLER_M = NO_ZAEHLER_M + 1;
+  if (NO_ZAEHLER_VSP_M != 0xffff) {
+    NO_ZAEHLER_VSP_M = NO_ZAEHLER_VSP_M + 1;
+  }
+  return uVar2;
+}
+

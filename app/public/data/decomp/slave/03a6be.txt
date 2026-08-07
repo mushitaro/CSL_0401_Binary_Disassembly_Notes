@@ -1,0 +1,19 @@
+
+void smg_shift_phase_dispatch_basic(void)
+
+{
+  smg_start_window_service();
+  switch(DAT_00ffdb3a) {
+  case 1:
+    smg_shift_phase1_clutch_profile_update(DAT_00ffdc60);
+    break;
+  case 2:
+    smg_shift_phase2_clutch_profile_update(DAT_00ffdc60);
+    break;
+  case 3:
+  case 4:
+    smg_shift_phase3_clutch_reengage_regulator(DAT_00ffdc60);
+  }
+  return;
+}
+

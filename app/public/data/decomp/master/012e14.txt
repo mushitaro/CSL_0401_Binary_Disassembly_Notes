@@ -1,0 +1,34 @@
+
+void task_10ms(void)
+
+{
+  d_wdk_word_calc();
+  n_calc();
+  zustand_motor_calc();
+  schalt_m_st_calc();
+  ub_uext1m_calc();
+  ub_uext2m_calc();
+  egas_setpoint_deviation_monitor();
+  calc_manifold_pressure();
+  aq_abs_lls_calc();
+  rf_diag();
+  rf_p_saug_i_calc();
+  pwg_calc();
+  md_pwg();
+  md_10ms();
+  fr_calc();
+  egas_compute_throttle_target();
+  EGAS_SOLL_BERECH();
+  pcntrl_calc();
+  SIM_SWSR = 0xaa;
+  tz_calc();
+  tz_auss_control();
+  dyn_calc();
+  can_tx_messages();
+  if (cfg_m_getriebetyp == 0x40) {
+    smg_ipk_tx_status_frame();
+  }
+  pcntrl_m = pcntrl_m | 0x1000;
+  return;
+}
+

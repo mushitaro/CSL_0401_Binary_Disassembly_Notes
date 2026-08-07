@@ -1,0 +1,64 @@
+
+char wdk_a100_adapt(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  ushort uVar3;
+  ushort uVar4;
+  
+  if (WDK_A100_ZAEHLER != '\0') {
+    WDK_A100_ZAEHLER = WDK_A100_ZAEHLER + -1;
+    uVar3 = DK1_AD;
+    if (K_WDK2_INVERS == '\0') {
+      uVar4 = dk2_ad;
+      uVar4 = (ushort)((int)((uint)uVar4 * (uint)UEXT2M_KORREKTUR + 0x200) >> 10);
+    }
+    else {
+      uVar4 = dk2_ad;
+      uVar4 = (ushort)((int)((uint)UEXT2M_KORREKTUR * (0x3ff - (uint)uVar4) + 0x200) >> 10);
+    }
+    uVar3 = (ushort)((int)((uint)uVar3 * (uint)UEXT1M_KORREKTUR + 0x200) >> 10);
+    DAT_00ffece4 = (uVar3 - K_WDK1_A100_OFFSET) + DAT_00ffece4;
+    DAT_00ffece6 = uVar4 + K_WDK2_A100_OFFSET + DAT_00ffece6;
+    if (uVar3 < WDK1_A100_MIN) {
+      WDK1_A100_MIN = uVar3;
+    }
+    if (WDK1_A100_MAX < uVar3) {
+      WDK1_A100_MAX = uVar3;
+    }
+    if (WDK2_A100_MIN < uVar4) {
+      WDK2_A100_MIN = uVar4;
+    }
+    if (uVar4 < WDK2_A100_MAX) {
+      WDK2_A100_MAX = uVar4;
+    }
+    if (WDK_A100_ZAEHLER == '\0') {
+      if (((int)((uint)WDK1_A100_MAX - (uint)WDK1_A100_MIN) <= (int)(uint)K_WDK_A100_DELTA_MAX) &&
+         ((int)((uint)WDK2_A100_MIN - (uint)WDK2_A100_MAX) <= (int)(uint)K_WDK_A100_DELTA_MAX)) {
+        uVar2 = (uint)K_WDK_A100_ANZAHL;
+        uVar1 = 0x1f4000 /
+                (int)(((uVar2 + (uint)DAT_00ffece4 * 2) / (uVar2 * 2) & 0xffff) - (uint)WDK1_A0);
+        uVar2 = 0x1f4000 /
+                (int)((uint)WDK2_A0 - ((uVar2 + (uint)DAT_00ffece6 * 2) / (uVar2 * 2) & 0xffff));
+        if ((K_WDK1_NORM_MIN < uVar1) &&
+           (((uVar1 < K_WDK1_NORM_MAX && (K_WDK2_NORM_MIN < uVar2)) && (uVar2 < K_WDK2_NORM_MAX))))
+        {
+          if (K_WDK_A100_ADAPT_TMOT <= TMOT) {
+            WDK_ADAPT = WDK_ADAPT & 0xfc;
+            WDK1_NORM = (short)uVar1;
+            WDK2_NORM = (short)uVar2;
+            return '\0';
+          }
+          WDK_ADAPT = WDK_ADAPT & 0xfe | 2;
+          WDK1_NORM = (short)uVar1;
+          WDK2_NORM = (short)uVar2;
+          return '\0';
+        }
+      }
+      WDK_ADAPT = WDK_ADAPT | 1;
+    }
+  }
+  return WDK_A100_ZAEHLER;
+}
+

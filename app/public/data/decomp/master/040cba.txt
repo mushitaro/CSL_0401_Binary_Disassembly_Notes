@@ -1,0 +1,27 @@
+
+byte kls_bstp(byte *curve,byte xValue)
+
+{
+  byte bVar1;
+  ushort uVar2;
+  byte *pbVar3;
+  
+  uVar2 = (ushort)*curve;
+  pbVar3 = curve + (short)uVar2 + 2;
+  if (curve[2] < xValue) {
+    if (xValue < curve[(short)uVar2 + 1]) {
+      do {
+        pbVar3 = pbVar3 + -1;
+      } while (xValue < *pbVar3);
+      bVar1 = pbVar3[(short)uVar2];
+    }
+    else {
+      bVar1 = curve[(short)uVar2 * 2 + 1];
+    }
+  }
+  else {
+    bVar1 = *pbVar3;
+  }
+  return bVar1;
+}
+

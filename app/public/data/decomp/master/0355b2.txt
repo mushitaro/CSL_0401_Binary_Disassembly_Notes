@@ -1,0 +1,31 @@
+
+void fsp_build_timer_snapshot_lut(undefined *param_1)
+
+{
+  *param_1 = N40;
+  param_1[1] = (char)((int)(uint)RF >> 3);
+  param_1[2] = TMOT;
+  param_1[3] = UB;
+  param_1[4] = (char)((int)(uint)V_ASC >> 5);
+  param_1[6] = (char)(MD_LLRA >> 2);
+  param_1[7] = (char)((int)(uint)LLR_N_SOLL >> 6);
+  param_1[8] = (char)(AVAN2_SOLL >> 3);
+  param_1[9] = (char)(AVAN2_IST >> 3);
+  param_1[10] = T_UMG;
+  param_1[0xb] = TAN;
+  param_1[0xd] = (char)((ushort)UEXT1M >> 8);
+  param_1[0xe] = (char)((ushort)UEXT2M >> 8);
+  param_1[0xf] = edksi_st;
+  param_1[0x10] = (char)(EGAS_IST >> 4);
+  param_1[0x11] = TOEL;
+  param_1[0x12] = (char)((int)(uint)ML >> 4);
+  param_1[0x17] = (char)((int)(uint)WDK >> 3);
+  param_1[0x28] = DAT_00ffd937;
+  param_1[0x36] = P_UMG;
+  param_1[0x39] = CAN_FST & 0x7f;
+  param_1[0x4a] = ASC_AX;
+  param_1[0x4b] = ASC_AY;
+  param_1[0x4e] = FST_MAX & 0x7f;
+  return;
+}
+

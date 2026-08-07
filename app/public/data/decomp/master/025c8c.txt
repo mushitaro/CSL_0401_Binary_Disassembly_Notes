@@ -1,0 +1,30 @@
+
+void lls_tv_init(void)
+
+{
+  byte bVar1;
+  char cVar2;
+  undefined2 *puVar3;
+  undefined2 *puVar4;
+  
+  LLS_ST = 1;
+  LLS_TV = 0;
+  LLS_TV_AQ = 0;
+  DAT_00ffef0c = 0;
+  bVar1 = SIM_PORTC;
+  SIM_PORTC = bVar1 | 0x20;
+  cVar2 = '\x06';
+  puVar3 = &DAT_00ffffc0;
+  puVar4 = &DAT_0003d97a;
+  while (cVar2 = cVar2 + -1, -1 < cVar2) {
+    *puVar3 = *puVar4;
+    puVar3 = puVar3 + 1;
+    puVar4 = puVar4 + 1;
+  }
+  tpu_set_channel_function(0xc,0xb);
+  tpu_set_channel_service_queue(0xc,1);
+  tpu_host_service_request(0xc,2);
+  tpu_set_channel_priority(0xc,2);
+  return;
+}
+

@@ -1,0 +1,51 @@
+
+/* WARNING: Removing unreachable block (ram,0x00017e6a) */
+/* WARNING: Removing unreachable block (ram,0x00017e34) */
+/* WARNING: Removing unreachable block (ram,0x00017ed6) */
+/* WARNING: Removing unreachable block (ram,0x00017e9a) */
+/* WARNING: Removing unreachable block (ram,0x00017eac) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void md_dsc(void)
+
+{
+  if ((K_MD_ASC_CONTROL & 1) == 0) {
+    MD_IND_ASC_LM_ABS = (ushort)((uint)MD_IND_ASC_LM * (uint)MD_NORM >> 8);
+    if ((MD_IND_ASC_LM_ABS < MD_IND_MIN) || (MD_IND_ASC_LM_ABS < K_MD_ASC_BEGR)) {
+      MD_ST = MD_ST | 0x20;
+      MD_IND_ASC_LM_ABS = MD_IND_MIN;
+    }
+    else {
+      MD_ST = MD_ST & 0xdf;
+    }
+    MD_IND_ASC_ABS = (ushort)((uint)MD_IND_ASC * (uint)MD_NORM >> 8);
+    if (MD_IND_ASC_ABS < MD_IND_MIN) {
+      MD_ST = MD_ST | 0x20;
+      MD_IND_ASC_ABS = MD_IND_MIN;
+    }
+    else {
+      MD_ST = MD_ST & 0xdf;
+    }
+  }
+  else {
+    MD_IND_ASC_LM_ABS = (ushort)((uint)MD_NORM * 0xff >> 8);
+    MD_ST = MD_ST | 0x20;
+    MD_IND_ASC_ABS = MD_IND_ASC_LM_ABS;
+  }
+  if ((K_MD_ASC_CONTROL & 2) == 0) {
+    MD_IND_MSR_ABS = (ushort)((uint)MD_IND_MSR * (uint)MD_NORM >> 8);
+    if (MD_IND_MSR_ABS <= K_MD_MSR_BEGR) {
+      _md_ind_asc_abs_dpr = MD_IND_ASC_ABS;
+      MD_ST = MD_ST & 0xbf;
+      return;
+    }
+    MD_IND_MSR_ABS = K_MD_MSR_BEGR;
+  }
+  else {
+    MD_IND_MSR_ABS = 0;
+  }
+  MD_ST = MD_ST | 0x40;
+  _md_ind_asc_abs_dpr = MD_IND_ASC_ABS;
+  return;
+}
+

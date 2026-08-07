@@ -1,0 +1,52 @@
+
+void rf_sk_wdk_calc(void)
+
+{
+  uint aq_abs_wdk_temp;
+  uint aq_rel_rf_temp;
+  uint rf_soll_temp;
+  int rf_soll_korr_temp;
+  byte wdk_idx;
+  uint rf_soll_temp2;
+  ushort *p_rf_out;
+  ushort *p_wdk_in;
+  ushort rf_sk_wdk_buf [4];
+  ushort aq_rel_temp;
+  
+  rf_sk_wdk_buf[2] = WDK1;
+  rf_sk_wdk_buf[3] = WDK2;
+  wdk_idx = 0;
+  p_rf_out = rf_sk_wdk_buf;
+  p_wdk_in = rf_sk_wdk_buf + 2;
+  do {
+    aq_abs_wdk_temp = klu_wint(&KL_AQ_ABS_WDK.sizeX,*p_wdk_in);
+    aq_rel_temp = AQ_ABS_LLS + (short)aq_abs_wdk_temp;
+    if (K_AQ_ABS_MIN < aq_rel_temp) {
+      aq_rel_temp = (ushort)((int)(((uint)aq_rel_temp - (uint)K_AQ_ABS_MIN) * 0x8000) /
+                            (int)((uint)K_AQ_ABS_MAX - (uint)K_AQ_ABS_MIN));
+    }
+    else {
+      aq_rel_temp = 0;
+    }
+    if (aq_rel_rf_fakt != 0) {
+      aq_rel_rf_temp = ((uint)aq_rel_temp << 0xf) / (uint)aq_rel_rf_fakt;
+      if (0xffff < aq_rel_rf_temp) {
+        aq_rel_rf_temp = 0xffff;
+      }
+      rf_soll_temp = kfu_wint(&kf_rf_soll.sizeX,N,(ushort)aq_rel_rf_temp);
+      rf_soll_temp2 = rf_soll_temp & 0xffff;
+    }
+    rf_soll_korr_temp = (rf_soll_temp2 & 0xffff) * (uint)RF_PT_KORR;
+    if (rf_soll_korr_temp < 0) {
+      rf_soll_korr_temp = rf_soll_korr_temp + 0xfff;
+    }
+    *p_rf_out = (ushort)(rf_soll_korr_temp >> 0xc);
+    wdk_idx = wdk_idx + 1;
+    p_rf_out = p_rf_out + 1;
+    p_wdk_in = p_wdk_in + 1;
+  } while (wdk_idx < 2);
+  RF_SK_WDK1 = rf_sk_wdk_buf[0];
+  RF_SK_WDK2 = rf_sk_wdk_buf[1];
+  return;
+}
+

@@ -1,0 +1,51 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void ask_flap_driver_write(byte value)
+
+{
+  int iVar1;
+  
+                    /* Ensure hardware actuator driver is enabled (diagnostic check). */
+  ask_flap_driver_ed();
+                    /* Set PWM period or actuator config register. */
+  _DAT_00ffffa6 = k_ask_flap_driver_periode;
+                    /* If param_1 is negative: command "open" (or one direction) */
+  if ((char)value < '\0') {
+                    /* Set direction bit for actuator ("open" polarity) */
+    DAT_00fffa11 = DAT_00fffa11 | 0x40;
+                    /* Use absolute value for magnitude calculation */
+    value = -value;
+                    /* If cycle/event count has reached limit, skip increment */
+    if (k_ask_flap_driver_energised_cycles_threshold <= ask_flap_driver_energised_cycles)
+    goto LAB_00016480;
+  }
+  else {
+                    /* If param_1 is positive or zero: command "close" (other direction/neutral)
+                       DAT_00fffa11 &= 0xbf;
+                       Clear direction bit ("close" polarity) */
+    DAT_00fffa11 = DAT_00fffa11 & 0xbf;
+                    /* If at limit or zero magnitude, skip increment */
+    if ((k_ask_flap_driver_energised_cycles_threshold <= ask_flap_driver_energised_cycles) ||
+       ((char)value < 1)) goto LAB_00016480;
+  }
+                    /* Increment actuator drive event/cycle counter */
+  ask_flap_driver_energised_cycles = ask_flap_driver_energised_cycles + 1;
+  value = k_ask_flap_driver_min_duty;
+                    /* Use calibrated magnitude for actuator output */
+LAB_00016480:
+                    /* Calculate final actuator output value (scaling by 128 and dividing to get
+                       final PWM/analog output)
+                       Formula: output = K_???_DAT0008a1dc * (128 - param_1) / 128 */
+  iVar1 = (uint)k_ask_flap_driver_periode * (0x80 - (uint)value);
+  if (iVar1 < 0) {
+                    /* Rounding for negative values */
+    iVar1 = iVar1 + 0x7f;
+  }
+                    /* Store calculated output to actuator register */
+  _DAT_00ffffa4 = (short)(iVar1 >> 7);
+  DAT_00ffdc95 = value;
+                    /* Store last output command for diagnostics/monitoring */
+  return;
+}
+

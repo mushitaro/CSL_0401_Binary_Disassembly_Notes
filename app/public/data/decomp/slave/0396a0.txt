@@ -1,0 +1,19 @@
+
+void smg_anti_stall_handler(void)
+
+{
+  undefined4 uVar1;
+  
+  DAT_00ffdbe2 = 0;
+  if ((DAT_00ffdb6c & 1) == 0) {
+    smg_start_window_service();
+    return;
+  }
+  DAT_00ffdbb2 = 5;
+  uVar1 = smg_engine_speed_controller_step((ushort)K_SMG_N_ZIEL_ABWUERG * 0x28,DAT_00ffdc60);
+  DAT_00ffdbb6 = (short)uVar1;
+  DAT_00ffdbb8 = DAT_00ffdbb6;
+  smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,K_SMG_ETA_RES_SCHA);
+  return;
+}
+

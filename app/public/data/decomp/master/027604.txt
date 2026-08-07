@@ -1,0 +1,32 @@
+
+void km_knock_adaptation_decay(uint param_1)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  byte *pbVar3;
+  ushort *puVar4;
+  byte *pbVar5;
+  
+  pbVar3 = KM_IHIP + (short)((ushort)param_1 & 0xff);
+  puVar4 = (ushort *)((int)KM_TEL_AD_FILT + (int)(short)(((ushort)param_1 & 0xff) * 2));
+  uVar1 = *puVar4;
+  uVar2 = *(ushort *)(&DAT_0003d6ee + (short)(ushort)*pbVar3 * 2);
+  if (*pbVar3 == 0) {
+    KM_ST_ZYL[param_1 & 0xff] = KM_ST_ZYL[param_1 & 0xff] | 2;
+  }
+  if (*pbVar3 == 0) {
+    *pbVar3 = 0;
+    pbVar5 = KM_ST_ZYL + (param_1 & 0xff);
+    *pbVar5 = *pbVar5 & 0xf3;
+    *pbVar5 = *pbVar5 | 8;
+  }
+  else {
+    *pbVar3 = *pbVar3 - 1;
+    KM_ST_ZYL[param_1 & 0xff] = KM_ST_ZYL[param_1 & 0xff] & 0xf3;
+  }
+  *puVar4 = (ushort)(((uint)uVar1 * (uint)uVar2) /
+                    (uint)*(ushort *)(&DAT_0003d6ee + (short)(ushort)*pbVar3 * 2));
+  return;
+}
+

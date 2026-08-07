@@ -1,0 +1,37 @@
+
+void smg_10ms(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  DAT_00ffdb62 = MD_IND_NE - DAT_00ffdb58;
+  iVar1 = abs((int)DAT_00ffdb62);
+  DAT_00ffdb26 = (undefined2)iVar1;
+  iVar1 = abs((uint)md_ind_asc_abs_dpr - (int)DAT_00ffdb58);
+  DAT_00ffdb64 = PT1_Filter_SS((short)iVar1,DAT_00ffdb64,K_SMG_TAU_DSC_ABS);
+  DAT_00ffdb68 = PT1_Filter_SS(D_N_SEGMENT,DAT_00ffdb68,K_SMG_TAU_DN_FILTER);
+  DAT_00ffdb30 = DAT_00ffdb08 - N;
+  uVar2 = abs((int)DAT_00ffdb30);
+  DAT_00ffdb32 = (undefined2)uVar2;
+  DAT_00ffdb34 = (undefined1)((uVar2 & 0xffff) / 0x28);
+  if ((CAN_ED_SMG & 0x40) == 0) {
+    if ((S_KRAFTSCHLUSS != '\0') &&
+       ((((DAT_00ffdb0e == '\x02' || (DAT_00ffdb0e == '\0')) || (smg_can_istgang == Neutral)) ||
+        ((smg_can_fahrzustand != Other && (smg_can_fahrzustand != Schub(Thrust))))))) {
+      S_KRAFTSCHLUSS = '\0';
+      GANG = Neutral;
+    }
+    if (((S_KRAFTSCHLUSS == '\0') && (DAT_00ffdb0e == '\x01')) && (smg_can_istgang != Neutral)) {
+      S_KRAFTSCHLUSS = '\x01';
+      GANG = smg_can_istgang;
+    }
+  }
+  smg_clutch_slip_plaus_update();
+  smg_driver_torque_ramp_update();
+  smg_clutch_torque_setpoint_update(smg_fahrzustand);
+  smg_clutch_protection_monitor();
+  smg_state_supervisor();
+  return;
+}
+

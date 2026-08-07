@@ -1,0 +1,79 @@
+
+/* WARNING: This function may have set the stack pointer */
+
+void bootloader_entry(void)
+
+{
+  byte bVar1;
+  int iVar2;
+  word *aif_entry;
+  bool bVar3;
+  
+  aif_entry = AIF_Flash_Counter;
+  if (AIF_Flash_Counter[0] == 0) {
+    do {
+      aif_entry = aif_entry + 1;
+    } while (*aif_entry == 0);
+    if (*aif_entry == 0xffff) {
+      uRamfffffffc = 0x230;
+      sys_main();
+    }
+    if ((*aif_entry == 0xf500) || (*aif_entry == 0xf5)) {
+                    /* WARNING: Could not recover jumptable at 0x00000248. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+      (*DAT_00004884)();
+      return;
+    }
+  }
+  if (DAT_0000fffc == 0x5aa556c9) {
+    uRamfffffffc = 0x25c;
+    FUN_00001bde();
+  }
+  _SIM_SIMCR = 0xc046;
+  SIM_SYNCR = 0x9700;
+  SIM_SYPCR = 0xbd;
+  SIM_SWSR = 0x55;
+  SIM_SWSR = 0xaa;
+  iVar2 = 0x276;
+  do {
+    bVar3 = iVar2 != 0;
+    iVar2 = iVar2 + -1;
+  } while (bVar3);
+  SIM_SYNCR = 0xd700;
+  SRAM_RAMBAH = 0xffe000;
+  SRAM_RAMMCR = 0;
+  SIM_CSBAR1 = 0x13f8;
+  SIM_CSOR1 = 0x3830;
+  SIM_CSBAR2 = 0x13f8;
+  SIM_CSOR2 = 0x5830;
+  DAT_00ffe4fc = 0x2da;
+  boot_config_check_and_sram_test();
+  DAT_00ffe4fc = 0x2e0;
+  bootloader_memory_and_gpio_init();
+  if ((CFG_RAM_SG_TYP & 1) != 0) {
+    SIM_CSBARBT = 7;
+    SIM_CSOR3 = 0;
+    SIM_CSOR4 = 0;
+    TPU_TRAMBAR = 0xffd0;
+    TPU_TRAMMCR = 0x1000;
+  }
+  if (CPU_Identifier == 'M') {
+    DAT_00ffe4fc = 0x31a;
+    bootloader_qsr_init();
+  }
+  DAT_00ffe4fc = 800;
+  FUN_00000350();
+  do {
+    do {
+      DAT_00ffe4fc = 0x326;
+      bootloader_scheduled_task_FUN_00000f04();
+      SIM_SWSR = 0x55;
+    } while (CPU_Identifier != 'M');
+  } while ((DAT_00ffd15a & 0x20) != 0);
+  bVar1 = SIM_PORTF0;
+  SIM_PORTF0 = bVar1 | 1;
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+

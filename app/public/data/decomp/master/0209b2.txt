@@ -1,0 +1,75 @@
+
+uint kats_calc(void)
+
+{
+  undefined3 uVar1;
+  uint in_D0;
+  uint uVar2;
+  
+  if (((ZUSTAND_MOTOR & KI.15 aus) != 0) && (N == 0)) {
+    KATS_MD = -0xb;
+    in_D0 = in_D0 & 0xffffff00;
+    if ((KATS_ED & 0xe0) != 0) {
+      in_D0 = ed_report(DTC_81_CAT_PROTECT_LEAN,0);
+      KATS_ED = (byte)in_D0;
+    }
+    KATS_INTEGRAL = 0;
+  }
+  if ((KATS_MD != -0xb) && (KATS_MD != '\n')) {
+    in_D0 = in_D0 & 0xffffff00;
+    if ((KATS_ED & 0x60) == 0) {
+      KATS_MD = -0xb;
+    }
+    else {
+      KATS_MD = '\n';
+    }
+  }
+  uVar1 = (undefined3)(in_D0 >> 8);
+  uVar2 = CONCAT31(uVar1,ZUSTAND_MOTOR) & 0xffffff1c;
+  if (((((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (cfg_m_betriebsmode != '\x01')) &&
+      (uVar2 = CONCAT31(uVar1,TMOT), K_KATS_TMOT_MIN <= TMOT)) &&
+     (uVar2 = CONCAT22((short)(in_D0 >> 0x10),TABG), K_KATS_TABG_MIN <= TABG)) {
+    if (((SA_WE_ST & 8) == 0) && ((SLP_ST & 0x40) == 0)) {
+      if (KATS_SA_DELAY != 0) {
+        uVar2 = klu_bint(&KL_KATS_SA_DELAY.sizeX,N40);
+        uVar2 = uVar2 & 0xff;
+        KATS_SA_DELAY = KATS_SA_DELAY - (short)uVar2;
+        if (KATS_SA_DELAY < 1) {
+          KATS_SA_DELAY = 0;
+        }
+      }
+    }
+    else {
+      KATS_SA_DELAY = 500;
+    }
+    if (KATS_LA == -0xb) {
+      if (KATS_INTEGRAL != 0) {
+        uVar2 = (uint)(ushort)((ushort)K_KATS_FETT_RAMPE * 8);
+        KATS_INTEGRAL = KATS_INTEGRAL + (ushort)K_KATS_FETT_RAMPE * -8;
+        if (-1 < (short)KATS_INTEGRAL) {
+          return uVar2;
+        }
+        KATS_INTEGRAL = 0;
+        return uVar2;
+      }
+    }
+    else if ((((KATS_LA == '\n') &&
+              (uVar2 = (int)K_KATS_NMAX_DELTA + (uint)N_BEGRENZER, (int)(uint)N < (int)uVar2)) &&
+             (KATS_SA_DELAY == 0)) &&
+            ((CAN_FST <= K_KATS_FST_MAX ||
+             (((CAN_FST <= K_KATS_FST_TI_ON_MAX && ((TI_ST_HELP & 0x10) == 0)) ||
+              (uVar2 = FST_ST & 0xf, (FST_ST & 0xf) != 0)))))) {
+      uVar2 = klu_bint(&KL_KATS_ML.sizeX,(byte)((int)(uint)ML >> 5));
+      KATS_INTEGRAL = KATS_INTEGRAL + ((ushort)uVar2 & 0xff);
+      if ((short)KATS_INTEGRAL < 0x9f6) {
+        return (uint)KATS_INTEGRAL;
+      }
+      KATS_MD = '\n';
+      KATS_INTEGRAL = 0x9f6;
+      uVar2 = ed_report(DTC_81_CAT_PROTECT_LEAN,8);
+      KATS_ED = (byte)uVar2;
+    }
+  }
+  return uVar2;
+}
+

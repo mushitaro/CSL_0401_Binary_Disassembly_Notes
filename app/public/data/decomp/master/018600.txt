@@ -1,0 +1,35 @@
+
+void n_init(void)
+
+{
+  char cVar1;
+  int *piVar2;
+  word *pwVar3;
+  word *pwVar4;
+  
+  N = 0;
+  N_SEGMENT = 0;
+  n_segment__t_1_ = 0;
+  N40 = 0;
+  cVar1 = '\0';
+  pwVar4 = N_T_DWF;
+  piVar2 = t_segm_history;
+  pwVar3 = n_segment_history;
+  do {
+    *pwVar3 = 0;
+    *piVar2 = 0x10000;
+    *pwVar4 = 0xffff;
+    *pwVar4 = 0;
+    pwVar4 = pwVar4 + 1;
+    cVar1 = cVar1 + '\x01';
+    piVar2 = piVar2 + 1;
+    pwVar3 = pwVar3 + 1;
+  } while (cVar1 < '\b');
+  D_N_SEGMENT = 0;
+  D_N40 = 0;
+  D_N = 0;
+  N_ST = 5;
+  N_DYN_ST = 0;
+  return;
+}
+

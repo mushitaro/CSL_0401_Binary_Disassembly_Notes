@@ -1,0 +1,126 @@
+
+uint egas_setpoint_deviation_monitor(void)
+
+{
+  bool bVar1;
+  uint uVar2;
+  byte errortype;
+  
+  uVar2 = cfg_m_motortyp & 0xf7;
+  if (uVar2 == 4) {
+    if ((WDK1 < K_WDK_NULLAGE) && (WDK_ZUSTAND == '\x01')) goto LAB_00025102;
+LAB_000250d8:
+    bVar1 = false;
+  }
+  else {
+    if (((K_WDK_NULLAGE <= WDK1) && (K_WDK_NULLAGE <= WDK2)) || (WDK_ZUSTAND != '\x01'))
+    goto LAB_000250d8;
+LAB_00025102:
+    bVar1 = true;
+  }
+  pcntrl_m = pcntrl_m | 0x40;
+  if (WDK_ZUSTAND == '\x03') {
+    return uVar2;
+  }
+  if (((ZUSTAND_MOTOR & KI.15 aus) != 0) && (N == 0)) {
+    return uVar2;
+  }
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+    if ((EDK_STATUS & 0x40) != 0) {
+      return 0;
+    }
+    if (PDR_PHASE == '\0') {
+      return 0;
+    }
+    if (PDR_PHASE == '\x01') {
+      return 0;
+    }
+    if (PDR_PHASE == '\x03') {
+      return 0;
+    }
+  }
+  if (((int)K_EDKSI_HYS_ZU + (int)K_EDKSI_POS_ZU < (int)EGAS_SOLL) && (EGAS_IST < K_EDKSI_POS_ZU)) {
+    if (edksi_1_time != 0xffff) {
+      edksi_1_time = edksi_1_time + 1;
+    }
+  }
+  else {
+    edksi_1_time = 0;
+  }
+  if (((EGAS_SOLL == 0) && (K_EDKSI_POS_ZU < EGAS_IST)) && (EGAS_IST <= K_EDKSI_HYS_BL_AUF)) {
+    if (edksi_2_time != 0xffff) {
+      edksi_2_time = edksi_2_time + 1;
+    }
+  }
+  else {
+    edksi_2_time = 0;
+  }
+  if (((K_ED_UBMIN_M < UB) && ((int)K_EDKSI_HYS_U_SOLL < (int)EGAS_SOLL - (int)EGAS_IST)) &&
+     ((K_EDKSI_POS_ZU < EGAS_IST && (EGAS_IST <= K_EDKSI_POS_N_GANZ)))) {
+    if (edksi_3_time != 0xffff) {
+      edksi_3_time = edksi_3_time + 1;
+    }
+  }
+  else {
+    edksi_3_time = 0;
+  }
+  if (((K_ED_UBMIN_M < UB) && (K_EDKSI_UB_N_GANZ <= UB)) &&
+     ((K_EDKSI_TMOT_N_GANZ <= TMOT &&
+      ((K_EDKSI_POS_N_GANZ < EGAS_IST && ((int)K_EDKSI_HYS_N_GANZ < (int)EGAS_SOLL - (int)EGAS_IST))
+      )))) {
+    if (edksi_4_time != 0xffff) {
+      edksi_4_time = edksi_4_time + 1;
+    }
+  }
+  else {
+    edksi_4_time = 0;
+  }
+  if ((int)K_EDKSI_HYS_BL_AUF < (int)EGAS_IST - (int)EGAS_SOLL) {
+    if (edksi_5_time != 0xffff) {
+      edksi_5_time = edksi_5_time + 1;
+    }
+  }
+  else {
+    edksi_5_time = 0;
+  }
+  DAT_00ffdab0 = K_EDKSI_T_BL_AUF_R <= edksi_5_time;
+  if ((edksi_5_time < K_EDKSI_T_BL_AUF_F) || (bVar1)) {
+    if (edksi_1_time < K_EDKSI_T_BL_ZU) {
+      if (edksi_3_time < K_EDKSI_T_U_SOLL) {
+        if (edksi_4_time < K_EDKSI_T_N_GANZ) {
+          if ((edksi_2_time < K_EDKSI_T_SPALT) || (bVar1)) {
+            edksi_st = 0;
+            if (edksi_ed == '\0') {
+              edksi_st = 0;
+              return CONCAT22((short)((uint)((int)EGAS_IST - (int)EGAS_SOLL) >> 0x10),edksi_2_time);
+            }
+            errortype = 0;
+          }
+          else {
+            edksi_st = 2;
+            errortype = 4;
+          }
+          goto LAB_00025368;
+        }
+        edksi_st = 4;
+      }
+      else {
+        edksi_st = 3;
+      }
+      errortype = 8;
+    }
+    else {
+      edksi_st = 1;
+      errortype = 2;
+    }
+  }
+  else {
+    edksi_st = 5;
+    errortype = 1;
+  }
+LAB_00025368:
+  uVar2 = ed_report(DTC_E6_THROTTLE_SETPOINT_DEVIATION,errortype);
+  edksi_ed = (char)uVar2;
+  return uVar2;
+}
+

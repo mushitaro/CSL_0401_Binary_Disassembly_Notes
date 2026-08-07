@@ -1,0 +1,10 @@
+
+/* EGAS Safety Concept Computer Core Test Task 3 - map interpolation of type signed char */
+
+void SK_TR_Test_3(int param_1)
+
+{
+  kfs_bint(&KF_SK_TR_SB_M.sizeX,*(byte *)(param_1 + 1),*(byte *)(param_1 + 3));
+  return;
+}
+

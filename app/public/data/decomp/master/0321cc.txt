@@ -1,0 +1,7 @@
+
+void delay_14_cycles(void)
+
+{
+  return;
+}
+

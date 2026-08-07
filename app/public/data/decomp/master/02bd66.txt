@@ -1,0 +1,52 @@
+
+void dyn_calc(void)
+
+{
+  int iVar1;
+  short sVar2;
+  
+  iVar1 = abs((int)D_WDK_WORD);
+  if ((K_DYN_DWDK_MIN < iVar1) && (((ZUSTAND_MOTOR & TL) != 0 || ((ZUSTAND_MOTOR & VL) != 0)))) {
+    iVar1 = dyn_trigger_calc(RF_DELTA);
+    DYN_TRIGGER = (short)iVar1;
+    iVar1 = abs((int)DYN_TRIGGER);
+    if (DYN_TRIGGER_KR < iVar1) {
+      if (DYN_TRIGGER < 1) {
+        DYN_KR_ST = DYN_KR_ST | 5;
+      }
+      else {
+        if (((DYN_KR_ST & 2) == 0) || (dyn_tz_kr < DYN_KR_TZ)) {
+          DYN_KR_TZ = dyn_tz_kr;
+        }
+        DYN_KR_ST = DYN_KR_ST | 7;
+      }
+    }
+    else if ((DYN_KR_ST & 2) == 0) {
+      DYN_KR_TZ = 0;
+      DYN_KR_ST = 0;
+    }
+    if ((((K_DYN_DWDK_MIN < D_WDK_WORD) && (K_DYN_DBGR_N_MIN < N)) &&
+        (DYN_TRIGGER_DBGR < DYN_TRIGGER)) &&
+       ((K_DYN_DBGR_WDK_MIN < WDK && (K_DYN_DBGR_TMOT_MIN < TMOT)))) {
+      sVar2 = kls_wint(&KL_DYN_TZ_DBGR.sizeX,N);
+      if (((DYN_DBGR_ST & 2) == 0) || (sVar2 < DYN_DBGR_TZ)) {
+        DYN_DBGR_TZ = sVar2;
+      }
+      DYN_DBGR_ST = DYN_DBGR_ST | 3;
+      return;
+    }
+    if ((DYN_DBGR_ST & 2) == 0) {
+      DYN_DBGR_TZ = 0;
+      DYN_DBGR_ST = 0;
+      return;
+    }
+  }
+  else {
+    DYN_KR_ST = 0;
+    DYN_DBGR_ST = 0;
+    DYN_KR_TZ = 0;
+    DYN_DBGR_TZ = 0;
+  }
+  return;
+}
+

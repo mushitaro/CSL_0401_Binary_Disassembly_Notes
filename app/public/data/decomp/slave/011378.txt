@@ -1,0 +1,16 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void db_tbgnd_calc(void)
+
+{
+  _DB_TBGND = SYS_TIMERTICS_COUNTER._2_2_ - DAT_00ffeff0._2_2_;
+  if (DB_TBGND_MAX < _DB_TBGND) {
+    DB_TBGND_MAX = _DB_TBGND;
+  }
+  DAT_00ffeff4 = PT1_Filter_UI((uint)_DB_TBGND << 0xb,DAT_00ffeff4,8);
+  _DB_TBGND_AV = (short)(DAT_00ffeff4 + 0x80 >> 8);
+  DAT_00ffeff0 = SYS_TIMERTICS_COUNTER;
+  return;
+}
+

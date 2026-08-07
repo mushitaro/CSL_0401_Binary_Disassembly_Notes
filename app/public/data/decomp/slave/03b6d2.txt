@@ -1,0 +1,31 @@
+
+uint smg_calibrate_speed_to_rpm_scale(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  uVar1 = (uint)smg_can_istgang;
+  if (((((DAT_00ffdc14 < 0x15) && (0x1e0 < DAT_00ffdc38)) &&
+       (uVar1 = DAT_00ffdb6c & 0xffff0001, (DAT_00ffdb6c & 1) == 0)) &&
+      ((S_KRAFTSCHLUSS != '\0' && ((V_ST & 0x40) == 0)))) &&
+     (uVar1 = DAT_00ffdc16 & 0xffff0020, (DAT_00ffdc16 & 0x20) == 0)) {
+    uVar1 = (int)((uint)N * 0xf000) /
+            (int)((uint)(byte)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] * (uint)DAT_00ffdc38);
+    DAT_00ffdc12 = (short)uVar1 + DAT_00ffdc12;
+    DAT_00ffdc14 = DAT_00ffdc14 + 1;
+  }
+  if (DAT_00ffdc14 == 0x14) {
+    uVar1 = 0x14;
+    uVar2 = DAT_00ffdc12 / 0x14;
+    if ((0x599 < uVar2) && (uVar2 < 0x9c4)) {
+      DAT_00ffdc10 = uVar2;
+      DAT_00ffdc14 = 0x15;
+      return 0x14;
+    }
+    DAT_00ffdc14 = 0;
+    DAT_00ffdc12 = 0;
+  }
+  return uVar1;
+}
+

@@ -1,0 +1,15 @@
+
+short abs_difference(ushort param_1,ushort param_2)
+
+{
+  short sVar1;
+  
+  if (param_1 < param_2) {
+    sVar1 = param_2 - param_1;
+  }
+  else {
+    sVar1 = param_1 - param_2;
+  }
+  return sVar1;
+}
+

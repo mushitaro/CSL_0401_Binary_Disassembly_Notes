@@ -1,0 +1,47 @@
+
+void can_a_message_table_init(char init_mode)
+
+{
+  byte bVar1;
+  byte slot_id;
+  struct_slot_message_block_entry *message_slot_ptr;
+  
+  can_a_control_message_table.control_block.un0 = 0x41;
+  can_a_control_message_table.control_block.un2 = DAT_0003cbb7;
+  can_a_control_message_table.message_block[0].unk6 = DAT_0003cbc2;
+  can_a_control_message_table.message_block[1].unk6 = DAT_0003cbc3;
+  can_a_control_message_table.message_block[2].unk6 = DAT_0003cbc4;
+  can_a_control_message_table.message_block[3].unk6 = DAT_0003cbc5;
+  if (init_mode == 1) {
+    can_a_control_message_table.message_block[8].unk6 = DAT_0003cbc6;
+    can_a_control_message_table.message_block[9].unk6 = DAT_0003cbc7;
+  }
+  can_a_control_message_table.control_block.un6 = (byte)((ushort)DAT_0003cbc0 >> 8);
+  can_a_control_message_table.control_block.un7 = (byte)DAT_0003cbc0 & 0xe0 | 0x1f;
+  can_a_control_message_table.control_block.un8 = (byte)((uint)DAT_0003cbbc >> 0x18);
+  can_a_control_message_table.control_block.un9 = (byte)((uint)DAT_0003cbbc >> 0x10);
+  can_a_control_message_table.control_block.un10 = (byte)((uint)DAT_0003cbbc >> 8);
+  can_a_control_message_table.control_block.un11 = (byte)DAT_0003cbbc & 0xf8;
+  can_a_control_message_table.control_block.un12 = (byte)((uint)DAT_0003cbb8 >> 0x18);
+  can_a_control_message_table.control_block.un13 = (byte)((uint)DAT_0003cbb8 >> 0x10);
+  can_a_control_message_table.control_block.un14 = (byte)((uint)DAT_0003cbb8 >> 8);
+  can_a_control_message_table.control_block.un15 = (byte)DAT_0003cbb8 & 0xf8;
+  message_slot_ptr = can_a_control_message_table.message_block;
+  for (slot_id = 1; slot_id <= prg_can_a_num_slots; slot_id = slot_id + 1) {
+    can_a_message_slot_init(slot_id,message_slot_ptr);
+    message_slot_ptr = message_slot_ptr + 1;
+  }
+  for (; slot_id < 0x10; slot_id = slot_id + 1) {
+    message_slot_ptr->slot_control_1 = 0x55;
+    message_slot_ptr->slot_control_2 = 0x55;
+    bVar1 = DAT_0003cbc8;
+    if (0xe < slot_id) {
+      bVar1 = DAT_0003cbc8 & 0xf7;
+    }
+    message_slot_ptr->direction = bVar1;
+    message_slot_ptr = message_slot_ptr + 1;
+  }
+  can_a_control_message_table.control_block.un0 = DAT_0003cbb6;
+  return;
+}
+

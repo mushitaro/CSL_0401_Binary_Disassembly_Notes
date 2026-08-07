@@ -1,0 +1,51 @@
+
+void dkba_post_injection(void)
+
+{
+  undefined4 uVar1;
+  uint uVar2;
+  int iVar3;
+  short sVar4;
+  KF_4x4_2byte_2byte_2byte *table;
+  
+  if (((((SK_TI_CONTR & 1) == 0) && ((DAT_00ffe6d0 & 1) == 0)) &&
+      (((ZUSTAND_MOTOR & VL) != 0 || ((ZUSTAND_MOTOR & TL) != 0)))) &&
+     ((N40 < K_DKBA_NMAX && (DKBA_AQ_SCHWELLE < AQ_REL_DELTA)))) {
+    uVar1 = kfu_wint(&KF_RF_N_AQ_REL.sizeX,N_SEGMENT,AQ_REL_OLD);
+    sVar4 = (short)uVar1;
+    uVar1 = kfu_wint(&KF_RF_N_AQ_REL.sizeX,N_SEGMENT,AQ_REL);
+    RF_DELTA = (short)uVar1 - sVar4;
+    uVar2 = kls_wint(&KL_DKBA_TRIGGER.sizeX,N);
+    if (RF_DELTA <= (short)uVar2) {
+      DKBA_TI_ROH = 0;
+      return;
+    }
+    DKBA_TI_ROH = (ushort)((int)((uint)RF_TI_CONST * (int)RF_DELTA) / 1000);
+    if ((DYN_ST & 1) == 0) {
+      table = &KF_DKBA_SOFT_RF_N;
+    }
+    else {
+      table = &KF_DKBA_HARD_RF_N;
+    }
+    uVar2 = kfu_wint(&table->sizeX,RF,N);
+    iVar3 = (uint)DKBA_TI_ROH * (uint)DKBA_TMOT;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x3ff;
+    }
+    iVar3 = (iVar3 >> 10) * (uVar2 & 0xffff);
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x3ff;
+    }
+    sVar4 = (short)(iVar3 >> 10);
+    if ((int)(uint)DKBA_TI < (int)sVar4) {
+      DKBA_TI = sVar4;
+      return;
+    }
+  }
+  else {
+    DKBA_TI_ROH = 0;
+    RF_DELTA = 0;
+  }
+  return;
+}
+

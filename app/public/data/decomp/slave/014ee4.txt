@@ -1,0 +1,31 @@
+
+byte auss_segm(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  
+  bVar2 = '\x01' << (LU_ZYL & 0x3f);
+  bVar1 = 0;
+  if ((bVar2 & LU_MERK_TI_DONE) != 0) {
+    if (((bVar2 & LU_AUS_ZYL) != 0) && ((&AUSS_SUM_DC_1OF8_)[(short)(ushort)LU_ZYL] != -1)) {
+      (&AUSS_SUM_DC_1OF8_)[(short)(ushort)LU_ZYL] = (&AUSS_SUM_DC_1OF8_)[(short)(ushort)LU_ZYL] + 1;
+    }
+    if (((((bVar2 & LU_AUS_ZYL) != 0) && ((K_AUSS_CFG & 1) != 0)) ||
+        (((bVar2 & TI_ED_ROH) != 0 && ((K_AUSS_CFG & 2) != 0)))) ||
+       ((((LU_ST != '\x02' && ((K_AUSS_CFG & 4) != 0)) && ((bVar2 & TZ_ZKUE_DIAG) != 0)) &&
+        (0xff >> (8 - zyl_count & 0x3f) != (uint)TZ_ZKUE_DIAG)))) {
+      AUSS_ZYL = bVar2 | AUSS_ZYL;
+      (&AUSS_SUM_ABG_1OF8_)[(short)(ushort)LU_ZYL] =
+           (&AUSS_SUM_ABG_1OF8_)[(short)(ushort)LU_ZYL] + 1;
+      bVar1 = AUSS_WICHT_KS;
+      (&AUSS_SUM_KS_1OF8_)[(short)(ushort)LU_ZYL] =
+           (ushort)AUSS_WICHT_KS + (&AUSS_SUM_KS_1OF8_)[(short)(ushort)LU_ZYL];
+      return bVar1;
+    }
+    bVar1 = ~bVar2;
+    AUSS_ZYL = bVar1 & AUSS_ZYL;
+  }
+  return bVar1;
+}
+

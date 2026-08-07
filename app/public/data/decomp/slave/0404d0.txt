@@ -1,0 +1,62 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void qsm_start_transfer(int *param_1)
+
+{
+  ushort *puVar1;
+  ushort *source;
+  undefined4 *puVar2;
+  int iVar3;
+  byte num;
+  uint uVar4;
+  undefined4 unaff_D2;
+  undefined4 uVar5;
+  undefined1 *puVar6;
+  byte abStackY_35 [9];
+  
+  puVar6 = &stack0xffffffe0;
+  DAT_00ffe5de = param_1;
+  puVar1 = (ushort *)*param_1;
+  puVar2 = (undefined4 *)param_1[1];
+  source = (ushort *)*puVar2;
+  num = *(byte *)(puVar2 + 3);
+  uVar5 = CONCAT31((int3)((uint)unaff_D2 >> 8),num);
+  uVar4 = *puVar1 & 0x3c00;
+  if (uVar4 == 0x2000) {
+    DAT_00ffe5e6 = DAT_00ffe5e6 | 0x40;
+  }
+  else {
+    DAT_00ffe5e6 = DAT_00ffe5e6 & 0xbf;
+  }
+  if (source != (ushort *)0x0) {
+    if ((DAT_00ffe5e6 & 0x40) == 0) {
+      puVar6 = &stack0xffffffd4;
+      uVar4 = memcpy_us(source,(ushort *)&DAT_00fffd20,num);
+    }
+    else {
+      puVar6 = &stack0xffffffd4;
+      uVar4 = memcpy_b_us((byte *)source,(ushort *)&DAT_00fffd20,num);
+    }
+  }
+  iVar3 = puVar2[2];
+  if (iVar3 == 0) {
+    *(undefined4 *)(puVar6 + -4) = uVar5;
+    *(undefined **)(puVar6 + -8) = &DAT_00fffd40;
+    *(uint *)(puVar6 + -0xc) = CONCAT31((int3)(uVar4 >> 8),*(undefined1 *)(puVar1 + 3));
+    *(undefined4 *)(puVar6 + -0x10) = 0x40564;
+    memset(puVar6[-9],*(byte **)(puVar6 + -8),puVar6[-1]);
+  }
+  else {
+    *(undefined4 *)(puVar6 + -4) = uVar5;
+    *(undefined **)(puVar6 + -8) = &DAT_00fffd40;
+    *(int *)(puVar6 + -0xc) = iVar3;
+    *(undefined4 *)(puVar6 + -0x10) = 0x40572;
+    memcpy_b(*(byte **)(puVar6 + -0xc),*(byte **)(puVar6 + -8),puVar6[-1]);
+  }
+  _DAT_00fffc18 = *puVar1;
+  _DAT_00fffc1c = puVar1[2] | (ushort)num * 0x100 - 0x100;
+  _DAT_00fffc1a = puVar1[1];
+  return;
+}
+

@@ -1,0 +1,15 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void mem_read_array_probe_and_settle(void)
+
+{
+  short sVar1;
+  
+  sVar1 = -0x5d40;
+  do {
+    sVar1 = sVar1 + -1;
+  } while (sVar1 != -1);
+  return;
+}
+

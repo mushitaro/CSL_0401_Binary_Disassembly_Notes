@@ -1,0 +1,39 @@
+
+/* Flap Actuator Driver Safety/Diagnostic Check
+   - Verifies the actuator driver hardware is enabled before allowing output
+   - If not enabled, logs a diagnostic fault (DTC_12_CSL_FLAP_DRIVER)
+   - Updates internal diagnostic state for subsequent logic/clearing
+   - Always called before setting actuator outputs */
+
+uint ask_flap_driver_ed(void)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  
+                    /* 0401 Specific */
+                    /* If the flap driver enable bit (0x40) is *not* set in the status register */
+  if ((DAT_00fffa19 & 0x40) == 0) {
+                    /* Set enable/diagnostic request bit in control/status register */
+    DAT_00fffa41 = DAT_00fffa41 | 0x40;
+                    /* Report a "flap driver not enabled" fault with code 8 */
+    uVar1 = ed_report(DTC_12_CSL_FLAP_DRIVER,8);
+                    /* Save returned diagnostic state */
+    DAT_00ffdc97 = (char)uVar1;
+                    /* Clear enable/request bit */
+    DAT_00fffa41 = DAT_00fffa41 & 0xbf;
+                    /* Exit: driver not enabled, fault reported */
+    return uVar1;
+  }
+  uVar1 = CONCAT31((int3)((uint)in_D0 >> 8),DAT_00ffdc97) & 0xffffffe0;
+                    /* Combine previous diagnostic state into a word */
+  if ((DAT_00ffdc97 & 0xe0) != 0) {
+                    /* Report/clear the fault if still pending */
+    uVar1 = ed_report(DTC_12_CSL_FLAP_DRIVER,0);
+                    /* Update diagnostic state */
+    DAT_00ffdc97 = (byte)uVar1;
+  }
+                    /* Return current diag/fault state */
+  return uVar1;
+}
+

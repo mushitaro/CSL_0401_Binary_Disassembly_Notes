@@ -1,0 +1,26 @@
+
+void bootloader_scheduled_task_FUN_00000f04(void)
+
+{
+  if (DAT_00ffd00a != 0) {
+    FUN_00000e66();
+    FUN_00000d24();
+    FUN_00001014();
+    if (CPU_Identifier == 'M') {
+      FUN_0000105a();
+      FUN_0000109a();
+      FUN_00001092();
+      FUN_00001076();
+    }
+    FUN_00000dc6();
+    if (CPU_Identifier == 'S') {
+      FUN_00001166();
+      FUN_000012f2();
+    }
+    if ((char)bootloader_diag_state == 0) {
+      boot_handoff_prepare();
+    }
+  }
+  return;
+}
+

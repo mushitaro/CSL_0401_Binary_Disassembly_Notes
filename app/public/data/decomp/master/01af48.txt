@@ -1,0 +1,72 @@
+
+ushort p_umg_filter_calc(ushort param_1)
+
+{
+  undefined4 uVar1;
+  byte bVar2;
+  ushort uVar3;
+  
+  bVar2 = 0;
+  if (param_1 < K_P_UMG_DIAG_MAX) {
+    if (K_P_UMG_DIAG_MIN < param_1) {
+      uVar3 = param_1 - P_UMG_FILTER;
+      if (((int)(uint)K_P_UMG_DIAG_ABW < (int)(short)uVar3) ||
+         ((int)(short)uVar3 < (int)-(uint)K_P_UMG_DIAG_ABW)) {
+        bVar2 = 8;
+      }
+      if (P_UMG_DIAG_ST == error_free) {
+        if ((int)(uint)K_P_UMG_MAX_GRAD < (int)(short)uVar3) {
+          uVar3 = K_P_UMG_MAX_GRAD;
+        }
+        if ((int)(short)uVar3 < (int)-(uint)K_P_UMG_MAX_GRAD) {
+          uVar3 = (ushort)-(uint)K_P_UMG_MAX_GRAD;
+        }
+        P_UMG_FILTER = uVar3 + P_UMG_FILTER;
+      }
+    }
+    else {
+      bVar2 = 2;
+    }
+  }
+  else {
+    bVar2 = 1;
+  }
+  if ((bVar2 != 0) || (P_UMG_ED != 0)) {
+    uVar1 = ed_report(DTC_4C_AMBIENT_PRESSURE,bVar2);
+    P_UMG_ED = (byte)uVar1;
+  }
+  if ((P_UMG_ED & 0x40) != 0) {
+    P_UMG_DIAG_ST = ersatz_value;
+  }
+  if (P_UMG_DIAG_ST == ersatz_value) {
+    uVar3 = P_UMG_ERSATZ - P_UMG_FILTER;
+    if ((int)(uint)K_P_UMG_MAX_GRAD < (int)(short)(P_UMG_ERSATZ - P_UMG_FILTER)) {
+      uVar3 = K_P_UMG_MAX_GRAD;
+    }
+    if ((int)(short)uVar3 < (int)-(uint)K_P_UMG_MAX_GRAD) {
+      uVar3 = (ushort)-(uint)K_P_UMG_MAX_GRAD;
+    }
+    P_UMG_FILTER = uVar3 + P_UMG_FILTER;
+  }
+  if ((((P_UMG_DIAG_ST != error_free) && (N == 0)) && ((ZUSTAND_MOTOR & KI.15 aus) != 0)) &&
+     ((P_UMG_ED & 0x40) == 0)) {
+    P_UMG_DIAG_ST = error_free;
+    P_UMG_FILTER = param_1;
+  }
+  uVar3 = N_EVAN1 | N;
+  if ((uVar3 == 0) && ((SCHALT_M_ST & 8) == 0)) {
+    bVar2 = RESET_STATUS;
+    uVar3 = bVar2 & 0xffc0;
+    if ((bVar2 & 0xc0) != 0) {
+      if ((p_saug_st & 2) != 0) {
+        P_UMG_ERSATZ = K_P_UMG_ERSATZ;
+        return uVar3;
+      }
+                    /* If we have an error condition with P_UMG and if the engine isn't turning then
+                       we can use CSL_MAP_Pressure to calibrate P_UMG_ERSATZ */
+      P_UMG_ERSATZ = p_saug_no_filter;
+    }
+  }
+  return uVar3;
+}
+

@@ -1,0 +1,22 @@
+
+void obd_reset_phase_slot(byte param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = (uint)param_1 * 6;
+  (&DAT_00ffd808)[iVar1] = 0xff;
+  (&DAT_00ffd809)[iVar1] = 0;
+  (&DAT_00ffd80a)[iVar1] = 0xff;
+  (&DAT_00ffd80b)[iVar1] = 0;
+  (&DAT_00ffd80c)[iVar1] = 0;
+  (&DAT_00ffd80d)[iVar1] = 0;
+  (&DAT_00ffd7f0)[iVar1] = 0xff;
+  (&DAT_00ffd7f1)[iVar1] = 0;
+  (&DAT_00ffd7f2)[iVar1] = 0xff;
+  (&DAT_00ffd7f3)[iVar1] = 0;
+  (&DAT_00ffd7f4)[iVar1] = 0;
+  (&DAT_00ffd7f5)[iVar1] = 0;
+  return;
+}
+

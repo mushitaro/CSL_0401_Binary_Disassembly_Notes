@@ -1,0 +1,11 @@
+
+void swe_vdiff_calc(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = klu_wint(&KL_SWE_SW_DIFF.sizeX,V);
+  SWE_VDIFF = (char)uVar1;
+  return;
+}
+

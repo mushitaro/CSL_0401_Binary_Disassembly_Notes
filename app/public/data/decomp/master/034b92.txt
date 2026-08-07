@@ -1,0 +1,50 @@
+
+void mil_obd_st_calc(void)
+
+{
+  bool bVar1;
+  byte bVar2;
+  byte *pbVar3;
+  
+  obd_warm_up_readiness();
+  if (((OBD_STATE & 1) != 0) || ((OBD_STATE & 8) != 0)) {
+    obd_monitor_tests();
+  }
+  if (K_MIL_MODE_M == 2) {
+    bVar1 = false;
+    if ((char)DAT_00ffd200 != '\0') {
+      bVar2 = 0;
+      pbVar3 = &DAT_00ffd202;
+      do {
+        if (((pbVar3[1] & 0x10) != 0) && ((k_ed_fil_base[*pbVar3].K_ED_FIL_CTL & 0x20) != 0)) {
+          bVar1 = true;
+          break;
+        }
+        pbVar3 = pbVar3 + 0x16;
+        bVar2 = bVar2 + 1;
+      } while (bVar2 < 0x20);
+    }
+    if (CPU_Identifier == 'M') {
+      if (bVar1) {
+        MIL_ST = MIL_ST & 0xfd | 1;
+      }
+      else {
+        MIL_ST = MIL_ST & 0xfc;
+      }
+      MIL_ST = MIL_ST_S & 0xf | MIL_ST & 0xf3;
+      return;
+    }
+    if (bVar1) {
+      MIL_ST_S = MIL_ST_S | 1;
+    }
+    else {
+      MIL_ST_S = MIL_ST_S & 0xfe;
+    }
+    MIL_ST_S = MIL_ST_S & 0xfd;
+    if ((DAT_00ff8148 & 1) != 0) {
+      MIL_ST_S = MIL_ST_S | 3;
+    }
+  }
+  return;
+}
+

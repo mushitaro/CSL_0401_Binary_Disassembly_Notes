@@ -1,0 +1,32 @@
+
+undefined8 sys_isr_timer_tic(void)
+
+{
+  undefined4 in_D0;
+  undefined4 in_D1;
+  undefined1 in_A0b;
+  undefined1 in_A1b;
+  undefined1 in_stack_00000000;
+  undefined1 in_stack_00000003;
+  undefined in_stack_00000007;
+  undefined in_stack_0000000b;
+  undefined in_stack_0000000f;
+  undefined in_stack_00000013;
+  undefined in_stack_00000017;
+  
+  sys_active_interrupts = sys_active_interrupts + '\x01';
+  sys_isr_count = sys_isr_count + 1;
+  sys_timer_tics_calc();
+  if ((SYS_TIMERTICS_COUNTER & 1) != 0) {
+    sys_process_scheduled_tasks();
+  }
+  task_1ms();
+  sys_active_interrupts = sys_active_interrupts + -1;
+  if (sys_active_interrupts == '\0') {
+    sys_dispatch_tasks((char)in_D0,(char)in_D1,in_A0b,in_A1b,in_stack_00000003,in_stack_00000007,
+                       in_stack_0000000b,in_stack_0000000f,in_stack_00000013,in_stack_00000017,
+                       in_stack_00000000);
+  }
+  return CONCAT44(in_D0,in_D1);
+}
+

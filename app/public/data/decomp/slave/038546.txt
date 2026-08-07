@@ -1,0 +1,42 @@
+
+uint smg_rev_target_offset_limits_update(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  ushort uVar4;
+  ushort uVar5;
+  
+  uVar1 = kfu_bint(&KF_SMG_N_ZIEL_OFF_K.sizeX,DAT_00ffdb2e,DAT_00ffdb28);
+  uVar2 = kfu_bint(&KF_SMG_N_ZIEL_OFF_S.sizeX,DAT_00ffdb2e,DAT_00ffdb28);
+  uVar5 = (ushort)(byte)uVar1 +
+          (short)((int)((DAT_00ffdb78 - 1) * ((uVar2 & 0xff) - (uVar1 & 0xff))) / 7);
+  uVar1 = klu_bint(&KL_SMG_N_ZIEL_OFF_MA.sizeX,TOEL);
+  uVar4 = uVar5;
+  if ((short)uVar5 < (short)(ushort)(byte)uVar1) {
+    uVar4 = (ushort)(byte)uVar1;
+  }
+  if ((short)uVar4 < 0) {
+    uVar4 = 0;
+  }
+  if (0x80 < (short)uVar4) {
+    uVar4 = 0x80;
+  }
+  DAT_00ffdbe3 = (char)uVar4;
+  uVar1 = CONCAT22((short)uVar5 >> 0xf,DAT_00ffdb6c) & 0xffff0001;
+  if ((DAT_00ffdb6c & 1) != 0) {
+    iVar3 = (int)(short)(ushort)K_SMG_____DAT_0008a89d * (int)DAT_00ffdb5c;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x3ff;
+    }
+    uVar5 = (ushort)K_SMG_____DAT_0008a89c + (short)(iVar3 >> 10);
+    uVar1 = CONCAT22((short)(char)((uint)iVar3 >> 0x18) >> 2,uVar5);
+    if (uVar5 < 0x81) goto LAB_0003862a;
+  }
+  uVar5 = 0x80;
+LAB_0003862a:
+  DAT_00ffdbe4 = (char)uVar5;
+  return uVar1;
+}
+

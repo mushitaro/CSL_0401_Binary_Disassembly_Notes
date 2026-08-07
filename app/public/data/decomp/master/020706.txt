@@ -1,0 +1,31 @@
+
+void kkos_autodetect_from_can(void)
+
+{
+  if ((KKOS_ST_VERBAUT & 2) == 0) {
+    if ((SCHALTER_CAN & 4) == 0) {
+      DAT_00ffe90d = DAT_00ffe90d + 1;
+      if (DAT_00ffe90d <= K_KKOS_T_ERKENN) {
+        return;
+      }
+      KKOS_ST_VERBAUT = KKOS_ST_VERBAUT | 2;
+      return;
+    }
+  }
+  else {
+    if ((KKOS_ST_VERBAUT & 1) != 0) {
+      return;
+    }
+    if (((SCHALTER_CAN & 4) != 0) && ((SCHALTER_CAN & 2) != 0)) {
+      DAT_00ffe90d = DAT_00ffe90d + 1;
+      if (DAT_00ffe90d <= K_KKOS_T_ERKENN) {
+        return;
+      }
+      KKOS_ST_VERBAUT = KKOS_ST_VERBAUT | 1;
+      return;
+    }
+  }
+  DAT_00ffe90d = 0;
+  return;
+}
+

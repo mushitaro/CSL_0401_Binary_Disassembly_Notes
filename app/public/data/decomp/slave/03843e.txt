@@ -1,0 +1,44 @@
+
+uint smg_clutch_protection_monitor(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar1 = klu_wint(&KL_SMG_____DAT_0008a9da.sizeX,DAT_00ffdb32);
+  uVar2 = CONCAT22((short)(uVar1 >> 0x10),DAT_00ffdb6c) & 0xffff0001;
+  if (((((DAT_00ffdb6c & 1) != 0) && (DAT_00ffdb3a == '\x03')) && (DAT_00ffdb86 == -0x80)) &&
+     (uVar2 = (uint)DAT_00ffdb5a, (int)(uint)K_SMG_____DAT_0008a840 < (int)uVar2)) {
+    uVar2 = (uint)DAT_00ffdb68;
+    if ((int)(uVar1 & 0xffff) < (int)uVar2) {
+      if (DAT_00ffdb16__SMGCAN_Power_at_clutch_ < 0xfb) {
+        uVar2 = CONCAT22(DAT_00ffdb68 >> 0xf,DAT_00ffdb32);
+        if ((K_SMG_____DAT_0008a844 < DAT_00ffdb32) &&
+           (uVar2 = (uint)K_SMG_____DAT_0008a842 + (int)DAT_00ffdb62, (int)uVar2 < (int)DAT_00ffdb8a
+           )) {
+          DAT_00ffdbb0 = DAT_00ffdbb0 | 1;
+        }
+      }
+      else {
+        DAT_00ffdbb0 = DAT_00ffdbb0 | 2;
+      }
+    }
+  }
+  if ((DAT_00ffdb3a == '\0') ||
+     (uVar2 = CONCAT22((short)(uVar2 >> 0x10),DAT_00ffdb6c) & 0xffff0001, (DAT_00ffdb6c & 1) == 0))
+  {
+    DAT_00ffdbb0 = 0;
+  }
+  if ((DAT_00ffdbb0 & 2) == 0) {
+    DAT_00ffdbae = DAT_00ffdbb6;
+  }
+  else {
+    uVar2 = (uint)DAT_00ffdbae;
+    if ((int)(uint)K_SMG_____DAT_0008a846 < (int)uVar2) {
+      DAT_00ffdbae = DAT_00ffdbae - (ushort)K_SMG_____DAT_0008a84a;
+      return (uint)K_SMG_____DAT_0008a84a;
+    }
+  }
+  return uVar2;
+}
+

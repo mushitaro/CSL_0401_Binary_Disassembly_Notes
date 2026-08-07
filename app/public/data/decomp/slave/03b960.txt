@@ -1,0 +1,118 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void smg_vehicle_dynamics_observer_update(void)
+
+{
+  ushort uVar1;
+  undefined4 uVar2;
+  int iVar3;
+  short sVar5;
+  uint uVar4;
+  
+  smg_vehicle_speed_slope_estimator();
+  smg_calibrate_speed_to_rpm_scale();
+  FUN_0003c530();
+  uVar2 = kfu_bint(&KF_SMG_BW_NULL.sizeX,ki_ab,ki_scha);
+  smg_bw_null = (undefined1)uVar2;
+  if ((DAT_00ffdb3a == '\x02') || ((DAT_00ffdb6c & 0x200) != 0)) {
+    if (((DAT_00ffdb6c & 1) == 0) || ((DAT_00ffdb6c & 4) == 0)) {
+      uVar4 = klu_bint(&KL_SMG_MOT_J_MOTOR.sizeX,(byte)(n_zie / 0x28));
+      smg_mot_j_motor = (byte)uVar4;
+    }
+    else {
+      smg_mot_j_motor = KL_SMG_MOT_J_MOTOR.y[0];
+    }
+  }
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    _DAT_00ffdc6c =
+         (undefined2)
+         ((int)((uint)(byte)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] * (int)DAT_00ffdb62 + 0x1e
+               ) / 600);
+    _DAT_00ffdc6e =
+         (undefined2)
+         ((int)((uint)(byte)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] * (int)DAT_00ffdb18 + 0x1e
+               ) / 600);
+  }
+  DAT_00ffdb7a = smg_expected_N_from_V_and_gear(DAT_00ffdc38,smg_can_istgang);
+  DAT_00ffdb7c = smg_expected_N_from_V_and_gear(DAT_00ffdc38,smg_can_gewuenschter_gang);
+  if ((smg_can_istgang == Neutral) || (5th < smg_can_istgang)) {
+    DAT_00ffdb7e = N;
+  }
+  else {
+    DAT_00ffdb7e = smg_expected_N_from_V_and_gear(DAT_00ffdc36,smg_can_istgang + 1st);
+  }
+  sVar5 = DAT_00ffdb5a - DAT_00ffdb4e;
+  DAT_00ffdb4e = DAT_00ffdb5a;
+  DAT_00ffdb60 = PT1_Filter_SS(sVar5 * 0x32,DAT_00ffdb60,K_SMG_TAU_DMD_FAHRER);
+  DAT_00ffdc72 = PT1_Filter_SS((short)DAT_00ffdb10 << 8,DAT_00ffdc72,K_SMG_TAU_AX_MESS);
+  if ((V_ST & 0x40) == 0) {
+    if (V < 2) {
+      sVar5 = 0;
+    }
+    else if (DAT_00ffdc38 == 0) {
+      sVar5 = -0x400;
+    }
+    else {
+      sVar5 = 0x400 - (short)((int)(((int)DAT_00ffdc08 + (uint)DAT_00ffdc36) * 0x400) /
+                             (int)(uint)DAT_00ffdc38);
+    }
+    DAT_00ffdb76 = PT1_Filter_SS(sVar5,DAT_00ffdb76,K_SMG_TAU_RSCHLUPF);
+    uVar1 = DAT_00ffdc36;
+    iVar3 = ((uint)DAT_00ffdc36 - (uint)DAT_00ffdb52) * 0x22b9;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x3ff;
+    }
+    sVar5 = (short)(iVar3 >> 10);
+    if (sVar5 < -0x7f) {
+      sVar5 = -0x7f;
+    }
+    if (0x7f < sVar5) {
+      sVar5 = 0x7f;
+    }
+    sVar5 = PT1_Filter_SS(sVar5 << 8,DAT_00ffe63c,K_SMG_TAU_AX_BERECH);
+    if ((((DAT_00ffdc36 < 0x10) && (iVar3 = abs((int)sVar5), iVar3 < 0x100)) ||
+        (-0x65 < DAT_00ffdb30)) || ((int)DAT_00ffe63c * (int)sVar5 < 0)) {
+      if (((DAT_00ffdbb3 & 0x10) != 0) && (smg_can_istgang != Reverse)) {
+        DAT_00ffdbb3 = DAT_00ffdbb3 & 0xef;
+      }
+      if (((DAT_00ffdbb3 & 0x10) == 0) && (smg_can_istgang == Reverse)) {
+        DAT_00ffdbb3 = DAT_00ffdbb3 | 0x10;
+      }
+    }
+    DAT_00ffdc70 = sVar5;
+    if ((DAT_00ffdbb3 & 0x10) != 0) {
+      DAT_00ffdc70 = -sVar5;
+    }
+    DAT_00ffdb52 = uVar1;
+    DAT_00ffe63c = sVar5;
+    if (((DAT_00ffdb01 & 0x10) == 0) || (smg_can_istgang == Reverse)) {
+      smg_ax_berg = PT1_Filter_SS(DAT_00ffdc72 - DAT_00ffdc70,smg_ax_berg,K_SMG_TAU_AX_BERG);
+    }
+    else {
+      smg_ax_berg = 0;
+    }
+    iVar3 = (int)smg_ax_berg;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0xff;
+    }
+    iVar3 = abs(iVar3 >> 8);
+    DAT_00ffdb36 = (undefined1)iVar3;
+  }
+  else {
+    DAT_00ffdb76 = 0;
+    smg_ax_berg = 0;
+    DAT_00ffdc70 = 0;
+  }
+  if (DAT_00ffdb3a == '\0') {
+    if (((ASC_SCHALTER & 1) != 0) && (10 < DAT_00ffdb76)) {
+      uVar4 = klu_bint(&KL_SMG_FW_REL_VIRT.sizeX,(byte)((int)DAT_00ffdb76 / 10));
+      DAT_00ffdb66 = (short)((int)((DAT_00ffdb12__SMGCAN_PROGRAMMINFO_ - 1) * (uVar4 & 0xffff)) / 5)
+                     + 0x80;
+      return;
+    }
+    DAT_00ffdb66 = 0x80;
+  }
+  return;
+}
+

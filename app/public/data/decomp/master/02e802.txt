@@ -1,0 +1,8 @@
+
+void tog_capture_arm(void)
+
+{
+  CTM4_DASM9SIC = 0x1901;
+  return;
+}
+

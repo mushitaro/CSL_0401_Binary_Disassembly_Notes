@@ -1,0 +1,26 @@
+
+int * qsm_get_highest_priority_queued_transfer(void)
+
+{
+  byte bVar1;
+  char cVar2;
+  int *piVar3;
+  int *piVar4;
+  
+  piVar3 = (int *)0x0;
+  if (DAT_00ffe5e5 != '\0') {
+    piVar4 = &DAT_00ffe5e8;
+    bVar1 = 0;
+    cVar2 = '\x04';
+    do {
+      if ((*piVar4 != 0) && (bVar1 < *(byte *)(piVar4 + 1))) {
+        bVar1 = *(byte *)(piVar4 + 1);
+        piVar3 = piVar4;
+      }
+      piVar4 = (int *)((int)piVar4 + 6);
+      cVar2 = cVar2 + -1;
+    } while ('\0' < cVar2);
+  }
+  return piVar3;
+}
+

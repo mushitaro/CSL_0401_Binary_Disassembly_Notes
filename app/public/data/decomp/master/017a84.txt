@@ -1,0 +1,8 @@
+
+void md_maximum_moment_init_FUN_00017a84(void)
+
+{
+  MD_Maximum_Moment_FUN_00017a76();
+  return;
+}
+

@@ -1,0 +1,51 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* runs in the segment task */
+
+void m_calc(void)
+
+{
+  int tetv_ms;
+  uint tetv_flow_temp;
+  short unaff_D2w;
+  int m_temp;
+  
+                    /* 0401 Specific */
+  if (tan_m != 0) {
+    saug_m = (short)((uint)((int)((uint)p_saug_m * (uint)hubvolumen_r_verh) / (int)tan_m) >> 5);
+  }
+  tetv_ms = (uint)TETV * (uint)p_kvd_ersatz;
+  if (tetv_ms < 0) {
+    tetv_ms = tetv_ms + 0x7fff;
+  }
+                    /* DAT_00ffeee6 is an adjusted value (p_UMG_minus_MAP_Scaled times TETV *
+                       DAT8e69c * adjustment factors) */
+  tetv_flow_temp = ((uint)k_m_tetv_scaler * (tetv_ms >> 0xf)) / 1920000;
+  tetv_flow = (short)tetv_flow_temp;
+  if (N != 0) {
+                    /* m_720_2 is the mass of air per cylinder per cycle lost due to TETV */
+    tetv_m = (short)((tetv_flow_temp * 83333) / ((uint)zyl_count * (uint)N));
+  }
+  m_temp = ((int)saug_m - (int)rg_m) - (int)tetv_m;
+  if (m_temp < 1) {
+    m = 0;
+  }
+  else {
+    m = (undefined2)m_temp;
+  }
+  rg_m_copy = rg_m;
+  if (saug_m != 0) {
+    unaff_D2w = (short)((rg_m * 10000) / (int)saug_m);
+  }
+  if (unaff_D2w < 5001) {
+    if (unaff_D2w < -1000) {
+      unaff_D2w = -1000;
+    }
+  }
+  else {
+    unaff_D2w = 5000;
+  }
+  _DAT_00ff82b2 = unaff_D2w;
+  return;
+}
+

@@ -1,0 +1,26 @@
+
+void obd_freeze_frame_reset(void)
+
+{
+  byte bVar1;
+  undefined1 *puVar2;
+  
+  FF_CODE = 0;
+  DAT_00ffd7df = 0;
+  bVar1 = 0;
+  puVar2 = &DAT_00ffd7e0;
+  do {
+    *puVar2 = 0;
+    bVar1 = bVar1 + 1;
+    puVar2 = puVar2 + 1;
+  } while (bVar1 < 0x10);
+  FF_INDEX = 0;
+  DAT_00ffd7de = 0;
+  DAT_00ffd7ce = 0;
+  DAT_00ffd7d2 = 0;
+  DAT_00ffd7d4 = 0;
+  DAT_00ffd7d6 = 0;
+  OBD_STEUER = OBD_STEUER & 199;
+  return;
+}
+

@@ -1,0 +1,21 @@
+
+void can_init(void)
+
+{
+  byte bVar1;
+  
+  can_a_message_table_init(1);
+  can_a_tx_ed(true);
+  can_a_tx_status = can_a_tx_status | 0x30;
+  bVar1 = SIM_PFPAR._1_1_;
+  SIM_PFPAR._1_1_ = bVar1 | 4;
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    can_b_message_table_init(1);
+    can_b_reinit(1);
+    can_b_tx_status = can_b_tx_status | 0x30;
+    bVar1 = SIM_PFPAR._1_1_;
+    SIM_PFPAR._1_1_ = bVar1 | 2;
+  }
+  return;
+}
+

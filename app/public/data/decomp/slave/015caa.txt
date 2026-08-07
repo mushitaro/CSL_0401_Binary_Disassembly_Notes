@@ -1,0 +1,121 @@
+
+uint ar_anti_jerking(void)
+
+{
+  ushort uVar1;
+  bool bVar2;
+  short sVar3;
+  int iVar4;
+  uint uVar5;
+  byte bVar6;
+  
+  if ((((((((ZUSTAND_MOTOR & TL) == 0) && ((ZUSTAND_MOTOR & VL) == 0)) || (TMOT < K_AR_TMOT_MIN)) ||
+        ((N < K_AR_NMIN || (K_AR_NMAX < N)))) || ((RF < K_AR_RFMIN || (K_AR_RFMAX < RF)))) ||
+      (((V < K_AR_VMIN || (K_AR_VMAX < V)) && ((V_ST & 0x40) == 0)))) || (S_KRAFTSCHLUSS == '\0')) {
+    bVar2 = false;
+  }
+  else {
+    bVar2 = true;
+  }
+  bVar6 = AR_ZUSTAND;
+  if ((AR_ZUSTAND != 1) && (!bVar2)) {
+    bVar6 = 0x10;
+  }
+  iVar4 = 0;
+  if (bVar6 == 1) {
+    if ((AR_GRAD1 < (short)D_N_SEGMENT) && (bVar2)) {
+      bVar6 = 2;
+      AR_T_AKTIV = SYS_TIMERTICS_COUNTER._2_2_;
+      AR_T_TRIGGER = SYS_TIMERTICS_COUNTER._2_2_;
+      AR_TRIGGER_COUNT = 1;
+    }
+    goto LAB_00015e2c;
+  }
+  if (bVar6 == 2) {
+    if ((short)D_N_SEGMENT < AR_GRAD2) {
+LAB_00015dba:
+      bVar6 = 4;
+LAB_00015dbc:
+      AR_T_TRIGGER = SYS_TIMERTICS_COUNTER._2_2_;
+      goto LAB_00015e2c;
+    }
+    iVar4 = (uint)SYS_TIMERTICS_COUNTER._2_2_ - (uint)AR_T_TRIGGER;
+    uVar1 = K_AR_T_TRIGGER;
+LAB_00015dd2:
+    if (iVar4 <= (int)(uint)uVar1) goto LAB_00015e2c;
+  }
+  else {
+    if (bVar6 == 4) {
+      if (AR_GRAD2 < (short)D_N_SEGMENT) {
+        AR_TRIGGER_COUNT = AR_TRIGGER_COUNT + 1;
+        bVar6 = 8;
+        goto LAB_00015dbc;
+      }
+    }
+    else {
+      if (bVar6 != 8) {
+        if ((bVar6 != 0x10) || (MD_AR_OFFSET == 0)) {
+          bVar6 = 1;
+          AR_TRIGGER_COUNT = 0;
+        }
+        goto LAB_00015e2c;
+      }
+      if ((short)D_N_SEGMENT < AR_GRAD2) goto LAB_00015dba;
+    }
+    iVar4 = 0;
+    if ((AR_TRIGGER_COUNT <= K_AR_ANZ_TRIGGER) &&
+       (iVar4 = (uint)SYS_TIMERTICS_COUNTER._2_2_ - (uint)AR_T_TRIGGER,
+       iVar4 <= (int)(uint)K_AR_T_TRIGGER)) {
+      iVar4 = (uint)SYS_TIMERTICS_COUNTER._2_2_ - (uint)AR_T_AKTIV;
+      uVar1 = K_AR_T_AKTIV;
+      goto LAB_00015dd2;
+    }
+  }
+  bVar6 = 0x10;
+LAB_00015e2c:
+  if ((bVar6 & 1) != 0) {
+    MD_AR_OFFSET = 0;
+  }
+  uVar5 = CONCAT31((int3)((uint)iVar4 >> 8),bVar6) & 0xffffff0a;
+  sVar3 = MD_AR_OFFSET;
+  if ((bVar6 & 10) != 0) {
+    uVar5 = kfs_wint(&KF_AR_MD.sizeX,N_SEGMENT,D_N_SEGMENT);
+    AR_MD_ROH = (short)uVar5;
+    sVar3 = AR_MD_ROH;
+    if ((AR_MD_ROH < MD_AR_OFFSET) &&
+       (uVar5 = (int)MD_AR_OFFSET - (int)K_AR_MDB1, sVar3 = AR_MD_ROH, (int)AR_MD_ROH < (int)uVar5))
+    {
+      uVar5 = CONCAT22((short)(uVar5 >> 0x10),K_AR_MDB1);
+      sVar3 = MD_AR_OFFSET - K_AR_MDB1;
+    }
+  }
+  MD_AR_OFFSET = sVar3;
+  if ((bVar6 & 4) != 0) {
+    MD_AR_OFFSET = 0;
+  }
+  if (((bVar6 & 0x10) != 0) && (MD_AR_OFFSET != 0)) {
+    if ((int)MD_AR_OFFSET < -(int)K_AR_MDB2) {
+      uVar5 = CONCAT22(MD_AR_OFFSET >> 0xf,K_AR_MDB2);
+      MD_AR_OFFSET = K_AR_MDB2 + MD_AR_OFFSET;
+    }
+    else {
+      uVar5 = (uint)MD_AR_OFFSET;
+      if (K_AR_MDB2 < MD_AR_OFFSET) {
+        uVar5 = CONCAT22(MD_AR_OFFSET >> 0xf,K_AR_MDB2);
+        MD_AR_OFFSET = MD_AR_OFFSET - K_AR_MDB2;
+      }
+      else {
+        MD_AR_OFFSET = 0;
+      }
+    }
+  }
+  if (K_AR_ENABLE == '\0') {
+    MD_AR = 0;
+  }
+  else {
+    MD_AR = MD_AR_OFFSET;
+  }
+  AR_ZUSTAND = bVar6;
+  return uVar5;
+}
+

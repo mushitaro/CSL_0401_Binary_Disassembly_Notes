@@ -1,0 +1,38 @@
+
+/* Writes 8 bytes of CAN A transmit payload data into the transmit message buffer
+   for the given slot. This function signals the start and end of transmission
+   using control flags at a fixed memory-mapped location. */
+
+void can_a_tx_frame_data(byte *payload_data,struct_rx_tx_frame *tx_frame_struct)
+
+{
+  int remaining_bytes;
+  byte *tx_buffer_ptr;
+  uint slot_id;
+  
+  slot_id = (uint)tx_frame_struct->slot_id;
+                    /* Extract CAN slot ID from offset +1 in the struct, and calculate memory offset
+                        */
+                    /* Write 0xFA to control byte at offset +1 to indicate transmission is starting
+                        */
+  can_a_control_message_table.message_block[slot_id - 1].slot_control_2 = 0xfa;
+                    /* Prepare to copy 8 bytes of payload to data region (starts at offset +7 in
+                       each slot) */
+  remaining_bytes = 8;
+  tx_buffer_ptr = can_a_control_message_table.message_block[slot_id - 1].data_payload;
+  do {
+                    /* Advance to next byte and copy one payload byte */
+    tx_buffer_ptr = tx_buffer_ptr + 1;
+    *tx_buffer_ptr = *payload_data;
+                    /* Decrement remaining byte count */
+    remaining_bytes = remaining_bytes + -1;
+                    /* Advance payload pointer */
+    tx_buffer_ptr = tx_buffer_ptr;
+    payload_data = payload_data + 1;
+  } while (0 < remaining_bytes);
+                    /* Write 0xE7 to control byte at offset +1 to indicate transmission is
+                       ready/completed */
+  can_a_control_message_table.message_block[slot_id - 1].slot_control_2 = 0xe7;
+  return;
+}
+

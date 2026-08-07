@@ -1,0 +1,12 @@
+
+void tpu_set_channel_function(byte param_1,byte param_2)
+
+{
+  short sVar1;
+  
+  sVar1 = (param_1 & 3) << 2;
+  (&TPU_CFSR3)[-((int)(uint)param_1 >> 2)] =
+       (&TPU_CFSR3)[-((int)(uint)param_1 >> 2)] & ~(0xf << sVar1) | (ushort)param_2 << sVar1;
+  return;
+}
+

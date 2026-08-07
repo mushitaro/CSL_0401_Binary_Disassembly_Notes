@@ -1,0 +1,17 @@
+
+void task_20ms(void)
+
+{
+  FUN_00016df8();
+  FUN_00042482();
+  FUN_00028850();
+  FUN_00014fec();
+  sk_pcntrl_partner_timer_watchdog();
+  FUN_00012e72();
+  FUN_0000130e();
+  if (cfg_s_getriebetyp == '@') {
+    smg_vehicle_dynamics_observer_update();
+  }
+  return;
+}
+

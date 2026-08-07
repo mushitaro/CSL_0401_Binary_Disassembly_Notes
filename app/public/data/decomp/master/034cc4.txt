@@ -1,0 +1,120 @@
+
+/* WARNING: Removing unreachable block (ram,0x00034ed4) */
+
+void fsp_capture_freeze_frame(char param_1,byte param_2,byte param_3)
+
+{
+  bool bVar1;
+  uint uVar2;
+  word wVar4;
+  int iVar3;
+  ushort uVar5;
+  
+  if (((param_1 == '\0') && (param_2 == 0)) && (param_3 == 0)) {
+    bVar1 = true;
+  }
+  else {
+    bVar1 = false;
+  }
+  if (((k_ed_fil_base[param_2].K_ED_FIL_CTL & 4) != 0) || (bVar1)) {
+    if ((FF_CODE != 0) && ((param_2 == FF_INDEX && (!bVar1)))) {
+      DAT_00ffd7de = param_3 & 0xf;
+      switch(param_3 & 0xf) {
+      case 1:
+        FF_CODE = *(short *)(&DAT_00038d96 + (uint)param_2 * 8);
+        break;
+      case 2:
+        FF_CODE = *(short *)(&DAT_00038d98 + (uint)param_2 * 8);
+        break;
+      default:
+        FF_CODE = 0;
+        break;
+      case 4:
+        FF_CODE = *(short *)(&DAT_00038d9a + (uint)param_2 * 8);
+        break;
+      case 8:
+        FF_CODE = *(short *)(&DAT_00038d9c + (uint)param_2 * 8);
+      }
+    }
+    if ((FF_CODE == 0) ||
+       (((DAT_00ffd7df & 0x80) == 0 &&
+        (((k_ed_fil_base[param_2].K_ED_FIL_CTL & 0x80) != 0 ||
+         (((CPU_Identifier == 'S' && (param_2 == 0x12)) || (param_2 == 0x1f)))))))) {
+      DAT_00ffd7e0 = CRB_LA_STATUS1;
+      DAT_00ffd7e1 = CRB_LA_STATUS2;
+      uVar2 = ((uint)RF5 * 0xff) / 200;
+      DAT_00ffd7e2 = (undefined1)uVar2;
+      if (0xff < (ushort)uVar2) {
+        DAT_00ffd7e2 = 0xff;
+      }
+      if (TMOT < 8) {
+        DAT_00ffd7e3 = '\0';
+      }
+      else {
+        DAT_00ffd7e3 = TMOT - 8;
+      }
+      DAT_00ffd7e4 = (undefined1)((ushort)LA_F_REGLER1 >> 8);
+      DAT_00ffd7e6 = (undefined1)((ushort)LA_F_REGLER2 >> 8);
+      DAT_00ffd7e5 = (undefined1)((ushort)LAA_F1 >> 8);
+      DAT_00ffd7e7 = (undefined1)((ushort)LAA_F2 >> 8);
+      DAT_00ffd7e8 = (undefined1)((ushort)(N << 2) >> 8);
+      DAT_00ffd7e9 = (undefined1)(N << 2);
+      wVar4 = V;
+      if (0xff < V) {
+        wVar4 = 0xff;
+      }
+      DAT_00ffd7ea = (undefined1)wVar4;
+      iVar3 = (short)TZ[0] + 0x280;
+      if (iVar3 < 0) {
+        iVar3 = 0;
+      }
+      if (0x4f6 < iVar3) {
+        iVar3 = 0x4f6;
+      }
+      DAT_00ffd7eb = (undefined1)(iVar3 / 5);
+      if (TAN < 8) {
+        DAT_00ffd7ec = '\0';
+      }
+      else {
+        DAT_00ffd7ec = TAN - 8;
+      }
+      uVar2 = (uint)((int)((uint)ML * 1000) >> 2) / 0x24;
+      DAT_00ffd7ed = (undefined1)(uVar2 >> 8);
+      DAT_00ffd7ee = (undefined1)uVar2;
+      uVar5 = WDK1_DPR;
+      if (1000 < WDK1_DPR) {
+        uVar5 = 1000;
+      }
+      DAT_00ffd7ef = (undefined1)(((uVar5 / 10) * 0xff) / 100);
+      FF_INDEX = param_2;
+      DAT_00ffd7de = param_3 & 0xf;
+      DAT_00ffd7df = k_ed_fil_base[param_2].K_ED_FIL_CTL & 0x80;
+      DAT_00ffd7d4 = CAN_KM_STAND;
+      DAT_00ffd7d6 = DAT_00ffd4c6;
+      if (bVar1) {
+        FF_CODE = 0;
+        OBD_STEUER = OBD_STEUER & 199 | 0x10;
+        return;
+      }
+      switch(param_3 & 0xf) {
+      case 1:
+        FF_CODE = *(short *)(&DAT_00038d96 + (uint)param_2 * 8);
+        break;
+      case 2:
+        FF_CODE = *(short *)(&DAT_00038d98 + (uint)param_2 * 8);
+        break;
+      default:
+        FF_CODE = 0;
+        break;
+      case 4:
+        FF_CODE = *(short *)(&DAT_00038d9a + (uint)param_2 * 8);
+        break;
+      case 8:
+        FF_CODE = *(short *)(&DAT_00038d9c + (uint)param_2 * 8);
+      }
+      OBD_STEUER = OBD_STEUER & 199 | 8;
+    }
+  }
+  return;
+}
+

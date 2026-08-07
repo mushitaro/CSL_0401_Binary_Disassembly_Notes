@@ -1,0 +1,33 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void edk_1ms(void)
+
+{
+  char cVar1;
+  byte bVar2;
+  bool bVar3;
+  
+  cVar1 = edk_cycle_counter + 1;
+  bVar3 = K_EDK_CYCL <= edk_cycle_counter;
+  edk_cycle_counter = cVar1;
+  if (bVar3) {
+    FUN_00018e7c();
+    EGAS_IST = WDK_WORD;
+    _wdk_word_dpr = WDK_WORD;
+    if ((((SK_EDK_CONTR & 2) == 0) && ((DAT_00ffda36 & 2) == 0)) ||
+       (((ZUSTAND_MOTOR & S) != 0 && ((b_diag != '\0' && ((EDK_TR_DIAG_STAT & 0x80) != 0)))))) {
+      bVar2 = SIM_PORTE0;
+      SIM_PORTE0 = bVar2 | 4;
+      FUN_00023a3a();
+    }
+    else {
+      bVar2 = SIM_PORTE0;
+      SIM_PORTE0 = bVar2 & 0xfb;
+      EDK__write_to_port_to_set_EDK_duty_cycle_(0);
+    }
+    edk_cycle_counter = '\x01';
+  }
+  return;
+}
+

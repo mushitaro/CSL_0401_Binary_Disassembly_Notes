@@ -1,0 +1,223 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint tog_toel_calc(void)
+
+{
+  undefined2 extraout_D0u;
+  undefined3 uVar1;
+  uint in_D0;
+  int iVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  byte bVar6;
+  char cVar7;
+  byte xValue;
+  short sVar5;
+  ushort uVar8;
+  
+  TOG_A_SPERR_COUNT = TOG_A_SPERR_COUNT + -1;
+  uVar3 = in_D0 & 0xffffff00;
+  if ((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || ((TOG_ED & 0x40) != 0)) ||
+     ((uVar3 = (SYS_TIMERTICS_COUNTER - n_start_exit_time) * 10,
+      uVar3 >> 10 <= (uint)K_TOG_T_SEIT_START &&
+      (uVar3 = (uVar3 >> 0x12) << 8, (ZUSTAND_MOTOR & (VL|TL|LL)) != 0)))) {
+    if (((((ZUSTAND_MOTOR & KI.15 aus) != 0) || ((ZUSTAND_MOTOR & Nachlauf) != 0)) ||
+        ((TOG_FLAG & 4) == 0)) || ((TOG_ED & 0x40) != 0)) {
+      TOG_T_FLAG = 0;
+      goto LAB_0002ef12;
+    }
+    cVar7 = TOEL_WANNE - TMOT;
+    if ((TOG_T_FLAG == 0) && (TOG_COUNT != '\0')) {
+      TOG_T_FLAG = 0x80;
+      bVar6 = TMOT;
+      if ((T_MOTOR_STEHT <= K_TOG_T_MOT_STEHT) && (bVar6 = TOEL, K_TOG_TOEL_T_VER < T_MOTOR_STEHT))
+      {
+        if (cVar7 < '\x01') {
+          iVar2 = -(int)cVar7;
+        }
+        else {
+          iVar2 = (int)cVar7;
+        }
+        bVar6 = TOEL_WANNE;
+        if ((int)(uint)K_TOG_TOEL_DIF < iVar2) {
+          iVar2 = (uint)TMOT + (uint)TOEL_WANNE;
+          if (SCARRY4((uint)TMOT,(uint)TOEL_WANNE)) {
+            iVar2 = iVar2 + 1;
+          }
+          bVar6 = (byte)(iVar2 >> 1);
+        }
+      }
+      uVar3 = (uint)bVar6 << 8;
+      goto LAB_0002eaac;
+    }
+  }
+  else {
+    if ((TOEL_WANNE <= K_TOG_TOEL_S) && (TOG_T_FLAG != 4)) {
+      cVar7 = (char)((ushort)TKA - (ushort)TOG_TKA);
+      if (cVar7 < '\x01') {
+        iVar2 = -(int)cVar7;
+      }
+      else {
+        iVar2 = (int)cVar7;
+      }
+      if (iVar2 < (int)(uint)K_TOG_DTKA) {
+        TOG_TKA_D = (ushort)K_TOG_G_TKA * ((ushort)TKA - (ushort)TOG_TKA);
+        TOG_T_FLAG = 1;
+      }
+      else {
+        TOG_TKA_D = 0;
+        TOG_T_FLAG = 0x41;
+      }
+      TOG_TKA = TKA;
+      cVar7 = TMOT - TOG_TMOT;
+      if (cVar7 < '\x01') {
+        iVar2 = -(int)cVar7;
+      }
+      else {
+        iVar2 = (int)cVar7;
+      }
+      if (iVar2 < (int)(uint)K_TOG_DTKA) {
+        uVar3 = klu_bint(&KL_TOG_G_TMOT.sizeX,TMOT_START);
+        TOG_TMOT_D = ((ushort)uVar3 & 0xff) * ((ushort)TMOT - (ushort)TOG_TMOT);
+        TOG_T_FLAG = TOG_T_FLAG & 0xef;
+      }
+      else {
+        TOG_TMOT_D = 0;
+        TOG_T_FLAG = TOG_T_FLAG | 0x10;
+      }
+      TOG_TMOT = TMOT;
+      cVar7 = (char)((ushort)TOEL_WANNE - (ushort)TOG_TOEL);
+      if (cVar7 < '\x01') {
+        iVar2 = -(int)cVar7;
+      }
+      else {
+        iVar2 = (int)cVar7;
+      }
+      if (iVar2 < (int)(uint)K_TOG_DTKA) {
+        TOG_TOEL_D = (ushort)K_TOG_G_TOEL * ((ushort)TOEL_WANNE - (ushort)TOG_TOEL);
+        TOG_T_FLAG = TOG_T_FLAG & 0xdf;
+      }
+      else {
+        TOG_TOEL_D = 0;
+        TOG_T_FLAG = TOG_T_FLAG | 0x20;
+      }
+      TOG_TOEL = TOEL_WANNE;
+      uVar3 = klu_wint(&KL_TOG_TOEL_NKL.sizeX,N);
+      TOG_TOEL_N = (short)((uVar3 & 0xffff) >> 4);
+      TOEL_W = TOG_TOEL_N + TOG_TOEL_D + TOG_TMOT_D + TOG_TKA_D + TOEL_W;
+      if ((short)(ushort)K_TOG_DTOEL < (short)(TOEL_W - TOG_TOEL_ALT)) {
+        TOEL_W = TOG_TOEL_ALT + K_TOG_DTOEL;
+        uVar3 = (uint)TOEL_W;
+      }
+      else {
+        uVar3 = (uint)(short)(TOEL_W - TOG_TOEL_ALT);
+        if ((int)uVar3 < (int)-(uint)K_TOG_DTOEL) {
+          uVar3 = 0;
+          TOEL_W = TOG_TOEL_ALT - K_TOG_DTOEL;
+        }
+      }
+      TOEL = (byte)(TOEL_W >> 8);
+      uVar1 = (undefined3)(uVar3 >> 8);
+      if ((char)(TOEL_WANNE - TMOT) < '\x01') {
+        if (TOEL <= TMOT) {
+          uVar3 = CONCAT31(uVar1,TOEL);
+          if (TOEL_WANNE <= TOEL) goto LAB_0002ece0;
+          goto LAB_0002ecd6;
+        }
+LAB_0002ecbe:
+        TOEL = TMOT;
+LAB_0002ecd8:
+        TOEL_W = (ushort)TOEL << 8;
+        uVar3 = (uint)TOEL << 8;
+      }
+      else {
+        if (TOEL_WANNE < TOEL) {
+LAB_0002ecd6:
+          TOEL = TOEL_WANNE;
+          goto LAB_0002ecd8;
+        }
+        uVar3 = CONCAT31(uVar1,TOEL);
+        if (TOEL < TMOT) goto LAB_0002ecbe;
+      }
+LAB_0002ece0:
+      TOG_TOEL_ALT = TOEL_W;
+      goto LAB_0002ef12;
+    }
+    if ((K_TOG_TOEL_G < TOEL_WANNE) || (TOG_T_FLAG == 4)) {
+      TOG_T_FLAG = 4;
+      if ((((T_UMG_ST & 0x80) == 0) && ((TMOT_ED & 0x40) == 0)) && ((TMOT_ST1 & 0x10) == 0)) {
+        if (V < 0x100) {
+          bVar6 = (byte)V;
+        }
+        else {
+          bVar6 = 0xff;
+        }
+        xValue = TMOT - k_tog_tmot_offset;
+        if ((char)xValue < '\0') {
+          xValue = 0;
+        }
+        uVar4 = kfus_bint(&KF_TOG_T_N_RF.sizeX,N,RF);
+        TOG_TEMP_NRF = (ushort)uVar4 & 0xff;
+        uVar3 = kls_bint(&KL_TOG_T_V_ANT.sizeX,bVar6);
+        TOG_TEMP_V_OFFSET = (char)uVar3;
+        uVar3 = kls_bint(&KL_TOG_T_TUMG_ANT.sizeX,T_UMG);
+        TOG_TEMP_TUMG_OFFSET = (char)uVar3;
+        uVar3 = klu_bint(&KL_TOG_T_PV_WI.sizeX,N40);
+        uVar8 = (ushort)uVar3 & 0xff;
+        uVar3 = kls_bint(&KL_TOG_T_NIV_ANT.sizeX,(byte)TOG_TEMP_NIVEAU);
+        iVar2 = (int)(short)(char)uVar3 * (int)(short)uVar8;
+        if (iVar2 < 0) {
+          iVar2 = iVar2 + 0x3f;
+        }
+        TOG_TEMP_NIV_OFFSET = (char)(iVar2 >> 6);
+        uVar3 = kls_bint(&KL_TOG_T_DTM_ANT.sizeX,xValue);
+        TOG_TEMP_DTM_OFFSET = (char)uVar3;
+        TOEL_W = ((short)TOG_TEMP_DTM_OFFSET +
+                 (short)TOG_TEMP_NIV_OFFSET +
+                 (short)TOG_TEMP_TUMG_OFFSET + TOG_TEMP_NRF + (short)TOG_TEMP_V_OFFSET) * 0x100;
+        uVar4 = kfu_wint(&KF_TOG_T_FIL_K.sizeX,N,V);
+        _TOG_TEMP_FIL_K = (ushort)uVar4;
+        TOEL_W = IIR_Filter_US(TOEL_W,TOG_TOEL_ALT,_TOG_TEMP_FIL_K);
+        uVar3 = CONCAT22(extraout_D0u,TOEL_W);
+        TOEL = (byte)(TOEL_W >> 8);
+        TOG_TOEL_ALT = TOEL_W;
+        goto LAB_0002eef8;
+      }
+      TOEL_W = (ushort)TOEL_WANNE * 0x100;
+      sVar5 = TOEL_W - TOG_TOEL_ALT;
+      if (sVar5 <= (short)(ushort)K_TOG_DTOEL) goto LAB_0002eece;
+LAB_0002ee9a:
+      uVar3 = (uint)(ushort)(TOG_TOEL_ALT + K_TOG_DTOEL);
+LAB_0002eaac:
+      TOEL_W = (ushort)uVar3;
+    }
+    else {
+      TOG_T_FLAG = 2;
+      TOEL_W = (ushort)TOEL_WANNE * 0x100;
+      sVar5 = TOEL_W - TOG_TOEL_ALT;
+      if ((short)(ushort)K_TOG_DTOEL < sVar5) goto LAB_0002ee9a;
+LAB_0002eece:
+      uVar3 = (uint)sVar5;
+      if ((int)uVar3 < (int)-(uint)K_TOG_DTOEL) {
+        uVar3 = 0;
+        TOEL_W = TOG_TOEL_ALT - K_TOG_DTOEL;
+      }
+    }
+    TOEL = (byte)(TOEL_W >> 8);
+    TOG_TOEL_ALT = TOEL_W;
+  }
+LAB_0002eef8:
+  TOG_TMOT = TMOT;
+  TOG_TKA = TKA;
+  TOG_TOEL = TOEL_WANNE;
+LAB_0002ef12:
+  uVar1 = (undefined3)(uVar3 >> 8);
+  uVar3 = CONCAT31(uVar1,TOEL);
+  if ((TOEL_MAX < TOEL) &&
+     (uVar3 = CONCAT31(uVar1,ZUSTAND_MOTOR) & 0xffffff1c, (ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    TOEL_MAX = TOEL;
+  }
+  return uVar3;
+}
+

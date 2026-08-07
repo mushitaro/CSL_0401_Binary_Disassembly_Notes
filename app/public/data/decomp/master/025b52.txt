@@ -1,0 +1,52 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void lfra_adapt(void)
+
+{
+  int iVar1;
+  short sVar2;
+  
+  if (LFRA_SPERREN == '\0') {
+    sVar2 = 0;
+    if (((LFR_ZUSTAND & 2) == 0) || (TMOT <= K_LFR_TMOT_ADAPT)) {
+      if (LFRA_KO_FLAGS != '\0' || LFRA_FLAGS != '\0') {
+        LFRA_MD_START = LFRA_MD_INTEGRATOR;
+        LFRA_KO_MD_START = LFRA_KO_MD_INTEGRATOR;
+        LFRA_TIMER = 0;
+        LFRA_FLAGS = '\0';
+        LFRA_KO_FLAGS = '\0';
+      }
+    }
+    else {
+      if (LFRA_KO_FLAGS == '\0' && LFRA_FLAGS == '\0') {
+        _LFRA_MD_INTEGRATOR = (int)LFRA_MD_START << 0x10;
+        _LFRA_KO_MD_INTEGRATOR = (int)LFRA_KO_MD_START << 0x10;
+      }
+      if (((KKOS_ST & 1) == 0) && ((KKOS_ST_TREIBER & 0x40) == 0)) {
+        LFRA_KO_FLAGS = '\0';
+        iVar1 = FUN_000259de((int *)&LFRA_MD_INTEGRATOR);
+        iVar1 = FUN_00025a82(iVar1,K_LFR_MDADAPT_MAX,K_LFR_MDADAPT_MIN);
+        sVar2 = (short)((uint)iVar1 >> 0x10) - LFRA_MD_INTEGRATOR;
+        _LFRA_MD_INTEGRATOR = iVar1;
+      }
+      else {
+        LFRA_FLAGS = '\0';
+        iVar1 = FUN_000259de((int *)&LFRA_KO_MD_INTEGRATOR);
+        iVar1 = FUN_00025a82(iVar1,K_LFR_MDADAPT_KO_MAX,K_LFR_MDADAPT_KO_MIN);
+        sVar2 = (short)((uint)iVar1 >> 0x10) - LFRA_KO_MD_INTEGRATOR;
+        _LFRA_KO_MD_INTEGRATOR = iVar1;
+      }
+    }
+    LFR_MD_ADAPTION = LFRA_MD_INTEGRATOR;
+    LFR_MDI = LFR_MDI + sVar2 * -0x10;
+    MD_LLRA = LFRA_MD_INTEGRATOR;
+    MD_LLRA_KO = LFRA_KO_MD_INTEGRATOR;
+    return;
+  }
+  LFRA_TIMER = 0;
+  LFRA_FLAGS = 0;
+  LFRA_KO_FLAGS = 0;
+  return;
+}
+

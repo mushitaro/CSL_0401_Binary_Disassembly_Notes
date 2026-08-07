@@ -1,0 +1,67 @@
+
+void servo_mode_calc(void)
+
+{
+  undefined4 uVar1;
+  uint uVar2;
+  byte bVar3;
+  undefined *iVar4;
+  
+  if (((SCHALT_S_ST & 0x20) == 0) || (K_SERVO_CTRL == '\0')) {
+    SERVO_MODE = 0;
+    return;
+  }
+  if (SERVO_MODE == 0) {
+    FUN_0002cd0e();
+    DAT_00ffe97e = SYS_TIMERTICS_COUNTER;
+    bVar3 = SERVO_MODE | 1;
+    if ((SCHALT_M_ST & 1) != 0) {
+      SERVO_MODE = SERVO_MODE | 3;
+      goto LAB_0002d23a;
+    }
+LAB_0002d274:
+    SERVO_MODE = bVar3;
+    iVar4 = &KL_SERVO_SPORT.sizeX;
+  }
+  else {
+    if ((SCHALT_M_ST & 1) == 0) {
+      if ((SERVO_MODE & 2) == 0) goto LAB_0002d2a0;
+      bVar3 = SERVO_MODE & 0xfd;
+      if (SERVO_S_CNT == 0) {
+        SERVO_S_CNT = 0x3ff;
+      }
+      goto LAB_0002d274;
+    }
+    if ((SERVO_MODE & 2) != 0) goto LAB_0002d2a0;
+    SERVO_MODE = SERVO_MODE | 2;
+    if (SERVO_S_CNT == 0) {
+      SERVO_S_CNT = 1;
+    }
+LAB_0002d23a:
+    iVar4 = (undefined *)0x8c1c4;
+  }
+  uVar2._0_1_ = ((KL_10_2byte_2byte *)((int)iVar4 + -0x2a))->sizeX;
+  uVar2._1_1_ = ((KL_10_2byte_2byte *)((int)iVar4 + -0x2a))->sizeY;
+  uVar2._2_2_ = ((KL_10_2byte_2byte *)((int)iVar4 + -0x2a))->x[0];
+  uVar1 = FUN_0002d184(uVar2);
+  if ((char)uVar1 != '\0') {
+    SERVO_MODE = SERVO_MODE | 4;
+  }
+LAB_0002d2a0:
+  if ((uint)K_SERVO_ED_CYCLE <= SYS_TIMERTICS_COUNTER - DAT_00ffe97e) {
+    DAT_00ffe97e = SYS_TIMERTICS_COUNTER;
+    uVar2 = FUN_0002cf90();
+    if ((char)uVar2 != '\0') {
+      SERVO_MODE = SERVO_MODE | 8;
+    }
+    bVar3 = FUN_0002d0b0();
+    if (bVar3 != 0) {
+      SERVO_MODE = SERVO_MODE | 4;
+    }
+  }
+  if (b_diag == '\0') {
+    SERVO_MODE = SERVO_MODE & 0x7f;
+  }
+  return;
+}
+

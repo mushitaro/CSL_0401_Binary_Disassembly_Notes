@@ -1,0 +1,102 @@
+
+void bls_init(void)
+
+{
+  byte bVar1;
+  uint uVar2;
+  byte bVar3;
+  
+  S_BLS_TIME_BTS_E36_7 = 0;
+  S_BLS_EPZ_BTS_E36_7 = 0;
+  DAT_00ffedbd = 0;
+  S_BLS_EPZ_BLS_E36_7 = 0;
+  if ((cfg_m_baureihe & 0xf8) == 8) {
+    if ((S_BLS_ED & 0x40) != 0) {
+      uVar2 = ed_report(DTC_6A_BRAKELIGHTSWITCH_SIGNAL,0x80);
+      S_BLS_ED_DPR = (byte)uVar2;
+      S_BLS_ED = S_BLS_ED_DPR;
+      if ((uVar2 & 1) == 0) {
+        if ((uVar2 & 2) != 0) {
+          S_BLS_EPZ_BLS_E36_7 = K_S_BLS_EPZ_BLS_E36_7;
+        }
+      }
+      else {
+        S_BLS_EPZ_BTS_E36_7 = K_S_BLS_EPZO_BTS_E36_7;
+      }
+    }
+    if ((cfg_m_motortyp & 0xef) != 0x20) {
+      CTM4_PWM5B = 0;
+      Ram00fff42a = 400;
+      Ram00fff428 = 0x80f;
+      CTM4_PWM7B = 0;
+      Ram00fff43a = 400;
+      Ram00fff438 = 0x80f;
+    }
+  }
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    DAT_00ffedba = 0;
+  }
+  S_BLS_ED_FILTER = 0;
+  SCHALT_START_BEGIN = 0;
+  S_BLS_TIME_LA = 0;
+  S_BLS_TIME_LA_ST = 0;
+  if ((cfg_m_baureihe & 0xf8) == 0x40) {
+    S_KL50_ED = 0xe0;
+  }
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 | 8;
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 & 0xcf;
+  bVar3 = 0;
+  do {
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 0xd);
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 | 0x20;
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 | 0x10;
+  bVar3 = SIM_DDRF;
+  SIM_DDRF = bVar3 | 0x18;
+  bVar3 = SIM_PORTF0;
+  SIM_PORTF0 = bVar3 & 0xe7;
+  bVar3 = SIM_PORTF0;
+  SIM_PORTF0 = bVar3 | 0x10;
+  bVar3 = QSM_DDRQS;
+  QSM_DDRQS = bVar3 | 0x40;
+  bVar3 = QSM_PORTQS;
+  QSM_PORTQS = bVar3 & 0xbf;
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 & 0xef;
+  bVar3 = 0;
+  do {
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 0x13);
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 | 0x10;
+  bVar3 = 0;
+  do {
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 0xf);
+  bVar3 = SIM_DDRF;
+  SIM_DDRF = bVar3 & 0xe7;
+  bVar3 = QSM_DDRQS;
+  QSM_DDRQS = bVar3 & 0xbf;
+  bVar3 = 0;
+  do {
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 3);
+  bVar3 = SIM_PORTE0;
+  SIM_PORTE0 = bVar3 & 0xdf;
+  bVar3 = 0;
+  do {
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 0x14);
+  bVar3 = SIM_PORTF0;
+  bVar1 = QSM_PORTQS;
+  DAT_00ffedbb = bVar1 & 0x40 | bVar3 & 0x18;
+  DAT_00ffedbc = DAT_00ffedbb;
+  SCHALT_M_ST = DAT_00ffedbb;
+  schalt_m_st_calc();
+  return;
+}
+

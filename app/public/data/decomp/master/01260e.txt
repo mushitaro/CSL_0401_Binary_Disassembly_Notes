@@ -1,0 +1,17 @@
+
+uint tpu_set_channel_priority(byte tpu_channel,byte priority_level)
+
+{
+  word awVar1 [2];
+  word awVar2 [2];
+  
+  awVar1 = TPU_CPR;
+  awVar1 = (word  [2])
+           ((uint)priority_level << ((uint)tpu_channel * 2 & 0x3f) |
+           (uint)awVar1 & ~(3 << ((uint)tpu_channel * 2 & 0x3f)));
+  awVar2[0] = awVar1[0];
+  awVar2[1] = awVar1[1];
+  TPU_CPR = awVar1;
+  return (uint)awVar2;
+}
+

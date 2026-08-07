@@ -1,0 +1,11 @@
+
+void oek_ed_reset(void)
+
+{
+  if ((b_diag == 0) || ((ZUSTAND_MOTOR & S) == 0)) {
+    OEK_L_ED = OEK_L_ED & 0x7f;
+    OEK_R_ED = OEK_R_ED & 0x7f;
+  }
+  return;
+}
+

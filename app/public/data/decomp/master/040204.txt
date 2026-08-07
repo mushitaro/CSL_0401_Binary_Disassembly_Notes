@@ -1,0 +1,63 @@
+
+/*  * sys_cancel_task - Cancels a delayed (scheduled) task if present in the scheduler queue.
+    *
+    * @param task_id: The ID of the task to cancel (0–31).
+    *
+    * @return byte: Status code.
+    *         - 0x00: Task successfully cancelled.
+    *         - 0x22: Task was not scheduled; no action taken.
+    *
+    * Description:
+    * If the given task is currently marked as scheduled (bit 0 set in its control byte),
+    * this function searches the scheduler's delay queue (up to 8 slots) to find the task entry.
+    * If found, it:
+    *   - Clears the task's countdown timer.
+    *   - Clears the task ID from the entry.
+    *   - Clears the scheduled flag (bit 0) in the task's control byte.
+    * 
+    * If the task is not marked as scheduled, the function logs an error using `syserror`
+    * and returns status 0x22.
+    *
+    * Interrupts are masked during table modification to ensure thread safety. */
+
+byte sys_cancel_task(byte task_id)
+
+{
+  undefined3 extraout_var;
+  byte original_sr;
+  char table_scan_index;
+  byte status;
+  struct_task_schedule_table_entry *table_entry;
+  undefined3 in_stack_00000004;
+  
+  status = 0;
+                    /* Check if task is marked as scheduled/delayed (bit 0 in control byte set) */
+  if ((*(byte *)(sys_task_control_bytes + task_id) & 1) == 1) {
+                    /* Disable interrupts and save current status register */
+    original_sr = set_status_register(0x2700);
+    table_scan_index = 7;
+                    /* Search the schedule table for this task_id (max 8 entries) */
+    for (table_entry = sys_task_schedule_table;
+        (-1 < table_scan_index && (task_id != table_entry->task_id)); table_entry = table_entry + 1)
+    {
+      table_scan_index = table_scan_index + -1;
+    }
+    if (-1 < (char)(table_scan_index + -1)) {
+                    /* If a matching entry was found (i.e., not the last slot scanned without match)
+                       Cancel the task by clearing its timer and task ID */
+      table_entry->countdown_timer_tics = 0;
+      table_entry->task_id = 0;
+                    /* Clear the "scheduled" bit in the control byte (bit 0) */
+      *(byte *)(sys_task_control_bytes + task_id) =
+           *(byte *)(sys_task_control_bytes + task_id) & 0xfe;
+    }
+    set_status_register((ushort)CONCAT31(extraout_var,original_sr));
+  }
+  else {
+                    /* Task was not scheduled */
+    status = 0x22;
+    syserror(_in_stack_00000004,0x200);
+  }
+  return status;
+}
+

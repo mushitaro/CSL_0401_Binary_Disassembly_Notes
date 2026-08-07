@@ -1,0 +1,41 @@
+
+void gang_calc(void)
+
+{
+  if (((cfg_m_getriebetyp != 0x40) || ((CAN_ED_SMG & 0x40) != 0)) &&
+     (((cfg_m_getriebetyp & 0x30) != 0x30 || ((CAN_TEL_EMPF & 0x10) == 0)))) {
+    if (V_ANTRIEB != 0) {
+      GANG_NV = ((uint)V_ANTRIEB + (uint)N * 0x40) / ((uint)V_ANTRIEB * 2);
+      if ((S_KRAFTSCHLUSS == '\0') || (N == 0)) {
+        GANG = 0;
+        return;
+      }
+      if (K_GANG_GRENZE1_2 <= GANG_NV) {
+        GANG = 1;
+        return;
+      }
+      if (K_GANG_GRENZE2_3 <= GANG_NV) {
+        GANG = 2;
+        return;
+      }
+      if (K_GANG_GRENZE3_4 <= GANG_NV) {
+        GANG = 3;
+        return;
+      }
+      if (K_GANG_GRENZE4_5 <= GANG_NV) {
+        GANG = 4;
+        return;
+      }
+      if (K_GANG_GRENZE5_6 <= GANG_NV) {
+        GANG = 5;
+        return;
+      }
+      GANG = 6;
+      return;
+    }
+    GANG = 0;
+    GANG_NV = 0xffffffff;
+  }
+  return;
+}
+

@@ -1,0 +1,14 @@
+
+undefined8 tpu_isr_tz7(void)
+
+{
+  undefined4 in_D0;
+  undefined4 in_D1;
+  
+  sys_active_interrupts = sys_active_interrupts + 1;
+  sys_isr_count = sys_isr_count + 1;
+  tz_pwm(7);
+  sys_active_interrupts = sys_active_interrupts - 1;
+  return CONCAT44(in_D0,in_D1);
+}
+

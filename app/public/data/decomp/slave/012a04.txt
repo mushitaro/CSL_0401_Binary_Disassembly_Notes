@@ -1,0 +1,17 @@
+
+void task_1ms(void)
+
+{
+  if ((SYS_TIMERTICS_COUNTER & 1) != 0) {
+    ipk_rx_dispatch_2ms();
+    ipk_service_tx_slots_2ms();
+    if ((PSYNC_ST & 0x80) != 0) {
+      dpr_sync();
+    }
+  }
+  if ((~DAT_00fffa19 & 0x10) != 0) {
+    ldp_i_roh_calc();
+  }
+  return;
+}
+

@@ -1,0 +1,905 @@
+
+void ds2_handler(void)
+
+{
+  undefined2 uVar1;
+  undefined1 uVar2;
+  word wVar3;
+  ushort uVar4;
+  undefined *puVar5;
+  short sVar6;
+  byte bVar7;
+  byte bVar8;
+  byte *peVar9;
+  undefined1 *puVar9;
+  byte *pbVar10;
+  undefined *puVar11;
+  undefined1 *puVar12;
+  byte *pbVar13;
+  byte *pbVar14;
+  byte *pbVar15;
+  undefined4 *puVar16;
+  undefined2 *puVar17;
+  
+  puVar5 = rsp_ptr;
+  bVar7 = req_ptr[3];
+  peVar9 = rsp_ptr + 3;
+  pbVar10 = peVar9;
+  if (0xd3 < bVar7) goto LAB_00031a16;
+  sVar6 = 0x1d;
+  pbVar14 = &DAT_00030c06;
+  do {
+    bVar8 = *pbVar14;
+    if (bVar7 <= bVar8) break;
+    sVar6 = sVar6 + -1;
+    pbVar14 = pbVar14 + 1;
+  } while (sVar6 != -1);
+  if (bVar7 != bVar8) goto LAB_00031a16;
+  bVar7 = (byte)((ushort)N >> 8);
+                    /* WARNING: Switch is manually overridden */
+  switch(sVar6) {
+  case 0:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x26);
+    break;
+  case 1:
+    bVar7 = 0;
+    pbVar14 = &TOG_FF_FREEZE_FLAG;
+    do {
+      pbVar13 = pbVar10;
+      *pbVar13 = *pbVar14;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar13 + 1;
+      pbVar14 = pbVar14 + 1;
+    } while (bVar7 < 6);
+    pbVar13[1] = (byte)((ushort)TOG_ADAPT_ANZAHL >> 8);
+    pbVar13[2] = (byte)TOG_ADAPT_ANZAHL;
+    pbVar13[3] = (byte)((ushort)TOG_ADAPT_OFFSET >> 8);
+    pbVar13[4] = (byte)TOG_ADAPT_OFFSET;
+    pbVar13[5] = TOG_ADAPT_ST;
+    pbVar13[6] = TOEL_WANNE;
+    pbVar10 = pbVar13 + 8;
+    pbVar13[7] = TOEL_ABSTELL;
+    break;
+  case 2:
+    bVar7 = 0;
+    do {
+      pbVar14 = pbVar10 + 1;
+      *pbVar10 = 0;
+      pbVar10 = pbVar10 + 2;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+    } while (bVar7 < 8);
+    break;
+  case 3:
+    bVar7 = 0x40;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x80);
+    break;
+  case 4:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x40);
+    break;
+  case 5:
+    bVar7 = 0x40;
+    pbVar13 = &ed_fil_base[0x40].ED_FIL_XT;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      pbVar13 = pbVar13 + 6;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x80);
+    break;
+  case 6:
+    bVar7 = 0;
+    pbVar13 = &ed_fil_base[0].ED_FIL_XT;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      pbVar13 = pbVar13 + 6;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x40);
+    break;
+  case 7:
+    bVar7 = 0x40;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x80);
+    break;
+  case 8:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x40);
+    break;
+  case 9:
+    bVar7 = 0x40;
+    pbVar13 = &ed_fil_base[0x40].ED_FIL_ST;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      pbVar13 = pbVar13 + 6;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x80);
+    break;
+  case 10:
+    bVar7 = 0;
+    pbVar13 = &ed_fil_base[0].ED_FIL_ST;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      pbVar13 = pbVar13 + 6;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x40);
+    break;
+  case 0xb:
+    bVar7 = 0;
+    do {
+      pbVar14 = pbVar10 + 1;
+      *pbVar10 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar14;
+    } while (bVar7 < 0x1e);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      pbVar14 = pbVar14 + 2;
+      *pbVar10 = 0;
+      bVar7 = bVar7 + 1;
+    } while (bVar7 < 0x12);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar14;
+      *pbVar10 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10 + 1;
+    } while (bVar7 < 8);
+    pbVar10[1] = (byte)((ushort)SLS_DIAG >> 8);
+    pbVar10[2] = (byte)SLS_DIAG;
+    pbVar10[3] = (byte)((ushort)SLS_DIAG_USV1 >> 8);
+    pbVar10[4] = (byte)SLS_DIAG_USV1;
+    pbVar10[5] = (byte)((ushort)SLS_DIAG_USV2 >> 8);
+    pbVar10[6] = (byte)SLS_DIAG_USV2;
+    pbVar10[7] = SLV_STARTS;
+    pbVar10[8] = SLV_STARTS_ADAPT;
+    pbVar10[9] = SLS_ST1;
+    pbVar10[10] = SLS_ST2;
+    pbVar10[0xb] = (byte)((ushort)SLS_TI_F_DIAG >> 8);
+    pbVar10[0xc] = (byte)SLS_TI_F_DIAG;
+    bVar7 = 0;
+    pbVar14 = pbVar10 + 0xd;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x1e);
+    break;
+  case 0xc:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = prg_vers_up_m;
+    *puVar11 = (char)((ushort)prg_vers_progr_m >> 8);
+    puVar5[5] = (undefined1)prg_vers_progr_m;
+    puVar5[6] = K_VERS_UP_M;
+    puVar5[7] = (char)((ushort)K_VERS_PROGR_M >> 8);
+    puVar5[8] = (undefined1)K_VERS_PROGR_M;
+    puVar5[9] = (char)((ushort)DAT_00088004 >> 8);
+    puVar5[10] = (undefined1)DAT_00088004;
+    puVar5[0xb] = (char)((ushort)DAT_00003ffe >> 8);
+    puVar5[0xc] = (undefined1)DAT_00003ffe;
+    puVar5[0xd] = (char)((ushort)DAT_00041be0 >> 8);
+    puVar5[0xe] = (undefined1)DAT_00041be0;
+    puVar5[0xf] = (char)((ushort)DAT_0008bffc >> 8);
+    puVar5[0x10] = (undefined1)DAT_0008bffc;
+    puVar5[0x11] = K_VERS_NAME_M;
+    puVar5[0x12] = DAT_0003cd18;
+    bVar7 = 0;
+    puVar9 = puVar5 + 0x13;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 0x10);
+    puVar12[1] = zyl_count;
+    puVar12[2] = 0;
+    bVar7 = 0;
+    pbVar10 = puVar12 + 3;
+    pbVar14 = &cfg_m_baureihe;
+    do {
+      pbVar13 = pbVar10 + 1;
+      *pbVar10 = *pbVar14;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar13;
+      pbVar14 = pbVar14 + 1;
+    } while (bVar7 < 0xe);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar13 + 1;
+      *pbVar13 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar13 = pbVar10;
+    } while (bVar7 < 0xe);
+    break;
+  case 0xd:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x28);
+    break;
+  case 0xe:
+    bVar7 = 0;
+    pbVar10 = &DAT_00ffd7f0;
+    pbVar14 = peVar9;
+    do {
+      bVar8 = 0;
+      pbVar13 = pbVar14;
+      pbVar15 = pbVar10;
+      do {
+        pbVar14 = pbVar13 + 1;
+        *pbVar13 = *pbVar15;
+        bVar8 = bVar8 + 1;
+        pbVar13 = pbVar14;
+        pbVar15 = pbVar15 + 1;
+      } while (bVar8 < 6);
+      pbVar10 = pbVar10 + 6;
+      bVar7 = bVar7 + 1;
+    } while (bVar7 < 4);
+    bVar7 = 0;
+    pbVar10 = &DAT_00ffd808;
+    do {
+      bVar8 = 0;
+      pbVar13 = pbVar14;
+      pbVar15 = pbVar10;
+      do {
+        pbVar14 = pbVar13 + 1;
+        *pbVar13 = *pbVar15;
+        bVar8 = bVar8 + 1;
+        pbVar13 = pbVar14;
+        pbVar15 = pbVar15 + 1;
+      } while (bVar8 < 6);
+      pbVar10 = pbVar10 + 6;
+      bVar7 = bVar7 + 1;
+    } while (bVar7 < 4);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x30);
+    break;
+  case 0xf:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    pbVar13 = &DAT_00ffda48;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+      pbVar13 = pbVar13 + 1;
+    } while (bVar7 < 0x34);
+    break;
+  case 0x10:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x40);
+    break;
+  case 0x11:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = (byte)(N_T_DWF[0] >> 8);
+    *puVar11 = (undefined1)N_T_DWF[0];
+    puVar5[5] = (char)(N_T_DWF[7] >> 8);
+    puVar5[6] = 0;
+    puVar5[7] = 0;
+    puVar5[8] = (char)(N_T_DWF[1] >> 8);
+    puVar5[9] = (undefined1)N_T_DWF[1];
+    puVar5[10] = (char)(N_T_DWF[2] >> 8);
+    puVar5[0xb] = (undefined1)N_T_DWF[2];
+    puVar5[0xc] = 0;
+    puVar5[0xd] = 0;
+    puVar5[0xe] = (undefined1)N_T_DWF[7];
+    puVar5[0xf] = (char)(N_T_DWF[3] >> 8);
+    puVar5[0x10] = (undefined1)N_T_DWF[3];
+    puVar5[0x11] = (char)(N_T_DWF[4] >> 8);
+    puVar5[0x12] = (undefined1)N_T_DWF[4];
+    puVar5[0x13] = (char)(N_T_DWF[5] >> 8);
+    puVar5[0x14] = (undefined1)N_T_DWF[5];
+    puVar5[0x15] = (char)(N_T_DWF[6] >> 8);
+    puVar5[0x16] = (undefined1)N_T_DWF[6];
+    puVar5[0x17] = NMAX_FF_FLAG;
+    bVar7 = 0;
+    pbVar14 = puVar5 + 0x18;
+    pbVar13 = &NMAX_FF_ANZAHL;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = *pbVar13;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+      pbVar13 = pbVar13 + 1;
+    } while (bVar7 < 0xc);
+    break;
+  case 0x12:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = MIL_ST;
+    *puVar11 = OBD_STATE;
+    puVar5[5] = OBD_STEUER;
+    puVar5[6] = (byte)FF_RDY;
+    puVar5[7] = (char)((ushort)FF_CODE >> 8);
+    puVar5[8] = (undefined1)FF_CODE;
+    puVar5[9] = FF_INDEX;
+    puVar5[10] = DAT_00ffd7de;
+    puVar5[0xb] = DAT_00ffd7df;
+    puVar5[0xc] = (char)((ushort)DAT_00ffd7d4 >> 8);
+    puVar5[0xd] = (undefined1)DAT_00ffd7d4;
+    puVar5[0xe] = (char)((uint)DAT_00ffd7d6 >> 0x18);
+    puVar5[0xf] = (char)((uint)DAT_00ffd7d6 >> 0x10);
+    puVar5[0x10] = (char)((uint)DAT_00ffd7d6 >> 8);
+    puVar5[0x11] = (undefined1)DAT_00ffd7d6;
+    bVar7 = 0;
+    pbVar10 = puVar5 + 0x12;
+    pbVar14 = &DAT_00ffd7e0;
+    do {
+      pbVar13 = pbVar10 + 1;
+      *pbVar10 = *pbVar14;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar13;
+      pbVar14 = pbVar14 + 1;
+    } while (bVar7 < 0x10);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar13 + 1;
+      *pbVar13 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar13 = pbVar10;
+    } while (bVar7 < 0x1f);
+    break;
+  case 0x13:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = (byte)FF_RDY;
+    *puVar11 = (char)((ushort)FF_DCY_CNT >> 8);
+    puVar5[5] = (undefined1)FF_DCY_CNT;
+    puVar5[6] = (char)((ushort)FF_WUC_CNT >> 8);
+    puVar5[7] = (undefined1)FF_WUC_CNT;
+    puVar5[8] = (char)((ushort)DAT_00ffd7ce >> 8);
+    puVar5[9] = (undefined1)DAT_00ffd7ce;
+    puVar5[10] = (char)((ushort)DAT_00ffd7d2 >> 8);
+    puVar5[0xb] = (undefined1)DAT_00ffd7d2;
+    puVar5[0xc] = (char)((ushort)DAT_00ffd7d4 >> 8);
+    puVar5[0xd] = (undefined1)DAT_00ffd7d4;
+    puVar5[0xe] = (char)((uint)DAT_00ffd7d6 >> 0x18);
+    puVar5[0xf] = (char)((uint)DAT_00ffd7d6 >> 0x10);
+    puVar5[0x10] = (char)((uint)DAT_00ffd7d6 >> 8);
+    pbVar14 = puVar5 + 0x12;
+    puVar5[0x11] = (undefined1)DAT_00ffd7d6;
+    bVar7 = 0;
+    puVar17 = &FF_RD1;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = (byte)((ushort)*puVar17 >> 8);
+      pbVar14 = pbVar14 + 2;
+      *pbVar10 = *(byte *)((int)puVar17 + 1);
+      puVar17 = puVar17 + 1;
+      bVar7 = bVar7 + 1;
+    } while (bVar7 < 0x10);
+    bVar7 = 0;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x35);
+    break;
+  case 0x14:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = EDK_DS2_STATUS;
+    *puVar11 = (char)((ushort)EDK_DS2_TSTELL >> 8);
+    puVar5[5] = (undefined1)EDK_DS2_TSTELL;
+    puVar5[6] = (char)((ushort)EDK_DS2_ABW_UMAX >> 8);
+    puVar5[7] = (undefined1)EDK_DS2_ABW_UMAX;
+    puVar5[8] = (char)((ushort)EDK_DS2_ABW_OMAX >> 8);
+    puVar5[9] = (undefined1)EDK_DS2_ABW_OMAX;
+    puVar5[10] = (char)((ushort)EDK_DS2_ABW_MW >> 8);
+    puVar5[0xb] = (undefined1)EDK_DS2_ABW_MW;
+    puVar5[0xc] = 0;
+    puVar5[0xd] = 0;
+    puVar5[0xe] = 0;
+    puVar5[0xf] = (char)((ushort)EGAS_MAXKRAFT_COUNT >> 8);
+    puVar5[0x10] = (undefined1)EGAS_MAXKRAFT_COUNT;
+    puVar5[0x11] = PDR_M_ZUSTAND;
+    puVar5[0x12] = 0;
+    puVar5[0x13] = 0;
+    puVar5[0x14] = (char)((ushort)EDK_T_AUFWEITUNG >> 8);
+    puVar5[0x15] = (undefined1)EDK_T_AUFWEITUNG;
+    puVar5[0x16] = (char)((ushort)EDK_I_BEGR >> 8);
+    puVar5[0x17] = (undefined1)EDK_I_BEGR;
+    puVar5[0x18] = (char)((ushort)EDK_ANZ_IBEGR >> 8);
+    puVar5[0x19] = (undefined1)EDK_ANZ_IBEGR;
+    puVar5[0x1a] = (char)((ushort)EDK_ANZ_IANSCHLAG >> 8);
+    puVar5[0x1b] = (undefined1)EDK_ANZ_IANSCHLAG;
+    pbVar14 = puVar5 + 0x1d;
+    puVar5[0x1c] = 0;
+    goto LAB_000313ce;
+  case 0x15:
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = bVar7;
+    *puVar11 = (undefined1)N;
+    bVar7 = 0;
+    puVar9 = puVar5 + 5;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 8);
+    puVar12[1] = (char)((ushort)DAT_00ff81e0 >> 8);
+    puVar12[2] = (undefined1)DAT_00ff81e0;
+    puVar12[3] = (char)((ushort)DAT_00ffec20 >> 8);
+    puVar12[4] = (undefined1)DAT_00ffec20;
+    puVar12[5] = (char)((ushort)AVAN2_IST >> 8);
+    puVar12[6] = (undefined1)AVAN2_IST;
+    puVar12[7] = (char)((ushort)AVAN2_SOLL >> 8);
+    puVar12[8] = (undefined1)AVAN2_SOLL;
+    bVar7 = 0;
+    puVar9 = puVar12 + 9;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 4);
+    puVar12[1] = (char)((ushort)p_saug_no_filter >> 8);
+    puVar12[2] = (undefined1)p_saug_no_filter;
+    puVar12[3] = (char)((ushort)p_saug_roh >> 8);
+    puVar12[4] = (undefined1)p_saug_roh;
+    puVar12[5] = (char)((ushort)aq_rel_rf_pt_fakt_ds2 >> 8);
+    puVar12[6] = (undefined1)aq_rel_rf_pt_fakt_ds2;
+    puVar12[7] = -(8 < rf_p_saug) & 1;
+    puVar12[8] = (undefined1)rf_p_saug;
+    puVar12[9] = (char)(rf_soll >> 8);
+    puVar12[10] = (undefined1)rf_soll;
+    puVar12[0xb] = (char)((ushort)rf_diag_f >> 8);
+    puVar12[0xc] = (undefined1)rf_diag_f;
+    puVar12[0xd] = (char)((ushort)rf_diag_f_max >> 8);
+    puVar12[0xe] = (undefined1)rf_diag_f_max;
+    puVar12[0xf] = (char)((ushort)rf_diag_f_min >> 8);
+    puVar12[0x10] = (undefined1)rf_diag_f_min;
+    pbVar10 = puVar12 + 0x12;
+    puVar12[0x11] = rf_diag_ed_st;
+    break;
+  case 0x16:
+    bVar7 = 0;
+    do {
+      pbVar14 = pbVar10 + 1;
+      *pbVar10 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar14;
+    } while (bVar7 < 0x30);
+    bVar7 = 0;
+    puVar16 = &DAT_00ffe89c;
+    do {
+      pbVar10 = pbVar14;
+      *pbVar10 = (byte)((uint)*puVar16 >> 0x18);
+      pbVar10[1] = (byte)((uint)*puVar16 >> 0x10);
+      pbVar10[2] = (byte)((uint)*puVar16 >> 8);
+      pbVar10[3] = *(byte *)((int)puVar16 + 3);
+      puVar16 = puVar16 + 1;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10 + 4;
+    } while (bVar7 < 8);
+    pbVar10[4] = (byte)((ushort)A_QUER_L_SEC >> 8);
+    pbVar10[5] = (byte)A_QUER_L_SEC;
+    pbVar10[6] = (byte)((ushort)A_QUER_R_SEC >> 8);
+    pbVar14 = pbVar10 + 8;
+    pbVar10[7] = (byte)A_QUER_R_SEC;
+    goto LAB_000313ce;
+  case 0x17:
+    bVar7 = 0;
+    pbVar14 = peVar9;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x2e);
+    break;
+  case 0x18:
+    puVar9 = rsp_ptr + 4;
+    *peVar9 = (byte)(V >> 8);
+    *puVar9 = (undefined1)V;
+    puVar5[5] = (char)((ushort)V_ASC >> 8);
+    puVar5[6] = (undefined1)V_ASC;
+    bVar7 = 0;
+    puVar9 = puVar5 + 7;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 0x12);
+    puVar12[1] = (char)(TZ[0] >> 8);
+    puVar12[2] = (undefined1)TZ[0];
+    puVar12[3] = (char)(TZ[1] >> 8);
+    puVar12[4] = (undefined1)TZ[1];
+    puVar12[5] = (char)(TZ[2] >> 8);
+    puVar12[6] = (undefined1)TZ[2];
+    puVar12[7] = (char)(TZ[3] >> 8);
+    puVar12[8] = (undefined1)TZ[3];
+    puVar12[9] = (char)(TZ[4] >> 8);
+    puVar12[10] = (undefined1)TZ[4];
+    puVar12[0xb] = (char)(TZ[5] >> 8);
+    puVar12[0xc] = (undefined1)TZ[5];
+    puVar12[0xd] = (char)(TZ[6] >> 8);
+    puVar12[0xe] = (undefined1)TZ[6];
+    puVar12[0xf] = (char)(TZ[7] >> 8);
+    puVar12[0x10] = (undefined1)TZ[7];
+    bVar7 = 0;
+    puVar9 = puVar12 + 0x11;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 10);
+    puVar12[1] = (char)((ushort)SERVO_I_IST >> 8);
+    puVar12[2] = (undefined1)SERVO_I_IST;
+    puVar12[3] = (char)((ushort)SERVO_TAST >> 8);
+    puVar12[4] = (undefined1)SERVO_TAST;
+    puVar12[5] = (char)((ushort)SERVO_I_SOLL >> 8);
+    puVar12[6] = (undefined1)SERVO_I_SOLL;
+    bVar7 = 0;
+    puVar9 = puVar12 + 7;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 6);
+    puVar12[1] = ASC_AY;
+    puVar12[2] = ASC_AX;
+    puVar12[3] = 0;
+    puVar12[4] = SLS_ST_BANDENDE;
+    bVar7 = 0;
+    puVar9 = puVar12 + 5;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 0xb);
+    puVar12[1] = (char)((ushort)LLS_TV >> 8);
+    puVar12[2] = (undefined1)LLS_TV;
+    puVar12[3] = (char)((ushort)MD_LLRI >> 8);
+    puVar12[4] = (undefined1)MD_LLRI;
+    puVar12[5] = (char)((ushort)FR_REGLER >> 8);
+    puVar12[6] = (undefined1)FR_REGLER;
+    puVar12[7] = (char)((ushort)EDK_AUS >> 8);
+    puVar12[8] = (undefined1)EDK_AUS;
+    puVar12[9] = CAN_FST;
+    bVar7 = 0;
+    pbVar14 = puVar12 + 10;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 6);
+    break;
+  case 0x19:
+    bVar7 = 0;
+    do {
+      pbVar14 = pbVar10;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar14 + 1;
+    } while (bVar7 < 0xc);
+    pbVar14[1] = (byte)((ushort)MD_LLRA >> 8);
+    pbVar14[2] = (byte)MD_LLRA;
+    pbVar14[3] = (byte)((ushort)V_MAX >> 8);
+    pbVar14[4] = (byte)V_MAX;
+    pbVar14[5] = (byte)((ushort)N_MAX >> 8);
+    pbVar14[6] = (byte)N_MAX;
+    pbVar14[7] = (byte)((uint)T_NBEGR >> 0x18);
+    pbVar14[8] = (byte)((uint)T_NBEGR >> 0x10);
+    pbVar14[9] = (byte)((uint)T_NBEGR >> 8);
+    pbVar14[10] = (byte)T_NBEGR;
+    pbVar14[0xb] = (byte)((ushort)PWG1_A0 >> 8);
+    pbVar14[0xc] = (byte)PWG1_A0;
+    pbVar14[0xd] = (byte)((ushort)PWG2_A0 >> 8);
+    pbVar14[0xe] = (byte)PWG2_A0;
+    pbVar14[0xf] = (byte)((ushort)WDK1_NORM >> 8);
+    pbVar14[0x10] = (byte)WDK1_NORM;
+    pbVar14[0x11] = (byte)((ushort)WDK2_NORM >> 8);
+    pbVar14[0x12] = (byte)WDK2_NORM;
+    pbVar14[0x13] = KKOS_ST_VERBAUT;
+    pbVar14[0x14] = (byte)((ushort)WDK1_A0 >> 8);
+    pbVar14[0x15] = (byte)WDK1_A0;
+    pbVar14[0x16] = (byte)((ushort)WDK2_A0 >> 8);
+    pbVar14[0x17] = (byte)WDK2_A0;
+    pbVar14[0x18] = (byte)((ushort)LFRA_MD_START >> 8);
+    pbVar14[0x19] = (byte)LFRA_MD_START;
+    pbVar14[0x1a] = (byte)((ushort)LFRA_KO_MD_START >> 8);
+    pbVar14[0x1b] = (byte)LFRA_KO_MD_START;
+    pbVar14[0x1c] = (byte)(FRA_ML_START >> 8);
+    pbVar14[0x1d] = (byte)FRA_ML_START;
+    pbVar14[0x1e] = TDME_MIN;
+    pbVar14[0x1f] = TDME_MAX;
+    pbVar14[0x20] = WDK_ADAPT;
+    pbVar14[0x21] = (byte)((ushort)WDK_MAX_DIFF_ADAPT >> 8);
+    pbVar14[0x22] = (byte)WDK_MAX_DIFF_ADAPT;
+    pbVar14[0x23] = (byte)((ushort)PWG_MAX_DIFF_ADAPT >> 8);
+    pbVar14[0x24] = (byte)PWG_MAX_DIFF_ADAPT;
+    bVar7 = 0;
+    pbVar10 = pbVar14 + 0x25;
+    do {
+      pbVar14 = pbVar10;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar14 + 1;
+    } while (bVar7 < 0x12);
+    pbVar14[1] = DAT_00ffd4c4;
+    pbVar14[2] = DAT_00ffd4c5;
+    pbVar14[3] = (byte)((uint)T_ML >> 0x18);
+    pbVar14[4] = (byte)((uint)T_ML >> 0x10);
+    pbVar14[5] = (byte)((uint)T_ML >> 8);
+    pbVar14[6] = (byte)T_ML;
+    pbVar14[7] = (byte)((uint)TDME_TIME_ZAEHLER >> 0x18);
+    pbVar14[8] = (byte)((uint)TDME_TIME_ZAEHLER >> 0x10);
+    pbVar14[9] = (byte)((uint)TDME_TIME_ZAEHLER >> 8);
+    pbVar14[10] = (byte)TDME_TIME_ZAEHLER;
+    pbVar14[0xb] = (byte)((ushort)TDME_ZYKLEN >> 8);
+    pbVar14[0xc] = (byte)TDME_ZYKLEN;
+    pbVar14[0xd] = VVDP_VERBAUT;
+    pbVar14[0xe] = LDPH_VERBAUT;
+    pbVar14[0xf] = 0;
+    pbVar14[0x10] = 0;
+    pbVar14[0x11] = 0;
+    pbVar14[0x12] = DAT_00ffeb74;
+    pbVar14[0x13] = 0;
+    pbVar14[0x14] = 0;
+    pbVar14[0x15] = 0;
+    pbVar14[0x16] = 0;
+    pbVar14[0x17] = (byte)((ushort)p_saug_error >> 8);
+    pbVar14[0x18] = (byte)p_saug_error;
+    pbVar14[0x19] = (byte)((ushort)rf_p_saug_i >> 8);
+    pbVar10 = pbVar14 + 0x1b;
+    pbVar14[0x1a] = (byte)rf_p_saug_i;
+    break;
+  case 0x1a:
+    bVar7 = 0;
+    do {
+      pbVar13 = pbVar10;
+      *pbVar13 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar10 = pbVar13 + 1;
+    } while (bVar7 < 10);
+    pbVar13[1] = (byte)((ushort)DAT_00ffec42 >> 8);
+    pbVar13[2] = (byte)DAT_00ffec42;
+    pbVar13[3] = (byte)((ushort)DAT_00ffec44 >> 8);
+    pbVar13[4] = (byte)DAT_00ffec44;
+    pbVar13[5] = (byte)((ushort)DAT_00ffec24 >> 8);
+    pbVar13[6] = (byte)DAT_00ffec24;
+    pbVar13[7] = (byte)((ushort)DAT_00ffec26 >> 8);
+    pbVar13[8] = (byte)DAT_00ffec26;
+    pbVar13[9] = DAT_00ffec41 & 1;
+    pbVar13[10] = DAT_00ffec22 & 1;
+    pbVar14 = pbVar13 + 0xc;
+    pbVar13[0xb] = EDK_STATUS;
+    goto LAB_000313ce;
+  case 0x1b:
+    puVar9 = rsp_ptr + 4;
+    *peVar9 = ZUSTAND_MOTOR;
+    *puVar9 = KKOS_ST_TREIBER;
+    puVar5[5] = ASC_ST;
+    puVar5[6] = KATH_ST;
+    puVar5[7] = 0;
+    puVar5[8] = VMAX_ST;
+    puVar5[9] = SLP_ST;
+    puVar5[10] = SLV_ST;
+    puVar5[0xb] = 0;
+    puVar5[0xc] = 0;
+    puVar5[0xd] = CFG_ROLLENBETRIEB;
+    puVar5[0xe] = START_STATUS;
+    puVar5[0xf] = fgr_b_aktiv;
+    puVar5[0x10] = LFR_ZUSTAND;
+    puVar5[0x11] = DAT_00ffe834_knock_evaluation_status_;
+    bVar7 = 0;
+    puVar9 = puVar5 + 0x12;
+    do {
+      puVar12 = puVar9;
+      *puVar12 = 0;
+      bVar7 = bVar7 + 1;
+      puVar9 = puVar12 + 1;
+    } while (bVar7 < 8);
+    puVar12[1] = NOISE_ST;
+    puVar12[2] = 0;
+    puVar12[3] = 0;
+    puVar12[4] = MIL_ST;
+    puVar12[5] = 0;
+    puVar12[6] = DSV_ST;
+    puVar12[7] = SERVO_MODE;
+    puVar12[8] = SCHALT_M_ST;
+    puVar12[9] = 0;
+    puVar12[10] = DAT_00ffeb2f;
+    puVar12[0xb] = 0;
+    puVar12[0xc] = OEK_STATUS;
+    puVar12[0xd] = 0;
+    puVar12[0xe] = 0;
+    puVar12[0xf] = VVDP_VERBAUT;
+    puVar12[0x10] = KATH_ZUSTAND;
+    puVar12[0x11] = SSP_ST;
+    puVar12[0x12] = LDPH_VERBAUT;
+    puVar12[0x13] = LDPH_ST;
+    puVar12[0x14] = SSP_DIAG_ST;
+    pbVar14 = puVar12 + 0x16;
+    puVar12[0x15] = DAT_00ffeb74;
+LAB_000313ce:
+    pbVar10 = pbVar14 + 1;
+    *pbVar14 = 0;
+    break;
+  case 0x1c:
+                    /* 12050B03 */
+    puVar11 = rsp_ptr + 4;
+    *peVar9 = bVar7;
+    *puVar11 = (undefined1)N;
+    puVar5[5] = (char)((ushort)LLR_N_SOLL >> 8);
+    puVar5[6] = (undefined1)LLR_N_SOLL;
+    puVar5[7] = (char)((ushort)ML >> 8);
+    puVar5[8] = (undefined1)ML;
+    puVar5[9] = (char)((ushort)TL >> 8);
+    puVar5[10] = (undefined1)TL;
+    puVar5[0xb] = (char)((ushort)RF >> 8);
+    puVar5[0xc] = (undefined1)RF;
+    puVar5[0xd] = TAN;
+    puVar5[0xe] = TMOT;
+    puVar5[0xf] = TOEL;
+    puVar5[0x10] = 0;
+    puVar5[0x11] = (char)(TABG >> 4);
+    puVar5[0x12] = T_UMG;
+    puVar5[0x13] = 0;
+    puVar5[0x14] = (char)((ushort)UEXT1M >> 8);
+    puVar5[0x15] = (char)((ushort)UEXT2M >> 8);
+    puVar5[0x16] = P_UMG;
+    puVar5[0x17] = 0;
+    puVar5[0x18] = 0;
+    puVar5[0x19] = WDK_ZUSTAND;
+    puVar5[0x1a] = (char)((ushort)PWG1 >> 8);
+    puVar5[0x1b] = (undefined1)PWG1;
+    puVar5[0x1c] = (char)((ushort)PWG2 >> 8);
+    puVar5[0x1d] = (undefined1)PWG2;
+    puVar5[0x1e] = (char)((ushort)WDK1 >> 8);
+    puVar5[0x1f] = (undefined1)WDK1;
+    puVar5[0x20] = (char)((ushort)WDK2 >> 8);
+    puVar5[0x21] = (undefined1)WDK2;
+    puVar5[0x22] = (char)((ushort)EDK_SOLL >> 8);
+    puVar5[0x23] = (undefined1)EDK_SOLL;
+    puVar5[0x24] = TOG_LEVEL_K;
+    pbVar10 = puVar5 + 0x26;
+    puVar5[0x25] = TDME;
+    break;
+  case 0x1d:
+    uVar1 = km_ad;
+    puVar9 = rsp_ptr + 4;
+    *peVar9 = (byte)((ushort)uVar1 >> 8);
+    uVar2 = km_ad._1_1_;
+    *puVar9 = uVar2;
+    uVar1 = DAT_00fff2b2;
+    puVar5[5] = (char)((ushort)uVar1 >> 8);
+    uVar2 = DAT_00fff2b2._1_1_;
+    puVar5[6] = uVar2;
+    uVar1 = servo_i_ad;
+    puVar5[7] = (char)((ushort)uVar1 >> 8);
+    uVar2 = servo_i_ad._1_1_;
+    puVar5[8] = uVar2;
+    wVar3 = ask_ad;
+    puVar5[9] = (char)(wVar3 >> 8);
+    uVar2 = ask_ad._1_1_;
+    puVar5[10] = uVar2;
+    uVar1 = p_saug_ad;
+    puVar5[0xb] = (char)((ushort)uVar1 >> 8);
+    uVar2 = p_saug_ad._1_1_;
+    puVar5[0xc] = uVar2;
+    uVar1 = TDME_AD;
+    puVar5[0xd] = (char)((ushort)uVar1 >> 8);
+    uVar2 = TDME_AD._1_1_;
+    puVar5[0xe] = uVar2;
+    uVar1 = dk2_ad;
+    puVar5[0xf] = (char)((ushort)uVar1 >> 8);
+    uVar2 = dk2_ad._1_1_;
+    puVar5[0x10] = uVar2;
+    uVar1 = tabg_ad;
+    puVar5[0x11] = (char)((ushort)uVar1 >> 8);
+    uVar2 = tabg_ad._1_1_;
+    puVar5[0x12] = uVar2;
+    uVar1 = DK1_AD;
+    puVar5[0x13] = (char)((ushort)uVar1 >> 8);
+    uVar2 = DK1_AD._1_1_;
+    puVar5[0x14] = uVar2;
+    uVar1 = pwg1_ad;
+    puVar5[0x15] = (char)((ushort)uVar1 >> 8);
+    uVar2 = pwg1_ad._1_1_;
+    puVar5[0x16] = uVar2;
+    uVar1 = pwg2_ad;
+    puVar5[0x17] = (char)((ushort)uVar1 >> 8);
+    uVar2 = pwg2_ad._1_1_;
+    puVar5[0x18] = uVar2;
+    uVar4 = uext1m_ad;
+    puVar5[0x19] = (char)(uVar4 >> 8);
+    uVar2 = uext1m_ad._1_1_;
+    puVar5[0x1a] = uVar2;
+    uVar1 = uext2m_ad;
+    puVar5[0x1b] = (char)((ushort)uVar1 >> 8);
+    uVar2 = uext2m_ad._1_1_;
+    puVar5[0x1c] = uVar2;
+    uVar1 = p_umg_ad;
+    puVar5[0x1d] = (char)((ushort)uVar1 >> 8);
+    uVar2 = p_umg_ad._1_1_;
+    puVar5[0x1e] = uVar2;
+    uVar1 = tan_ad;
+    puVar5[0x1f] = (char)((ushort)uVar1 >> 8);
+    uVar2 = tan_ad._1_1_;
+    puVar5[0x20] = uVar2;
+    uVar1 = tmot_ad;
+    puVar5[0x21] = (char)((ushort)uVar1 >> 8);
+    uVar2 = tmot_ad._1_1_;
+    puVar5[0x22] = uVar2;
+    bVar7 = 0;
+    pbVar14 = puVar5 + 0x23;
+    do {
+      pbVar10 = pbVar14 + 1;
+      *pbVar14 = 0;
+      bVar7 = bVar7 + 1;
+      pbVar14 = pbVar10;
+    } while (bVar7 < 0x20);
+  }
+LAB_00031a16:
+  bootloader_diag_state._3_1_ = 7;
+  rsp_ptr[2] = 0xa0;
+  rsp_ptr[1] = (char)pbVar10 - (char)peVar9;
+  return;
+}
+

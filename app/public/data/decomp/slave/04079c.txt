@@ -1,0 +1,29 @@
+
+void ipk_rx_dispatch_2ms(void)
+
+{
+  char cVar1;
+  uint uVar2;
+  char *pcVar3;
+  char *pcVar4;
+  
+  pcVar3 = PTR_DAT_00010812;
+  for (uVar2 = (uint)DAT_00010817; 0 < (int)uVar2; uVar2 = uVar2 - 1) {
+    if ((pcVar3[0x12] == '\x02') && (pcVar3[0x13] == '\0')) {
+      for (pcVar4 = "\x11"; (*pcVar4 != '\0' && (*pcVar3 != *pcVar4)); pcVar4 = pcVar4 + 6) {
+      }
+      if (*pcVar4 == '\0') {
+        pcVar3[0x13] = -0x80;
+      }
+      else {
+        pcVar3[0x13] = '\x01';
+        cVar1 = (**(code **)(pcVar4 + 2))(*pcVar3,pcVar3[1],pcVar3 + 2);
+        pcVar3[0x14] = cVar1;
+        pcVar3[0x13] = '\x02';
+      }
+    }
+    pcVar3 = pcVar3 + 0x16;
+  }
+  return;
+}
+

@@ -1,0 +1,23 @@
+
+short PT1_Filter_SS(short param_1,short param_2,byte param_3)
+
+{
+  int iVar1;
+  short sVar2;
+  
+  if (param_3 != 0) {
+    iVar1 = (uint)param_3 * ((int)param_1 - (int)param_2) + 0x80;
+    if ((param_2 == param_1) || (iVar1 >> 8 != 0)) {
+      sVar2 = (short)((uint)iVar1 >> 8) + param_2;
+    }
+    else if (param_2 < param_1) {
+      sVar2 = param_2 + 1;
+    }
+    else {
+      sVar2 = param_2 + -1;
+    }
+    return sVar2;
+  }
+  return param_1;
+}
+

@@ -1,0 +1,94 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void can_rx_1f0(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  byte bVar3;
+  byte *pbVar4;
+  undefined4 *puVar5;
+  byte local_c;
+  byte local_b;
+  byte local_a;
+  byte local_9;
+  byte local_8;
+  byte local_7;
+  byte local_6;
+  byte local_5;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    can_a_rx_frame_data(&local_c,rx_frame_struct);
+    _V_RAD_VR = (ushort)local_a + (local_9 & 0x1f) * 0x100;
+    if (_V_RAD_VR < 0x1fff) {
+      V_RAD_ST = V_RAD_ST & 0xfe;
+    }
+    else {
+      V_RAD_ST = V_RAD_ST | 1;
+      _V_RAD_VR = V_ASC;
+    }
+    if (_V_RAD_VR < 0xb) {
+      _V_RAD_VR = 0;
+    }
+    _V_RAD_VL = (ushort)local_c + (local_b & 0x1f) * 0x100;
+    if (_V_RAD_VL < 0x1fff) {
+      V_RAD_ST = V_RAD_ST & 0xfd;
+    }
+    else {
+      V_RAD_ST = V_RAD_ST | 2;
+      _V_RAD_VL = V_ASC;
+    }
+    if (_V_RAD_VL < 0xb) {
+      _V_RAD_VL = 0;
+    }
+    uVar1 = (ushort)local_6 + (local_5 & 0x1f) * 0x100;
+    if (uVar1 < 0x1fff) {
+      V_RAD_ST = V_RAD_ST & 0xfb;
+    }
+    else {
+      V_RAD_ST = V_RAD_ST | 4;
+      uVar1 = V_ASC;
+    }
+    if (uVar1 < 0xb) {
+      uVar1 = 0;
+    }
+    FUN_0002c5dc(uVar1,V_RAD_HR);
+    uVar2 = (ushort)local_8 + (local_7 & 0x1f) * 0x100;
+    if (uVar2 < 0x1fff) {
+      V_RAD_ST = V_RAD_ST & 0xf7;
+    }
+    else {
+      V_RAD_ST = V_RAD_ST | 8;
+      uVar2 = V_ASC;
+    }
+    if (uVar2 < 0xb) {
+      uVar2 = 0;
+    }
+    V_RAD_HR = uVar1;
+    FUN_0002c68c(uVar2,V_RAD_HL);
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 2;
+    bVar3 = 0;
+    pbVar4 = &local_c;
+    puVar5 = &ASC2_BYTE_1OF4_;
+    V_RAD_HL = uVar2;
+    do {
+      *puVar5 = *(undefined4 *)pbVar4;
+      bVar3 = bVar3 + 1;
+      pbVar4 = pbVar4 + 4;
+      puVar5 = puVar5 + 1;
+    } while (bVar3 < 2);
+    DAT_00ffd968 = 0;
+  }
+  else {
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xfffd;
+    _V_RAD_VR = V_ASC;
+    _V_RAD_VL = V_ASC;
+    V_RAD_HR = V_ASC;
+    V_RAD_HL = V_ASC;
+    V_RAD_ST = 0xf;
+  }
+  return;
+}
+

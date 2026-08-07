@@ -1,0 +1,16 @@
+
+void memcpy_us(ushort *source,ushort *destination,char num)
+
+{
+  ushort uVar1;
+  
+  uVar1 = (ushort)(byte)(num - 1);
+  do {
+    *destination = *source;
+    uVar1 = uVar1 - 1;
+    source = source + 1;
+    destination = destination + 1;
+  } while (uVar1 != 0xffff);
+  return;
+}
+

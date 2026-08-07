@@ -1,0 +1,7 @@
+
+void no_action_1(void)
+
+{
+  return;
+}
+

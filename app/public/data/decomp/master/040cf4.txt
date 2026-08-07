@@ -1,0 +1,77 @@
+
+uint kfu_wint_custom(byte *table,ushort xValue,ushort yValue)
+
+{
+  byte bVar1;
+  byte bVar2;
+  ushort uVar3;
+  int iVar4;
+  ushort uVar5;
+  byte bVar6;
+  byte bVar8;
+  ushort uVar7;
+  ushort *puVar9;
+  ushort *puVar10;
+  ushort *puVar11;
+  ushort *puVar12;
+  
+  bVar1 = *table;
+  bVar2 = table[1];
+  puVar11 = (ushort *)(table + 2);
+  puVar9 = puVar11 + bVar1;
+  if (*puVar9 < xValue) {
+    if (xValue < puVar9[bVar2 - 1]) {
+      bVar6 = 0;
+      while (puVar9[1] < xValue) {
+        bVar6 = bVar6 + 1;
+        puVar9 = puVar9 + 1;
+      }
+      bVar8 = bVar6 + 1;
+    }
+    else {
+      bVar6 = bVar2 - 1;
+      bVar8 = bVar6;
+    }
+  }
+  else {
+    bVar6 = 0;
+    bVar8 = 0;
+  }
+  if (bVar6 == bVar8) {
+    uVar7 = 0;
+  }
+  else {
+    uVar7 = (ushort)((int)(((uint)xValue - (uint)*puVar9) * 0x400) /
+                    (int)((uint)puVar9[1] - (uint)*puVar9));
+  }
+  puVar10 = puVar11 + (uint)bVar1 * (uint)bVar6 + (uint)bVar1 + (uint)bVar2;
+  puVar9 = puVar10 + bVar1;
+  if ((ushort)(puVar10[bVar1 - 1] +
+              (short)((int)((uint)uVar7 * ((uint)puVar9[bVar1 - 1] - (uint)puVar10[bVar1 - 1])) >>
+                     10)) <= yValue) {
+    return (uint)*(ushort *)(table + (uint)bVar1 * 2);
+  }
+  iVar4 = (uint)uVar7 * ((uint)*puVar9 - (uint)*puVar10);
+  uVar3 = *puVar10 + (short)(iVar4 >> 10);
+  if (yValue <= uVar3) {
+    return CONCAT22((short)(iVar4 >> 0x1a),*puVar11);
+  }
+  do {
+    uVar5 = uVar3;
+    puVar12 = puVar11;
+    puVar11 = puVar12 + 1;
+    puVar10 = puVar10 + 1;
+    puVar9 = puVar9 + 1;
+    uVar3 = *puVar10 + (short)((int)((uint)uVar7 * ((uint)*puVar9 - (uint)*puVar10)) >> 10);
+  } while (uVar3 < yValue);
+  if (uVar5 == uVar3) {
+    uVar7 = *puVar11;
+  }
+  else {
+    uVar7 = *puVar12 +
+            (short)((int)(((uint)*puVar11 - (uint)*puVar12) * ((uint)yValue - (uint)uVar5)) /
+                   (int)((uint)uVar3 - (uint)uVar5));
+  }
+  return (uint)uVar7;
+}
+

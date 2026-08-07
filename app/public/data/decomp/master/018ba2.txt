@@ -1,0 +1,24 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void nmax_ff_reset(void)
+
+{
+  _NMAX_FF_ANZAHL = 0;
+  NMAX_FF_DN = 0;
+  NMAX_FF_T = 0;
+  NMAX_FF_V = 0;
+  NMAX_FF_PWG = 0;
+  NMAX_FF_GANG = 0;
+  NMAX_FF_KM_STAND = 0;
+  N_T_DWF[0] = 0;
+  N_T_DWF[1] = 0;
+  N_T_DWF[2] = 0;
+  N_T_DWF[3] = 0;
+  N_T_DWF[4] = 0;
+  N_T_DWF[5] = 0;
+  N_T_DWF[6] = 0;
+  N_T_DWF[7] = 0;
+  return;
+}
+

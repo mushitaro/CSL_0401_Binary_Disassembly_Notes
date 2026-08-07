@@ -1,0 +1,16 @@
+
+void smg_ki_drive_logic_indicator_update(void)
+
+{
+  undefined4 uVar1;
+  
+  smg_update_program_level();
+  uVar1 = smg_ki_shift_icon_level('\x01');
+  ki_ab = (char)uVar1;
+  uVar1 = smg_ki_shift_icon_level('\x02');
+  ki_scha = (char)uVar1;
+  uVar1 = smg_ki_shift_icon_level('\x03');
+  ki_auf = (char)uVar1;
+  return;
+}
+

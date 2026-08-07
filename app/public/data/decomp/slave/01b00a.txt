@@ -1,0 +1,38 @@
+
+void ti_n_begrenzer_update(void)
+
+{
+  byte bVar1;
+  
+  bVar1 = GANG;
+  if (7 < GANG) {
+    bVar1 = 0;
+  }
+  N_BEGRENZER = K_TI_EINFAHR_N_MAX;
+  if (TI_EINFAHR_ST != '\0') {
+    N_BEGRENZER = KL_N_MAX.y[(short)(ushort)bVar1];
+  }
+  if (((((V_ST & 0x40) != 0) && (cfg_s_betriebsmode != '\x02')) && (CFG_ROLLENBETRIEB == '\0')) &&
+     (K_N_MAX_VFEHLER < N_BEGRENZER)) {
+    N_BEGRENZER = K_N_MAX_VFEHLER;
+  }
+  if (((V_ANTRIEB == 0) && ((V_ST & 0x40) == 0)) && (K_N_MAX_FZ_STEHT < N_BEGRENZER)) {
+    N_BEGRENZER = K_N_MAX_FZ_STEHT;
+  }
+  bVar1 = SK_NMAX_CONTR;
+  if (SK_NMAX_CONTR < DAT_00ffe6d1) {
+    bVar1 = DAT_00ffe6d1;
+  }
+  if (4 < bVar1) {
+    bVar1 = 4;
+  }
+  if ((bVar1 != 0) && (KL_N_MAX_SK.y[(short)(ushort)bVar1] < N_BEGRENZER)) {
+    N_BEGRENZER = KL_N_MAX_SK.y[(short)(ushort)bVar1];
+  }
+  if ((KATS_MD == '\n') && (K_N_MAX_KATS < N_BEGRENZER)) {
+    N_BEGRENZER = K_N_MAX_KATS;
+  }
+  N_BEGRENZER_TI = K_NMAX_TI_OFFSET + N_BEGRENZER;
+  return;
+}
+

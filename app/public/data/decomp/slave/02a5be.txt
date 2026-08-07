@@ -1,0 +1,46 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void sk_pcntrl_dpr_reset(void)
+
+{
+  ASC_ST_DPR = 0;
+  _DAT_00ff819a = 0;
+  ASC_AY_DPR = 0;
+  DAT_00ff8292 = 3;
+  rf_korr_st = 0;
+  FGR_B_AKTIV_DPR = 0;
+  DAT_00ff81a2 = 0;
+  MD_FW_DPR = 0;
+  _DAT_00ff816a = 0;
+  DAT_00ff8166 = 0;
+  DAT_00ff816c = 0;
+  DAT_00ff8176 = 0;
+  md_ind_max_dpr = 0;
+  md_ind_asc_abs_dpr = 0;
+  _MD_LLR_TZ = 0;
+  _MD_LLRP = 0;
+  _md_res_dpr = 0;
+  FST_ST = FST_ST | 1;
+  PWG_SOLL_DPR = 0;
+  DAT_00ff8066 = 0;
+  WDK1_DPR = 0;
+  _WDK2_DPR = 0;
+  WDK1_ABS_DPR = 0;
+  WDK2_ABS_DPR = 0;
+  _WDK_SEGM = 0;
+  WDK = 0;
+  N_DPR = (uint)N_S;
+  ZUSTAND_MOTOR_DPR = 8;
+  AQ_REL_DELTA = 0;
+  AQ_REL_OLD = AQ_REL;
+  DAT_00ff8234 = 0;
+  S_KRAFTSCHLUSS = 0;
+  GANG = 0;
+  DWF_ST_DPR = 0;
+  EGS_STATUS = 0;
+  ask_ad = 0;
+  FUN_0003c94a();
+  return;
+}
+

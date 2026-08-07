@@ -1,0 +1,28 @@
+
+void edk_tr_diag_stat(void)
+
+{
+  undefined4 uVar1;
+  byte errortype;
+  
+  if (((((PDR_STATUS & 0x80) == 0) || ((SK_EDK_CONTR & 2) != 0)) || ((DAT_00ffda36 & 2) != 0)) ||
+     ((((ZUSTAND_MOTOR & KI.15 aus) != 0 || ((ZUSTAND_MOTOR & Nachlauf) != 0)) ||
+      (UB <= K_EDK_UBMIN)))) {
+    EDK_TR_DIAG_STAT = EDK_TR_DIAG_STAT & 0xf3;
+    return;
+  }
+  if ((EDK_TR_DIAG_STAT & 8) == 0) {
+    if (EDK_HW_ED == '\0') goto LAB_0002418a;
+    errortype = 0;
+  }
+  else {
+    EDK_TR_DIAG_STAT = EDK_TR_DIAG_STAT & 0xf7;
+    errortype = 8;
+  }
+  uVar1 = ed_report(DTC_2D_ETHROTTLE_SERVO,errortype);
+  EDK_HW_ED = (char)uVar1;
+LAB_0002418a:
+  EDK_TR_DIAG_STAT = EDK_TR_DIAG_STAT | 4;
+  return;
+}
+

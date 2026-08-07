@@ -1,0 +1,17 @@
+
+void llr_qsoll_calc(void)
+
+{
+  LLR_QVS = PT1_Filter_US(LLR_QVS_ROH,LLR_QVS,LLR_TAU_QVS);
+  if ((int)((int)K_LLR_Q_MCS + (uint)LLR_QVS) < (int)(uint)K_LLR_QSOLL_MIN) {
+    LLR_QSOLL = K_LLR_QSOLL_MIN;
+  }
+  else {
+    LLR_QSOLL = (ushort)((int)K_LLR_Q_MCS + (uint)LLR_QVS);
+  }
+  if (cfg_m_egas != '\0') {
+    lls_tv_calc(LLR_QSOLL);
+  }
+  return;
+}
+

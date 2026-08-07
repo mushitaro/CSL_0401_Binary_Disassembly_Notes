@@ -1,0 +1,26 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void dpr_sync(void)
+
+{
+  N = (short)N_DPR;
+  N40 = (char)N40_DPR;
+  TL = (short)TL_DPR;
+  ML = (short)ML_DPR;
+  RF = (short)RF_DPR;
+  RF5 = (char)RF5_DPR;
+  TAN = (char)TAN_DPR;
+  TMOT = (char)TMOT_DPR;
+  TOEL = (char)TOEL_DPR;
+  TKATM = TKATM_DPR;
+  SCHALT_M_ST = (char)SCHALT_M_ST_DPR;
+  ASC_ST = (char)ASC_ST_DPR;
+  CAN_FST = (char)CAN_FST_DPR;
+  _SCHALT_S_ST_DPR = (ushort)SCHALT_S_ST;
+  _UB_DPR = (ushort)UB;
+  _TKA_DPR = (ushort)TKA;
+  _LDP_ED_DECKEL_DPR = (ushort)LDP_ED_DECKEL;
+  return;
+}
+

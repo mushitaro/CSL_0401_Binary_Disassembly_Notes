@@ -1,0 +1,33 @@
+
+void EGAS_SK_PCNTRL_Monitor_Partner_Processor_Timer(void)
+
+{
+  word wVar1;
+  
+  wVar1 = PCNTRL_TIMER_S;
+  if ((ZUSTAND_MOTOR & Nachlauf) == 0) {
+    if (PCNTRL_TIMER_S == DAT_00ffe5d2) {
+      if (DAT_00ffe5d7 < K_PCNTRL_TIMEOUT_M) {
+        DAT_00ffe5d7 = DAT_00ffe5d7 + 1;
+      }
+      else {
+        DAT_00ffe5d7 = 0;
+        FUN_0001132e();
+      }
+    }
+    else {
+      DAT_00ffe5d7 = 0;
+    }
+    DAT_00ffe5d2 = wVar1;
+    if (K_SK_TR_MANIPULATION <= DAT_00ffda42) {
+      PCNTRL_ZUSTAND = PCNTRL_ZUSTAND | 2;
+      ed_report(DTC_E7_DME_INTERNAL,2);
+    }
+    if (K_SKM_IPK_TIMEOUT <= skm_ipk_timer) {
+      PCNTRL_ZUSTAND = PCNTRL_ZUSTAND | 8;
+      ed_report(DTC_E7_DME_INTERNAL,4);
+    }
+  }
+  return;
+}
+

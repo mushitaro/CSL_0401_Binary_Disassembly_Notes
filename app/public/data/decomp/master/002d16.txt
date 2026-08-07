@@ -1,0 +1,53 @@
+
+uint8_t aif_log_update(void)
+
+{
+  uint8_t uVar1;
+  uint uVar2;
+  word *pwVar3;
+  word *a5;
+  uint8_t local_8 [2];
+  word aif_tag;
+  
+  local_8[0] = '\0';
+  local_8[1] = '\0';
+  uVar2 = 0;
+  a5 = AIF_Flash_Counter;
+  do {
+    pwVar3 = a5 + 1;
+    if (*a5 == 0xffff) break;
+    uVar2 = uVar2 + 1;
+    a5 = pwVar3;
+  } while (uVar2 < 64);
+  if (aif_cpu_selector == 0x3c) {
+    aif_tag = 0xff;
+  }
+  else if (aif_cpu_selector == 0x66) {
+    aif_tag = 0xff00;
+  }
+  else {
+    aif_tag = 0;
+  }
+  if ((a5 == AIF_Flash_Counter) || (a5[-1] != aif_tag)) {
+    if (((a5 < AIF_Flash_Counter + 60) || (aif_tag == 0)) ||
+       ((aif_tail_guard_key == -0x39 && (a5 < AIF_Flash_Counter + 62)))) {
+      if (a5 != AIF_Flash_Counter) {
+        flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,(uint8_t *)(a5 + -1),local_8,1);
+        flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,(uint8_t *)((int)a5 + -1),local_8 + 1,1);
+      }
+      flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,(uint8_t *)a5,(uint8_t *)&aif_tag,2);
+      if (*a5 == aif_tag) goto LAB_00002d76;
+      aif_log_status = 2;
+    }
+    else {
+      aif_log_status = 6;
+    }
+    uVar1 = '\0';
+  }
+  else {
+LAB_00002d76:
+    uVar1 = '\x01';
+  }
+  return uVar1;
+}
+

@@ -1,0 +1,35 @@
+
+void km_enable_tpu_channels(void)
+
+{
+  word wVar1;
+  uint uVar2;
+  
+  if ((KM_ST & 1) != 0) {
+    wVar1 = TPU_CIER;
+    TPU_CIER = wVar1 & 0xfbff;
+    uVar2 = tpu_try_initialize_channel(10,3);
+    if ((char)uVar2 == '\0') {
+      DAT_00ffe708 = 0;
+      KM_N_MAX_ST = KM_N_MAX_ST * 2;
+      wVar1 = TPU_CISR;
+      TPU_CISR = wVar1 & 0xfbff;
+      wVar1 = TPU_CIER;
+      TPU_CIER = wVar1 | 0x400;
+    }
+    if (K_KM_FEN_VIRT_ENABLE == 1) {
+      wVar1 = TPU_CIER;
+      TPU_CIER = wVar1 & 0xf7ff;
+      uVar2 = tpu_try_initialize_channel(11,3);
+      if ((char)uVar2 == '\0') {
+        wVar1 = TPU_CISR;
+        TPU_CISR = wVar1 & 0xf7ff;
+        wVar1 = TPU_CIER;
+        TPU_CIER = wVar1 | 0x800;
+        KM_FEN_VIRT = 1;
+      }
+    }
+  }
+  return;
+}
+

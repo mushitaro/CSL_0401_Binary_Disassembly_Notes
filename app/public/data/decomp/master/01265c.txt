@@ -1,0 +1,12 @@
+
+void tpu_disable_channel(byte param_1)
+
+{
+  word awVar1 [2];
+  
+  awVar1 = TPU_CPR;
+  TPU_CPR = (word  [2])(~(3 << ((uint)param_1 * 2 & 0x3f)) & (uint)awVar1);
+  delay_6us();
+  return;
+}
+

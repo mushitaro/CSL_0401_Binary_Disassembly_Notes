@@ -1,0 +1,22 @@
+
+uint nw_diag(void)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  
+  uVar1 = CONCAT31((int3)((uint)in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (uVar1 = 0x14, 0x14 < NO_ZAEHLER_M)) {
+    if (((NW_ST_M & 4) != 0) &&
+       ((NW_SYNCREQUEST_M == 0 && (uVar1 = NW_ED_M & 0xe0, (NW_ED_M & 0xe0) != 0)))) {
+      uVar1 = ed_report(DTC_A2_UNKOWN_TABLE_IDX_20,0);
+      NW_ED_M = (byte)uVar1;
+    }
+    if (((NW_ST_M & 8) != 0) || (NW_SYNCREQUEST_M != 0)) {
+      uVar1 = ed_report(DTC_A2_UNKOWN_TABLE_IDX_20,8);
+      NW_ED_M = (byte)uVar1;
+    }
+  }
+  return uVar1;
+}
+

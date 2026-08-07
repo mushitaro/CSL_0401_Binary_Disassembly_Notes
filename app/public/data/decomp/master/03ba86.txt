@@ -1,0 +1,15 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void can_a_rx_ed(ushort error_flags)
+
+{
+  undefined4 uVar1;
+  
+  CAN_ERRORCOUNT = CAN_ERRORCOUNT + '\x01';
+  _CAN_ERROR_FLAGS = error_flags & 0xff;
+  uVar1 = ed_report(DTC_56_DME_CAN_SIGNAL,2);
+  CAN_ED = (char)uVar1;
+  return;
+}
+

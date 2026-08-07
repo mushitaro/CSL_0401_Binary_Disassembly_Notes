@@ -1,0 +1,28 @@
+
+void ti_write_undo(byte param_1)
+
+{
+  byte bVar1;
+  char cVar2;
+  undefined4 unaff_D3;
+  undefined2 *puVar3;
+  undefined2 *puVar4;
+  
+  bVar1 = param_1 + 2;
+  tpu_disable_channel(bVar1);
+  DAT_00fffe0a = ~(1 << (bVar1 & 0x3f)) & DAT_00fffe0a;
+  cVar2 = '\x06';
+  puVar3 = &DAT_0003e78a;
+  puVar4 = (undefined2 *)(&DAT_00ffff20 + (uint)param_1 * 0x10);
+  while (cVar2 = cVar2 + -1, -1 < cVar2) {
+    *puVar4 = *puVar3;
+    puVar3 = puVar3 + 1;
+    puVar4 = puVar4 + 1;
+  }
+  tpu_set_channel_function(bVar1,0xb);
+  tpu_set_channel_service_queue(bVar1,3);
+  tpu_host_service_request(CONCAT31((int3)((uint)unaff_D3 >> 8),bVar1),2);
+  tpu_set_channel_priority(bVar1,3);
+  return;
+}
+

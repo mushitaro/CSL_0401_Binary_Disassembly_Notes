@@ -1,0 +1,39 @@
+
+void tpu_segm_channel_init(void)
+
+{
+  word wVar1;
+  char cVar2;
+  undefined2 *puVar3;
+  undefined2 *puVar4;
+  
+  if ((cfg_m_motortyp & 0xf7) == 4) {
+    puVar3 = &DAT_0003d902;
+  }
+  else {
+    puVar3 = (undefined2 *)&UNK_0003d938;
+  }
+  cVar2 = '\x06';
+  TPU_ST_M = nicht sync2|N-Segm gesperrt|keine NW;
+  NW_ST_M = 1;
+  NO_ZAEHLER_M = 0;
+  TPU_ZOT_ZYL_M = 0;
+  TPU_ZW = 0xff;
+  TPU_IRQ_COUNT_M = 0;
+  puVar4 = &TPU_SEGM_PERIOD;
+  while (cVar2 = cVar2 + -1, -1 < cVar2) {
+    *puVar4 = *puVar3;
+    puVar3 = puVar3 + 1;
+    puVar4 = puVar4 + 1;
+  }
+  tpu_set_channel_function(1,0xf);
+  tpu_set_channel_service_queue(1,0);
+  tpu_host_service_request(1,3);
+  wVar1 = TPU_CISR;
+  TPU_CISR = wVar1 & 0xfffd;
+  wVar1 = TPU_CIER;
+  TPU_CIER = wVar1 | 2;
+  tpu_set_channel_priority(1,3);
+  return;
+}
+

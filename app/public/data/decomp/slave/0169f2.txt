@@ -1,0 +1,32 @@
+
+void ask_filter_calc(void)
+
+{
+  ushort uVar1;
+  
+                    /* Only process sensor if system status bits indicate stable and valid
+                       conditions */
+  if (((UB_UEXT_HR_ST & 0x10) != 0) && ((UB_UEXT_HR_ST & 0x20) != 0)) {
+                    /* Apply scaling and correction to raw ADC value from the flap potentiometer */
+    ask_roh = ask_ed_filter((ushort)((int)((uint)ask_ad * (uint)UEXT1M_KORREKTUR_DPR + 0x200) >> 10)
+                           );
+    if (ask_flap_pot_learned_close_pos < ask_roh) {
+      uVar1 = ask_roh - ask_flap_pot_learned_close_pos;
+    }
+    else {
+      uVar1 = 0;
+    }
+    ask_filter = (ushort)((int)((uint)uVar1 * (uint)ask_filter_gain + 0x400) >> 0xb);
+    if (((ask_ed & 0x40) == 0) && (ask_flap_driver_block_timer < k_ask_flap_driver_sperre)) {
+      if (500 < ask_filter) {
+        ask_zustand_dpr = ask_zustand_dpr | 1;
+        return;
+      }
+      if (ask_filter < 480) {
+        ask_zustand_dpr = ask_zustand_dpr & 0xfe;
+      }
+    }
+  }
+  return;
+}
+

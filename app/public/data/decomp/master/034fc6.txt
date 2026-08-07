@@ -1,0 +1,38 @@
+
+void obd_drive_cycle_controller(void)
+
+{
+  if ((OBD_STATE & 1) == 0) {
+    if ((N < K_DCY_N_MIN) || (SYS_TIMERTICS_COUNTER < T_START)) {
+      T_START = SYS_TIMERTICS_COUNTER;
+      return;
+    }
+    if ((uint)K_DCY_DELAY * 1000 <= SYS_TIMERTICS_COUNTER - T_START) {
+      OBD_STATE = OBD_STATE | 1;
+      OBD_STEUER = OBD_STEUER | 4;
+      TSTART = TMOT;
+      if (FF_DCY_CNT != -1) {
+        FF_DCY_CNT = FF_DCY_CNT + 1;
+      }
+      if (DAT_00ffd7ce != -1) {
+        DAT_00ffd7ce = DAT_00ffd7ce + 1;
+      }
+      obd_arm_drive_cycle_monitors();
+      obd_refresh_secondary_air_dtcs();
+      return;
+    }
+  }
+  else if (((ZUSTAND_MOTOR & KI.15 aus) != 0) && (N == 0)) {
+    if ((OBD_STATE & 0x80) == 0) {
+      if ((OBD_STATE & 2) != 0) {
+        obd_monitor_scheduler_tick('\0');
+      }
+      FUN_00034a40('\0');
+      OBD_STATE = OBD_STATE | 0x88;
+    }
+    OBD_STATE = OBD_STATE & 0xfe;
+    OBD_STEUER = OBD_STEUER & 0xfb;
+  }
+  return;
+}
+

@@ -1,0 +1,45 @@
+
+void skm_ipk_heartbeat_tx(void)
+
+{
+  char cVar1;
+  uint8_t *puVar2;
+  uint8_t local_1e [4];
+  undefined1 local_1a;
+  undefined1 local_19;
+  undefined1 local_18;
+  char local_f;
+  struct_ipk_send_desc_t local_e;
+  
+  local_e.src = local_1e;
+  if (DAT_00ffda3e == '\x02') {
+    skm_ipk_timer = 0;
+  }
+  else if (skm_ipk_timer < K_SKM_IPK_TIMEOUT) {
+    skm_ipk_timer = skm_ipk_timer + 1;
+    DAT_00ffda45 = DAT_00ffda45 + '\x01';
+  }
+  DAT_00ffda3c = 0;
+  DAT_00ffda3e = 0;
+  local_1e[0] = DAT_00ffda32;
+  local_1e[1] = DAT_00ffda34;
+  local_1e[2] = DAT_00ffda35;
+  local_1e[3] = DAT_00ffda37;
+  local_1a = DAT_00ffda33;
+  local_19 = DAT_00ffda36;
+  local_18 = PCNTRL_RESET_COUNT;
+  local_f = '\0';
+  cVar1 = '\x0f';
+  puVar2 = local_e.src;
+  do {
+    local_f = *puVar2 + local_f;
+    cVar1 = cVar1 + -1;
+    puVar2 = puVar2 + 1;
+  } while ('\0' < cVar1);
+  local_e.cmd = 0x52;
+  local_e.len = 16;
+  local_e.ack = (uint8_t *)&DAT_00ffda3e;
+  ipk_enqueue_tx(&local_e);
+  return;
+}
+

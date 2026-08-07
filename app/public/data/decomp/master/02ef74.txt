@@ -1,0 +1,74 @@
+
+void tog_adapt_calc(void)
+
+{
+  byte bVar1;
+  int iVar2;
+  short sVar3;
+  
+  if (((TOG_ADAPT_ST & 4) == 0) &&
+     (((((TMOT_ED & 0x40) != 0 || ((TMOT_ST1 & 0x10) != 0)) || ((TAN_ED & 0x40) != 0)) ||
+      ((((TKA_ED & 0x40) != 0 || ((TOG_ED & 0x40) != 0)) || (K_TOG_ADAPT_TIMEOUT < T_ML)))))) {
+    TOG_ADAPT_ST = 4;
+  }
+  if (((TOG_ADAPT_ST == 0) && ((TOG_FLAG & 4) != 0)) && ((CAN_TEL_EMPF & 0x80) != 0)) {
+    TOG_ADAPT_ST = 1;
+    TOG_ADAPT_TIMER = K_TOG_ADAPT_WARTEZEIT;
+  }
+  if (TOG_ADAPT_ST == 1) {
+    if (TOG_ADAPT_TIMER == '\0') {
+      TOG_ADAPT_ST = 2;
+    }
+    else {
+      TOG_ADAPT_TIMER = TOG_ADAPT_TIMER + -1;
+    }
+  }
+  if (TOG_ADAPT_ST == 2) {
+    if (((((K_TOG_ADAPT_STANDZEIT < T_MOTOR_STEHT) && (TMOT <= K_TOG_ADAPT_TMOT_MAX)) &&
+         (K_TOG_ADAPT_TMOT_MIN <= TMOT)) &&
+        (iVar2 = abs((uint)TMOT - (uint)TAN), iVar2 < K_TOG_ADAPT_DIFF_MAX)) &&
+       (((iVar2 = abs((uint)TMOT - (uint)TKA), iVar2 < K_TOG_ADAPT_DIFF_MAX ||
+         ((cfg_m_baureihe & 0xf8) == 8)) &&
+        (iVar2 = abs((uint)TMOT - (uint)T_UMG), iVar2 < K_TOG_ADAPT_DIFF_MAX)))) {
+      if (TOG_ADAPT_ANZAHL != 0xffff) {
+        TOG_ADAPT_ANZAHL = TOG_ADAPT_ANZAHL + 1;
+      }
+      TOG_ADAPT_DIFF = (undefined1)((ushort)TMOT - (ushort)TOEL_WANNE);
+      bVar1 = K_TOG_ADAPT_GEW_L;
+      if (TOG_ADAPT_ANZAHL < K_TOG_ADAPT_ANZ) {
+        bVar1 = K_TOG_ADAPT_GEW_S;
+      }
+      TOG_ADAPT_OFFSET = TOG_ADAPT_OFFSET + (ushort)bVar1 * ((ushort)TMOT - (ushort)TOEL_WANNE);
+      if ((int)(uint)K_TOG_ADAPT_OFFS_MAX < (int)(short)TOG_ADAPT_OFFSET) {
+        TOG_ADAPT_OFFSET = K_TOG_ADAPT_OFFS_MAX;
+      }
+      if ((int)(short)TOG_ADAPT_OFFSET < (int)-(uint)K_TOG_ADAPT_OFFS_MAX) {
+        TOG_ADAPT_OFFSET = (ushort)-(uint)K_TOG_ADAPT_OFFS_MAX;
+      }
+      TOG_ADAPT_ST = 7;
+    }
+    else {
+      TOG_ADAPT_ST = TOG_ADAPT_ST | 4;
+    }
+  }
+  if ((short)((ushort)TOEL_WANNE - (ushort)K_TOG_ADAPT_TMOT_MAX) < 1) {
+    iVar2 = (int)(short)TOG_ADAPT_OFFSET;
+  }
+  else {
+    sVar3 = 0x400 - (ushort)K_TOG_ADAPT_ABREG * ((ushort)TOEL_WANNE - (ushort)K_TOG_ADAPT_TMOT_MAX);
+    if (sVar3 < 0) {
+      sVar3 = 0;
+    }
+    iVar2 = (int)(short)TOG_ADAPT_OFFSET * (int)sVar3;
+    if (iVar2 < 0) {
+      iVar2 = iVar2 + 0x3ff;
+    }
+    iVar2 = iVar2 >> 10;
+  }
+  TOG_RAW_OFFSET = (undefined1)((uint)(iVar2 + 0x80) >> 8);
+  if (iVar2 < -0x80) {
+    TOG_RAW_OFFSET = (undefined1)((uint)(iVar2 + 0x17f) >> 8);
+  }
+  return;
+}
+

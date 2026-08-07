@@ -1,0 +1,13 @@
+
+void can_segm(void)
+
+{
+  if (K_CAN_SEGM1 != '\0') {
+    FUN_0003d0e4(10);
+  }
+  if (K_CAN_SEGM2._0_1_ != '\0') {
+    FUN_0003d0e4(0xb);
+  }
+  return;
+}
+

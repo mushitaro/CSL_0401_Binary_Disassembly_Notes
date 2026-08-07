@@ -1,0 +1,11 @@
+
+int sk_tr_indirect_call_wrapper(void)
+
+{
+  int iVar1;
+  code *unaff_A2;
+  
+  iVar1 = (*unaff_A2)();
+  return iVar1;
+}
+

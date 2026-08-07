@@ -1,0 +1,10 @@
+
+void edk_switch_reset(void)
+
+{
+  if (b_diag == 0) {
+    edk_ds2_st = 0;
+  }
+  return;
+}
+

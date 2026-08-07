@@ -1,0 +1,11 @@
+
+void edk_vorst_calc(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = klu_wint(&KL_EDK_VORST.sizeX,EGAS_SOLL);
+  EDK_VORST = (short)uVar1;
+  return;
+}
+

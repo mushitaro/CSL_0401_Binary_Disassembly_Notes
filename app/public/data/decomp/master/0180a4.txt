@@ -1,0 +1,18 @@
+
+void md_sk_init_FUN_000180a4(void)
+
+{
+  MD_SK_MAX = KL_MD_SK_MAX.y[0];
+  DAT_00ffd93c = KL_MD_SK_MAX.y[0];
+  DAT_00ffd944 = KL_MD_SK_MAX.y[0];
+  md_sk_grad = KL_MD_SK_GRAD.y[0];
+  md_sk_ax = KL_MD_SK_AX.y[0];
+  MD_SK_ST = 0;
+  sk_stufe__n_1_ = 0;
+  DAT_00ffd947 = 0;
+  DAT_00ffd935 = 0;
+  DAT_00ffd936 = 0;
+  md_sk_wdk_calc();
+  return;
+}
+

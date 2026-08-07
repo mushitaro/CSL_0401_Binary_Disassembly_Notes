@@ -1,0 +1,34 @@
+
+void tabg_init(void)
+
+{
+  byte bVar1;
+  ushort xValue;
+  
+  DAT_00ffed74 = 0;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    tabg_ersatz_last = 0xfd00;
+    trg_filter = 0xfd00;
+    t_umg_last = 0;
+    t_umg_rg = 0;
+  }
+  bVar1 = TMOT;
+  if (K_TABG_ERSATZ_OFFSET == '\0') {
+    bVar1 = TAN;
+  }
+  TABG_ERSATZ = (ushort)bVar1 * 0x10 + -0x300;
+  bVar1 = TMOT;
+  if (k_trg_offset == '\0') {
+    bVar1 = TAN;
+  }
+  trg_no_filter = (ushort)bVar1 * 0x10 + -0x300;
+  xValue = tabg_ad;
+  TABG_ROH = kls_wint(&KL_TABG_PT200.sizeX,xValue);
+  TABG = tabg_filter_calc(TABG_ROH);
+  tabg_filter = TABG << 4;
+  trg_calc();
+  TABG_DIAG_TIME = K_TABG_DIAG_TIME;
+  TABG_ST = 0;
+  return;
+}
+

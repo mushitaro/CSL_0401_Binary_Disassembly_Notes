@@ -1,0 +1,21 @@
+
+void rf_pt_korr_calc(void)
+
+{
+  uint rf_tan_korr_temp;
+  uint rf_p_umg_korr_temp;
+  int rf_pt_korr_raw;
+  undefined4 rf_soll_tau_up_temp;
+  
+  rf_tan_korr_temp = klu_wint(&KL_RF_TAN_KORR.sizeX,(ushort)TAN);
+  rf_p_umg_korr_temp = klu_wint(&KL_RF_P_UMG_KORR.sizeX,(ushort)P_UMG);
+  rf_pt_korr_raw = (rf_tan_korr_temp & 0xffff) * rf_p_umg_korr_temp;
+  if (rf_pt_korr_raw < 0) {
+    rf_pt_korr_raw = rf_pt_korr_raw + 0xfff;
+  }
+  RF_PT_KORR = (undefined2)(rf_pt_korr_raw >> 0xc);
+  rf_soll_tau_up_temp = kfu_wint(&kf_rf_soll_tau_up.sizeX,N,RF);
+  rf_soll_tau_up = (short)rf_soll_tau_up_temp;
+  return;
+}
+

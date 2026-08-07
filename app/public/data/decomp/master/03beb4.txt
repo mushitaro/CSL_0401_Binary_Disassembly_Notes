@@ -1,0 +1,60 @@
+
+void can_tx_545(struct_rx_tx_frame *tx_frame_struct)
+
+{
+  byte bVar1;
+  byte b0;
+  byte b1;
+  byte b2;
+  byte b3;
+  byte b4;
+  byte b5;
+  byte b6;
+  byte b7;
+  
+  b0 = 0;
+  if ((MIL_ST & 0x80) != 0) {
+    b0 = 2;
+  }
+  if ((fgr_b_aktiv & 8) != 0) {
+    b0 = b0 | 8;
+  }
+  if ((LDP_ED_DECKEL & 0x60) != 0) {
+    b0 = b0 | 0x40;
+  }
+  if ((PWG_ZUSTAND != '\0' || sk_stufe_egas_sk_prog_level_ != '\0') ||
+     ((DAT_00ff81af != '\0' && (cfg_m_motortyp == 0xc)))) {
+    b0 = b0 | 0x10;
+  }
+  b5 = (GEN_ST & 1) != 0;
+  b1 = (byte)KVA_CAN;
+  b2 = (byte)((ushort)KVA_CAN >> 8);
+  b3 = (TOG_CAN_ST & 1) != 0;
+  if ((TOG_CAN_ST & 2) != 0) {
+    b3 = b3 | 2;
+  }
+  bVar1 = b3;
+  if (((TOG_ED & 0x40) != 0) && (bVar1 = b3 | 4, (cfg_m_motortyp & 0xef) == 0x20)) {
+    bVar1 = b3 | 5;
+  }
+  b3 = bVar1;
+  if (TMOT_STA == 1) {
+    b3 = b3 | 8;
+  }
+  bVar1 = DWF_ST;
+  if (DWF_ST == 0) {
+    bVar1 = SMG_DWF_DPR;
+  }
+  b3 = (bVar1 & 7) << 4 | b3;
+  if ((TOG_ED & 0x40) == 0) {
+    b4 = TOEL;
+  }
+  else {
+    b4 = 0xff;
+  }
+  b6 = tog_level_can;
+  b7 = TDME_RDKS != '\0';
+  can_a_tx_frame_data(&b0,tx_frame_struct);
+  return;
+}
+

@@ -1,0 +1,22 @@
+
+void pcntrl_calc(void)
+
+{
+  PCNTRL_TIMER_M = SYS_TIMERTICS_COUNTER._2_2_;
+  if ((ZUSTAND_MOTOR & Nachlauf) != 0) {
+    pcntrl_zeit_m = K_PCNTRL_ZEIT_M;
+    return;
+  }
+  if (pcntrl_zeit_m != 0) {
+    pcntrl_zeit_m = pcntrl_zeit_m + -1;
+    return;
+  }
+  pcntrl_zeit_m = K_PCNTRL_ZEIT_M;
+  if ((K_PCNTRL_BITMSK_M | pcntrl_m) != 0xffff) {
+    PCNTRL_ZUSTAND = PCNTRL_ZUSTAND | 1;
+    ed_report(DTC_E7_DME_INTERNAL,1);
+  }
+  pcntrl_m = 0;
+  return;
+}
+

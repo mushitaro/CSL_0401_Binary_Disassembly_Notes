@@ -1,0 +1,68 @@
+
+ushort tan_filter_calc(ushort param_1)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  byte bVar3;
+  
+  uVar1 = (int)(param_1 + 2) >> 2;
+  bVar3 = (byte)uVar1;
+  if (bVar3 < K_TAN_DIAG_MAX) {
+    if ((K_TAN_DIAG_MIN < bVar3) ||
+       (((SYS_TIMERTICS_COUNTER - n_start_exit_time <= (uint)K_TAN_DIAG_WARM_UP << 10 ||
+         (TMOT <= K_TAN_DIAG_TMOT)) && ((TAN_ED & 0x40) == 0)))) {
+      if (K_TAN_DIAG_SCHWELLE < bVar3) {
+        if (TAN_DIAG_TIME == K_TAN_DIAG_TIME) {
+          TAN_DIAG_START = bVar3;
+        }
+        if (((((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (K_TAN_DIAG_ML < ML)) &&
+            ((K_TAN_DIAG_V < V && ((T_UMG < K_TAN_DIAG_T_UMG && ((T_UMG_ST & 0x80) == 0)))))) &&
+           ((int)((uint)TAN_DIAG_START - (uint)K_TAN_DIAG_DELTA) < (int)(uVar1 & 0xff))) {
+          if (TAN_DIAG_TIME != 0) {
+            TAN_DIAG_TIME = TAN_DIAG_TIME + -1;
+            goto LAB_0001b5ea;
+          }
+          bVar3 = 8;
+          goto LAB_0001b502;
+        }
+      }
+      else if ((TAN_ED & 0xe0) != 0) {
+        uVar2 = ed_report(DTC_4D_IAT_SIGNAL,0);
+        TAN_ED = (byte)uVar2;
+      }
+      TAN_DIAG_TIME = K_TAN_DIAG_TIME;
+      goto LAB_0001b5ea;
+    }
+    bVar3 = 2;
+  }
+  else {
+    bVar3 = 1;
+  }
+LAB_0001b502:
+  uVar2 = ed_report(DTC_4D_IAT_SIGNAL,bVar3);
+  TAN_ED = (byte)uVar2;
+LAB_0001b5ea:
+                    /* The below section is additional to 1801 */
+  if ((TAN_ED & 0x40) != 0) {
+    DAT_00ffed4f = DAT_00ffed4f | 1;
+  }
+  if (DAT_00ffed4f != 0) {
+    if ((((T_UMG_ST & 0x80) != 0) || ((TMOT_ED & 0x40) != 0)) || ((TMOT_ST1 & 0x10) != 0)) {
+      DAT_00ffed4f = DAT_00ffed4f | 2;
+    }
+    if ((DAT_00ffed4f & 2) == 0) {
+      param_1 = ((ushort)T_UMG + (ushort)TMOT) * 2;
+    }
+    else {
+      param_1 = (ushort)K_TAN_ERSATZ << 2;
+    }
+  }
+  if (((DAT_00ffed4f != 0) && (N == 0)) &&
+     (((ZUSTAND_MOTOR & KI.15 aus) != 0 && ((TAN_ED & 0x40) == 0)))) {
+    DAT_00ffed4f = 0;
+    tan_filter = param_1;
+  }
+  return param_1;
+}
+

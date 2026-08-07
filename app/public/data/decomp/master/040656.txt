@@ -1,0 +1,48 @@
+
+void qsm_transfer_complete_handler(void)
+
+{
+  int *qsm_transfer_descriptor;
+  int iVar1;
+  byte *pbVar2;
+  int iVar3;
+  undefined1 extraout_var;
+  byte bVar5;
+  int *piVar4;
+  
+  iVar3 = qsm_active_transfer;
+  bVar5 = QSM_SPSR;
+  QSM_SPSR = bVar5 & 0x7f;
+  iVar1 = *(int *)(qsm_active_transfer + 4);
+  if (*(int *)(iVar1 + 4) != 0) {
+    if ((qsm_transfer_flags & 0x40) == 0) {
+      memcpy_us((ushort *)QSM_RR,*(ushort **)(iVar1 + 4),*(char *)(iVar1 + 0xc));
+    }
+    else {
+      memcpy_us_b((ushort *)QSM_RR,(byte *)*(ushort **)(iVar1 + 4),*(char *)(iVar1 + 0xc));
+    }
+  }
+  *(byte *)(iVar3 + 0xc) = *(byte *)(iVar3 + 0xc) | 1;
+  if (*(int *)(iVar3 + 8) != 0) {
+    (**(code **)(iVar3 + 8))();
+  }
+  bVar5 = set_status_register(0x2700);
+  piVar4 = qsm_get_highest_priority_queued_transfer();
+  if (piVar4 == (int *)0x0) {
+    qsm_queue_count = 0;
+    qsm_transfer_busy = qsm_transfer_busy & 0x7f;
+    set_status_register(CONCAT11(extraout_var,bVar5));
+  }
+  else {
+    qsm_transfer_descriptor = (int *)*piVar4;
+    *(undefined1 *)(piVar4 + 1) = 0;
+    *piVar4 = 0;
+    qsm_queue_count = qsm_queue_count + -1;
+    set_status_register(CONCAT11(extraout_var,bVar5));
+    pbVar2 = (byte *)(qsm_transfer_descriptor + 3);
+    *pbVar2 = *pbVar2 | 0x80;
+    qsm_start_transfer(qsm_transfer_descriptor);
+  }
+  return;
+}
+

@@ -1,0 +1,31 @@
+
+void ipk_rx_dispatch_2ms(void)
+
+{
+  byte bVar1;
+  uint rx_slots_remaining;
+  byte *rx_slot;
+  byte *cmd_entry;
+  
+  rx_slot = ipk_rx_buf_base;
+  for (rx_slots_remaining = (uint)ipk_rx_slot_count; 0 < (int)rx_slots_remaining;
+      rx_slots_remaining = rx_slots_remaining - 1) {
+    if ((rx_slot[0x12] == 2) && (rx_slot[0x13] == 0)) {
+      for (cmd_entry = &ipk_cmd_table; (*cmd_entry != 0 && (*rx_slot != *cmd_entry));
+          cmd_entry = cmd_entry + 6) {
+      }
+      if (*cmd_entry == 0) {
+        rx_slot[0x13] = 0x80;
+      }
+      else {
+        rx_slot[0x13] = 1;
+        bVar1 = (**(code **)(cmd_entry + 2))(*rx_slot,rx_slot[1],rx_slot + 2);
+        rx_slot[0x14] = bVar1;
+        rx_slot[0x13] = 2;
+      }
+    }
+    rx_slot = rx_slot + 0x16;
+  }
+  return;
+}
+

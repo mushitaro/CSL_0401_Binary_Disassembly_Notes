@@ -1,0 +1,53 @@
+
+void rf_dyn_st_calc(void)
+
+{
+  int iVar1;
+  ushort uVar2;
+  
+  RF_FILTER_DYN = PT1_Filter_US(RF,RF_FILTER_DYN,K_RF_DYN_TAU);
+  iVar1 = abs((uint)RF - (uint)RF_FILTER_DYN);
+  uVar2 = (ushort)iVar1;
+  if (K_RF_DYN_DELTA_SLP < uVar2) {
+    RF_DYN_ST = RF_DYN_ST | 1;
+    rf_dyn_t_slp = K_RF_DYN_T_SLP;
+  }
+  else if (rf_dyn_t_slp == 0) {
+    RF_DYN_ST = RF_DYN_ST & 0xfe;
+  }
+  else {
+    rf_dyn_t_slp = rf_dyn_t_slp + -1;
+  }
+  if (K_RF_DYN_DELTA_TEFC < uVar2) {
+    RF_DYN_ST = RF_DYN_ST | 2;
+    rf_dyn_t_tefc = K_RF_DYN_T_TEFC;
+  }
+  else if (rf_dyn_t_tefc == 0) {
+    RF_DYN_ST = RF_DYN_ST & 0xfd;
+  }
+  else {
+    rf_dyn_t_tefc = rf_dyn_t_tefc + -1;
+  }
+  if (K_RF_DYN_DELTA_KAT < uVar2) {
+    RF_DYN_ST = RF_DYN_ST | 4;
+    rf_dyn_t_kat = K_RF_DYN_T_KAT;
+  }
+  else if (rf_dyn_t_kat == 0) {
+    RF_DYN_ST = RF_DYN_ST & 0xfb;
+  }
+  else {
+    rf_dyn_t_kat = rf_dyn_t_kat + -1;
+  }
+  if (K_RF_DYN_DELTA_LA < uVar2) {
+    RF_DYN_ST = RF_DYN_ST | 8;
+    rf_dyn_t_la = K_RF_DYN_T_LA;
+    return;
+  }
+  if (rf_dyn_t_la != 0) {
+    rf_dyn_t_la = rf_dyn_t_la + -1;
+    return;
+  }
+  RF_DYN_ST = RF_DYN_ST & 0xf7;
+  return;
+}
+

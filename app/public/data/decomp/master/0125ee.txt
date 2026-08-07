@@ -1,0 +1,13 @@
+
+void delay_6us(void)
+
+{
+  short sVar1;
+  
+  sVar1 = 30;
+  do {
+    sVar1 = sVar1 + -1;
+  } while (sVar1 != -1);
+  return;
+}
+

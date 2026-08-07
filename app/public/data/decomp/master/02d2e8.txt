@@ -1,0 +1,659 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void tog_calc(void)
+
+{
+  undefined3 uVar1;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  int iVar2;
+  uint uVar3;
+  short sVar5;
+  undefined4 uVar4;
+  byte bVar6;
+  
+  if (TOG_N < 25) {
+    if (ASC_AY < 1) {
+      iVar2 = -(int)ASC_AY;
+    }
+    else {
+      iVar2 = (int)ASC_AY;
+    }
+    if ((int)(uint)K_TOG_AQ_ABS <= iVar2) goto LAB_0002d32a;
+  }
+  else {
+LAB_0002d32a:
+    if (25 < TOG_N) {
+      if (ASC_AY < 1) {
+        iVar2 = -(int)ASC_AY;
+      }
+      else {
+        iVar2 = (int)ASC_AY;
+      }
+      if (iVar2 < K_TOG_AQ_RECHTS) {
+        if (ASC_AX < 1) {
+          iVar2 = -(int)ASC_AX;
+        }
+        else {
+          iVar2 = (int)ASC_AX;
+        }
+        if ((iVar2 < (int)(uint)K_TOG_AL_ABS) && (TOG_LEVEL < 73)) goto LAB_0002d38c;
+      }
+    }
+    TOG_A_SPERR_COUNT = K_TOG_A_SPERR_COUNT;
+  }
+LAB_0002d38c:
+  uVar3 = klu_wint(&KL_TOG_IMP_MIN1.sizeX,N);
+  TOG_IMP_MIN1 = (ushort)uVar3;
+  switch(TOG_ST) {
+  case 0:
+    TOG_COUNT = 0;
+    if ((((ZUSTAND_MOTOR & KI.15 aus) == 0) && ((ZUSTAND_MOTOR & Nachlauf) == 0)) &&
+       ((TOG_SYSTIME + 3000 <= SYS_TIMERTICS_COUNTER || (bVar6 = RESET_STATUS, (bVar6 & 0xc0) == 0))
+       )) {
+      TOG_CAN_ST = 0;
+      if ((TOG_ED & 0x40) == 0) {
+        TOG_ST = 2;
+      }
+      else {
+        TOG_SYSTIME = SYS_TIMERTICS_COUNTER;
+        TOG_ST = 1;
+      }
+    }
+    if ((TOG_FLAG & 0x40) == 0) break;
+    bVar6 = TOG_ED | 8;
+    if (TOG_HEIZ <= K_TOG_HEIZ_MAX) {
+      if (K_TOG_HEIZ_MIN <= TOG_HEIZ) goto LAB_0002d46e;
+      goto LAB_0002d466;
+    }
+    goto LAB_0002d450;
+  case 1:
+    if (TOG_SYSTIME + 500 < SYS_TIMERTICS_COUNTER) {
+      TOG_SYSTIME = SYS_TIMERTICS_COUNTER;
+      TOG_ST = 2;
+    }
+    if ((TOG_FLAG & 0x40) == 0) break;
+    bVar6 = TOG_ED | 8;
+    if (K_TOG_HEIZ_MAX < TOG_HEIZ) goto LAB_0002d450;
+    if (TOG_HEIZ < K_TOG_HEIZ_MIN) goto LAB_0002d466;
+LAB_0002d46e:
+    TOG_ED = TOG_ED | 8;
+    uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+    TOG_KORR = (byte)uVar3;
+    goto LAB_0002dfd2;
+  case 2:
+    if ((TOG_FLAG & 0x80) != 0) {
+      TOG_COUNT = TOG_COUNT + 1;
+      TOG_FLAG = TOG_FLAG & 0x7f;
+    }
+    if ((TOG_FLAG & 0x40) != 0) {
+      if (K_TOG_HEIZ_MAX < TOG_HEIZ) {
+        TOG_ED = TOG_ED | 9;
+      }
+      else if (TOG_HEIZ < K_TOG_HEIZ_MIN) {
+        TOG_ED = TOG_ED | 10;
+      }
+      else {
+        TOG_ED = TOG_ED | 8;
+        uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+        TOG_KORR = (byte)uVar3;
+        uVar4 = kfus_bint(&KF_TOG_TEMP.sizeX,TOG_HEIZ,TOG_TEMP_NIVEAU - (ushort)TOG_KORR);
+        TOEL_RAW = (byte)uVar4;
+        TOG_FLAG = TOG_FLAG | 4;
+      }
+      TOG_FLAG = TOG_FLAG & 0xbf;
+    }
+    if (9 < TOG_COUNT) {
+      TOG_ST = 3;
+      TOG_COUNT = 0;
+    }
+    break;
+  case 3:
+    if ((TOG_FLAG & 0x80) != 0) {
+      bVar6 = TOG_ED | 8;
+      if (K_TOG_IMP_MAX < TOG_IMP) {
+        bVar6 = TOG_ED | 9;
+      }
+      TOG_ED = bVar6;
+      if (TOG_IMP < K_TOG_IMP_MIN) {
+        TOG_ED = TOG_ED | 2;
+      }
+      if (TOG_IMP < TOG_IMP_MIN1) {
+        TOG_IMP = TOG_IMP_MIN1;
+      }
+      TOG_LEVEL = (byte)((int)((0x3cc - (uint)TOG_IMP) * 100) / 0x3c8);
+      uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+      TOG_KORR = (byte)uVar3;
+      TOG_NIVEAU = TOG_KORR + TOG_LEVEL;
+      TOG_COUNT = 0;
+      if ((((TOG_LEVEL < 65) && (K_TOG_OM_AUS == 0)) && ((ZUSTAND_MOTOR & S) != 0)) &&
+         (0x1e < T_MOTOR_STEHT)) {
+        TOG_FLAG = TOG_FLAG | 8;
+        TOG_CAN_ST = TOG_CAN_ST | 2;
+        TOG_A_SPERR_COUNT = 0;
+      }
+      TOG_FLAG = TOG_FLAG & 0x7f;
+      TOG_ST = 4;
+      TOG_SYSTIME = SYS_SEC_COUNTER;
+      TOG_LEVEL_K = TOG_NIVEAU;
+    }
+    goto LAB_0002d68c;
+  case 4:
+    if ((TOG_FLAG & 0x80) != 0) {
+      bVar6 = TOG_ED | 8;
+      if (K_TOG_IMP_MAX < TOG_IMP) {
+        bVar6 = TOG_ED | 9;
+      }
+      TOG_ED = bVar6;
+      if (TOG_IMP < K_TOG_IMP_MIN) {
+        TOG_ED = TOG_ED | 2;
+      }
+      if (TOG_IMP < TOG_IMP_MIN1) {
+        TOG_IMP = TOG_IMP_MIN1;
+      }
+      TOG_LEVEL = (byte)((int)((0x3cc - (uint)TOG_IMP) * 100) / 0x3c8);
+      uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+      TOG_KORR = (byte)uVar3;
+      TOG_NIVEAU = TOG_KORR + TOG_LEVEL;
+      TOG_FLAG = TOG_FLAG & 0x7f;
+      TOG_LEVEL_K = TOG_NIVEAU;
+    }
+    if ((TOG_FLAG & 0x40) != 0) {
+      if (K_TOG_HEIZ_MAX < TOG_HEIZ) {
+        TOG_ED = TOG_ED | 9;
+      }
+      else if (TOG_HEIZ < K_TOG_HEIZ_MIN) {
+        TOG_ED = TOG_ED | 10;
+      }
+      else {
+        TOG_ED = TOG_ED | 8;
+        uVar4 = kfus_bint(&KF_TOG_TEMP.sizeX,TOG_HEIZ,TOG_TEMP_NIVEAU - (ushort)TOG_KORR);
+        TOEL_RAW = (byte)uVar4;
+        TOG_FLAG = TOG_FLAG | 4;
+      }
+      TOG_FLAG = TOG_FLAG & 0xbf;
+    }
+    if ((ZUSTAND_MOTOR & S) != 0) {
+      TOG_SYSTIME = SYS_SEC_COUNTER;
+    }
+    if (K_TOG_TOEL < TOEL_WANNE) {
+      TOG_ST = 5;
+      tog_rp_sperr_counter = k_tog_rp_sperr;
+      TOG_P_ANF = P_UMG_HOEHE;
+      TOG_ASCAX_SUM = 0;
+      TOG_ASCAY_SUM = 0;
+      if ((uint)K_TOG_VER_MWL < SYS_SEC_COUNTER - TOG_SYSTIME) {
+        TOG_FLAG = TOG_FLAG | 0x20;
+      }
+    }
+    break;
+  case 5:
+    if ((TOG_FLAG & 0x80) != 0) {
+      bVar6 = TOG_ED | 8;
+      if (K_TOG_IMP_MAX < TOG_IMP) {
+        bVar6 = TOG_ED | 9;
+      }
+      TOG_ED = bVar6;
+      if (TOG_IMP < K_TOG_IMP_MIN) {
+        TOG_ED = TOG_ED | 2;
+      }
+      if (TOG_IMP < TOG_IMP_MIN1) {
+        TOG_IMP = TOG_IMP_MIN1;
+      }
+      TOG_LEVEL = (byte)((int)((0x3cc - (uint)TOG_IMP) * 100) / 0x3c8);
+      uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+      TOG_KORR = (byte)uVar3;
+      TOG_LEVEL_K = TOG_KORR + TOG_LEVEL;
+      if (TOG_N < 25) {
+        if (ASC_AY < 1) {
+          iVar2 = -(int)ASC_AY;
+        }
+        else {
+          iVar2 = (int)ASC_AY;
+        }
+        if ((int)(uint)K_TOG_AQ_ABS <= iVar2) goto LAB_0002d904;
+LAB_0002d958:
+        if (V == 0) goto LAB_0002d9e8;
+        if (TOG_A_SPERR_COUNT < 0) {
+          bVar6 = K_TOG_MWL_KORR;
+          if ((TOG_FLAG & 0x20) == 0) {
+            bVar6 = 0;
+          }
+          TOG_COUNT = TOG_COUNT + 1;
+          TOG_LEVEL_SUM =
+               (ushort)bVar6 +
+               (short)TOG_KORR_AX +
+               (short)TOG_KORR_AY + (short)TOG_KORR_P + (ushort)TOG_LEVEL + TOG_LEVEL_SUM + TOG_KORR
+          ;
+          TOG_KONTR = (undefined1)(TOG_LEVEL_SUM / TOG_COUNT);
+          TOG_A_SPERR_COUNT = -1;
+        }
+LAB_0002daee:
+        tog_rp_summe = 0;
+        tog_rp_sample_count = 0;
+        tog_rp_sperr_counter = k_tog_rp_sperr;
+LAB_0002db04:
+        DAT_00ffeaca = 0;
+      }
+      else {
+LAB_0002d904:
+        if (25 < TOG_N) {
+          if (ASC_AY < 1) {
+            iVar2 = -(int)ASC_AY;
+          }
+          else {
+            iVar2 = (int)ASC_AY;
+          }
+          if (iVar2 < K_TOG_AQ_RECHTS) {
+            if (ASC_AX < 1) {
+              iVar2 = -(int)ASC_AX;
+            }
+            else {
+              iVar2 = (int)ASC_AX;
+            }
+            if (iVar2 < (int)(uint)K_TOG_AL_ABS) goto LAB_0002d958;
+          }
+        }
+LAB_0002d9e8:
+                    /* Appears to be extra code in 0401 for the case where V = 0 */
+        if (ASC_AY < 1) {
+          iVar2 = -(int)ASC_AY;
+        }
+        else {
+          iVar2 = (int)ASC_AY;
+        }
+        if ((int)(uint)k_tog_rp_ay_max <= iVar2) goto LAB_0002daee;
+        if (smg_ax_berg_dpr < 1) {
+          iVar2 = -(int)smg_ax_berg_dpr;
+        }
+        else {
+          iVar2 = (int)smg_ax_berg_dpr;
+        }
+        if ((((int)(uint)k_tog_rp_ax_max <= iVar2) || (24 < TOG_N)) ||
+           ((V != 0 || ((ZUSTAND_MOTOR & LL) == 0)))) goto LAB_0002daee;
+        DAT_00ffeaca = (SCHALT_M_ST & 0x10) == 0;
+        if (tog_rp_sperr_counter < 0) {
+          tog_rp_sperr_counter = -1;
+          if (tog_rp_sample_count <= k_tog_rp_sample_count_min) {
+            tog_rp_sample_count = tog_rp_sample_count + 1;
+            tog_rp_summe = (short)TOG_KORR_AX +
+                           (short)TOG_KORR_AY +
+                           (short)TOG_KORR_P + (ushort)TOG_LEVEL + tog_rp_summe + TOG_KORR;
+            tog_rp_level_avg = (byte)(tog_rp_summe / tog_rp_sample_count);
+          }
+          if ((SCHALT_M_ST & 0x10) == 0) {
+            DAT_00ffeaca = 2;
+            goto LAB_0002db06;
+          }
+          goto LAB_0002db04;
+        }
+      }
+LAB_0002db06:
+      if (34 < TOG_COUNT) {
+        bVar6 = K_TOG_MWL_KORR;
+        if ((TOG_FLAG & 0x20) == 0) {
+          bVar6 = 0;
+        }
+        uVar3 = (uint)TOG_LEVEL_SUM;
+        TOG_LEVEL_SUM._1_1_ = (byte)(uVar3 / 35);
+        uVar1 = (undefined3)(uVar3 / 35 >> 8);
+        TOG_NIVEAU = bVar6 + (byte)TOG_LEVEL_SUM;
+        TOG_LEVEL_SUM = 0;
+        TOG_COUNT = 0;
+        if (tog_level_sum_last == 110) {
+          tog_level_sum_last = TOG_NIVEAU;
+        }
+        if (TOG_NIVEAU < K_TOG_VB1) {
+          TOG_FLAG = TOG_FLAG | 8;
+          uVar3 = CONCAT31(uVar1,TOG_CAN_ST);
+          TOG_CAN_ST = TOG_CAN_ST | 1;
+          tog_ff_write(uVar3 | 1);
+          TOG_A_SPERR_COUNT = 0;
+          uVar1 = extraout_var;
+        }
+        if (TOG_NIVEAU < K_TOG_VL) {
+          TOG_FLAG = TOG_FLAG | 8;
+          uVar3 = CONCAT31(uVar1,TOG_CAN_ST);
+          TOG_CAN_ST = TOG_CAN_ST | 2;
+          tog_ff_write(uVar3 | 2);
+        }
+        TOG_P_ANF = P_UMG_HOEHE;
+        TOG_ASCAX_SUM = 0;
+        TOG_ASCAY_SUM = 0;
+        TOG_FLAG = TOG_FLAG & 0xdf;
+        TOG_ST = 6;
+      }
+      TOG_FLAG = TOG_FLAG & 0x7f;
+    }
+LAB_0002d68c:
+    if ((TOG_FLAG & 0x40) != 0) {
+      TOG_ED = TOG_ED | 8;
+      bVar6 = TOG_ED;
+      if (K_TOG_HEIZ_MAX < TOG_HEIZ) {
+LAB_0002d450:
+        TOG_ED = bVar6;
+        TOG_ED = TOG_ED | 1;
+      }
+      else if (TOG_HEIZ < K_TOG_HEIZ_MIN) {
+LAB_0002d466:
+        TOG_ED = bVar6;
+        TOG_ED = TOG_ED | 2;
+      }
+      else {
+LAB_0002dfd2:
+        uVar4 = kfus_bint(&KF_TOG_TEMP.sizeX,TOG_HEIZ,TOG_TEMP_NIVEAU - (ushort)TOG_KORR);
+        TOEL_RAW = (byte)uVar4;
+        TOG_FLAG = TOG_FLAG | 4;
+      }
+      TOG_FLAG = TOG_FLAG & 0xbf;
+    }
+    break;
+  case 6:
+    if ((TOG_FLAG & 0x80) != 0) {
+      bVar6 = TOG_ED | 8;
+      if (K_TOG_IMP_MAX < TOG_IMP) {
+        bVar6 = TOG_ED | 9;
+      }
+      TOG_ED = bVar6;
+      if (TOG_IMP < K_TOG_IMP_MIN) {
+        TOG_ED = TOG_ED | 2;
+      }
+      if (k_tog_ed_threshold < tog_ed_threshold_counter) {
+        uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,8);
+        TOG_ED = (byte)uVar4;
+        tog_ed_threshold_counter = 0;
+      }
+      if (TOG_IMP < TOG_IMP_MIN1) {
+        TOG_IMP = TOG_IMP_MIN1;
+      }
+      TOG_LEVEL = (byte)((int)((0x3cc - (uint)TOG_IMP) * 100) / 0x3c8);
+      uVar3 = klu_bint(&KL_TOG_NIVEAU.sizeX,TOG_N);
+      TOG_KORR = (byte)uVar3;
+      TOG_LEVEL_K = TOG_KORR + TOG_LEVEL;
+      if (TOG_N < 25) {
+        if (ASC_AY < 1) {
+          iVar2 = -(int)ASC_AY;
+        }
+        else {
+          iVar2 = (int)ASC_AY;
+        }
+        if ((int)(uint)K_TOG_AQ_ABS <= iVar2) goto LAB_0002dcd4;
+LAB_0002dd26:
+        if (V == 0) goto LAB_0002dd9e;
+        if (TOG_A_SPERR_COUNT < 0) {
+          TOG_COUNT = TOG_COUNT + 1;
+          TOG_LEVEL_SUM =
+               (short)TOG_KORR_AX +
+               (short)TOG_KORR_AY + (short)TOG_KORR_P + (ushort)TOG_LEVEL + TOG_LEVEL_SUM + TOG_KORR
+          ;
+          TOG_KONTR = (undefined1)(TOG_LEVEL_SUM / TOG_COUNT);
+          TOG_A_SPERR_COUNT = -1;
+        }
+LAB_0002dea4:
+        tog_rp_summe = 0;
+        tog_rp_sample_count = 0;
+        tog_rp_sperr_counter = k_tog_rp_sperr;
+LAB_0002deba:
+        DAT_00ffeaca = 0;
+      }
+      else {
+LAB_0002dcd4:
+        if (25 < TOG_N) {
+          if (ASC_AY < 1) {
+            iVar2 = -(int)ASC_AY;
+          }
+          else {
+            iVar2 = (int)ASC_AY;
+          }
+          if (iVar2 < K_TOG_AQ_RECHTS) {
+            if (ASC_AX < 1) {
+              iVar2 = -(int)ASC_AX;
+            }
+            else {
+              iVar2 = (int)ASC_AX;
+            }
+            if (iVar2 < (int)(uint)K_TOG_AL_ABS) goto LAB_0002dd26;
+          }
+        }
+LAB_0002dd9e:
+        if (ASC_AY < 1) {
+          iVar2 = -(int)ASC_AY;
+        }
+        else {
+          iVar2 = (int)ASC_AY;
+        }
+        if ((int)(uint)k_tog_rp_ay_max <= iVar2) goto LAB_0002dea4;
+        if (smg_ax_berg_dpr < 1) {
+          iVar2 = -(int)smg_ax_berg_dpr;
+        }
+        else {
+          iVar2 = (int)smg_ax_berg_dpr;
+        }
+        if (((((int)(uint)k_tog_rp_ax_max <= iVar2) || (24 < TOG_N)) || (V != 0)) ||
+           ((ZUSTAND_MOTOR & LL) == 0)) goto LAB_0002dea4;
+        DAT_00ffeaca = (SCHALT_M_ST & 0x10) == 0;
+        if (tog_rp_sperr_counter < 0) {
+          tog_rp_sperr_counter = -1;
+          if (tog_rp_sample_count <= k_tog_rp_sample_count_min) {
+            tog_rp_sample_count = tog_rp_sample_count + 1;
+            tog_rp_summe = (short)TOG_KORR_AX +
+                           (short)TOG_KORR_AY +
+                           (short)TOG_KORR_P + (ushort)TOG_LEVEL + tog_rp_summe + TOG_KORR;
+            tog_rp_level_avg = (byte)(tog_rp_summe / tog_rp_sample_count);
+          }
+          if ((SCHALT_M_ST & 0x10) == 0) {
+            DAT_00ffeaca = 2;
+            goto LAB_0002debc;
+          }
+          goto LAB_0002deba;
+        }
+      }
+LAB_0002debc:
+      if (k_tog_count_min <= TOG_COUNT) {
+        TOG_LEVEL_SUM = TOG_LEVEL_SUM / k_tog_count_min;
+        TOG_NIVEAU = (byte)TOG_LEVEL_SUM;
+        DAT_00ffeacc = CAN_KM_STAND;
+        if (((6 < (char)((byte)TOG_LEVEL_SUM - tog_level_sum_last)) && ((TOG_FLAG & 0x20) == 0)) ||
+           ((char)((byte)TOG_LEVEL_SUM - tog_level_sum_last) < 0)) {
+          tog_level_sum_last = (byte)TOG_LEVEL_SUM;
+        }
+        TOG_FLAG = TOG_FLAG | 0x20;
+        uVar4 = tog_update_level_bucket_max();
+        TOG_COUNT = 0;
+        TOG_LEVEL_SUM = 0;
+        TOG_ASCAX_SUM = 0;
+        TOG_ASCAY_SUM = 0;
+        uVar1 = (undefined3)((uint)uVar4 >> 8);
+        if (TOG_NIVEAU < K_TOG_VB2) {
+          TOG_FLAG = TOG_FLAG | 8;
+          uVar3 = CONCAT31(uVar1,TOG_CAN_ST);
+          TOG_CAN_ST = TOG_CAN_ST | 1;
+          tog_ff_write(uVar3 | 1);
+          TOG_A_SPERR_COUNT = 0;
+          uVar1 = extraout_var_00;
+        }
+        if (TOG_NIVEAU < K_TOG_VL) {
+          TOG_FLAG = TOG_FLAG | 8;
+          uVar3 = CONCAT31(uVar1,TOG_CAN_ST);
+          TOG_CAN_ST = TOG_CAN_ST | 2;
+          tog_ff_write(uVar3 | 2);
+        }
+        TOG_ST = 6;
+      }
+      TOG_FLAG = TOG_FLAG & 0x7f;
+    }
+    if ((TOG_FLAG & 0x40) != 0) {
+      TOG_ED = TOG_ED | 8;
+      bVar6 = TOG_ED;
+      if (K_TOG_HEIZ_MAX < TOG_HEIZ) goto LAB_0002d450;
+      if (TOG_HEIZ < K_TOG_HEIZ_MIN) goto LAB_0002d466;
+      goto LAB_0002dfd2;
+    }
+  }
+  if (((ZUSTAND_MOTOR & S) == 0) && ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) {
+    TOG_FLAG = TOG_FLAG | 0x10;
+    TOG_SEC_COUNTER = SYS_SEC_COUNTER._2_2_;
+  }
+  else {
+    if ((TOG_FLAG & 0x10) == 0) {
+      TOG_FLAG = TOG_FLAG | 0x10;
+      TOG_SEC_COUNTER = SYS_SEC_COUNTER._2_2_;
+    }
+    else {
+      if ((ushort)(SYS_SEC_COUNTER._2_2_ - TOG_SEC_COUNTER) <= (ushort)K_TOG_ED_T1)
+      goto LAB_0002e06c;
+      TOG_ED = TOG_ED | 4;
+    }
+    TOG_ED = TOG_ED | 0x10;
+  }
+LAB_0002e06c:
+  if ((TOG_ED & 0x40) == 0) {
+    if (K_TOG_UB_TOEL_ECK < TOEL_RAW) {
+      sVar5 = kls_wint(&KL_TOG_TOEL_UB_KORR.sizeX,(ushort)UB);
+      iVar2 = ((uint)TOEL_RAW - (uint)K_TOG_UB_TOEL_ECK) * (int)sVar5;
+      if (iVar2 < 0) {
+        iVar2 = iVar2 + 0x3ff;
+      }
+      TOG_UB_OFFSET = (char)(iVar2 >> 10);
+    }
+    else {
+      TOG_UB_OFFSET = '\0';
+    }
+    sVar5 = (short)TOG_RAW_OFFSET + (short)TOG_UB_OFFSET + (ushort)TOEL_RAW;
+    if (sVar5 < 0) {
+      sVar5 = 0;
+    }
+    if (0xff < sVar5) {
+      sVar5 = 0xff;
+    }
+    TOEL_WANNE = (byte)sVar5;
+    if ((cfg_m_motortyp & 0xef) != 0x20) goto LAB_0002e164;
+    iVar2 = (uint)TOEL_WANNE + (uint)TMOT;
+    if (SCARRY4((uint)TOEL_WANNE,(uint)TMOT)) {
+      iVar2 = iVar2 + 1;
+    }
+    TOEL = (byte)(iVar2 >> 1);
+  }
+  else {
+    TOEL = TMOT;
+    TOEL_WANNE = TMOT;
+  }
+  if (TOEL_MAX < TOEL) {
+    TOEL_MAX = TOEL;
+  }
+LAB_0002e164:
+  bVar6 = TOG_ED;
+  if ((TOG_ED & 0x10) != 0) {
+    if ((TOG_ED & 4) == 0) {
+      if (((TOG_ED & 0x60) != 0) &&
+         (uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0x80), ((byte)uVar4 & 7) == 4)) {
+        uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0);
+        bVar6 = (byte)uVar4 & bVar6 & 0x60;
+      }
+    }
+    else {
+      uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,4);
+      bVar6 = (byte)uVar4 & 0x60 | bVar6;
+    }
+    TOG_ED = bVar6 & 0xeb;
+  }
+  bVar6 = TOG_ED;
+  if ((TOG_ED & 8) != 0) {
+    if ((TOG_ED & 1) == 0) {
+      if (((TOG_ED & 0x60) != 0) &&
+         (uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0x80), ((byte)uVar4 & 7) == 1)) {
+        uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0);
+        bVar6 = (byte)uVar4 & bVar6 & 0x60;
+      }
+    }
+    else {
+      uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,1);
+      bVar6 = (byte)uVar4 & 0x60 | bVar6;
+    }
+    if ((bVar6 & 2) == 0) {
+      if (((bVar6 & 0x60) != 0) &&
+         (uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0x80), ((byte)uVar4 & 7) == 2)) {
+        uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0);
+        bVar6 = (byte)uVar4 & bVar6 & 0x60;
+      }
+    }
+    else {
+      uVar4 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,2);
+      bVar6 = (byte)uVar4 & 0x60 | bVar6;
+    }
+    TOG_ED = bVar6 & 0xf4;
+  }
+  if (((ZUSTAND_MOTOR & KI.15 aus) != 0) || ((ZUSTAND_MOTOR & Nachlauf) != 0)) {
+    tog_ed_threshold_counter = 0;
+    TOG_SYSTIME = SYS_TIMERTICS_COUNTER;
+    TOG_ST = 0;
+    TOG_FLAG = TOG_FLAG & 0xdf;
+    DAT_00ffeaca = 0;
+    TOG_T_FLAG = 0;
+    TOG_COUNT = 0;
+    TOG_LEVEL_SUM = 0;
+    TOG_KONTR = 0;
+    TOG_IMP_COUNT = 0;
+    TOG_IMP_SUM = 0;
+    TOG_N_SUM = 0;
+    TOG_N = 0;
+    TOG_A_SPERR_COUNT = 0;
+    _TOG_T_START = 300;
+    TOEL_RAW = TOEL;
+    TOEL_W = (ushort)TOEL << 8;
+    TOG_TMOT = TMOT;
+    TOG_TKA = TKA;
+    TOG_TOEL = TOEL_WANNE;
+    TOG_TKA_D = 0;
+    TOG_TMOT_D = 0;
+    TOG_TOEL_D = 0;
+    TOG_P_COUNT = (ushort)K_TOG_P_COUNT;
+    tog_rp_sperr_counter = k_tog_rp_sperr;
+  }
+  if (((ZUSTAND_MOTOR & S) != 0) && ((TOG_CAN_ST & 2) != 0)) {
+    if ((SCHALT_M_ST & 0x10) == 0) {
+      DAT_00ffeaca = 2;
+      tog_rp_level_avg = 0;
+      TOG_ST = 6;
+    }
+    else {
+      DAT_00ffeaca = 0;
+    }
+  }
+  if ((TOG_ED & 0x40) == 0) {
+    if (DAT_00ffeaca == 0) {
+      if ((tog_level_sum_last != 0x6e) && ((int)((uint)CAN_KM_STAND - (uint)DAT_00ffeacc) < 20)) {
+        uVar3 = klu_bint(&kl_tog_level_can.sizeX,tog_level_sum_last);
+        tog_level_pre_can = (byte)uVar3;
+        tog_level_can = (byte)uVar3 | 0xc0;
+        return;
+      }
+    }
+    else {
+      if (DAT_00ffeaca == 1) {
+        uVar3 = klu_bint(&kl_tog_level_can.sizeX,tog_level_sum_last);
+        tog_level_pre_can = (byte)uVar3;
+        tog_level_can = 0;
+      }
+      if (DAT_00ffeaca != 2) {
+        return;
+      }
+      uVar3 = klu_bint(&kl_tog_level_can.sizeX,tog_rp_level_avg);
+      tog_level_pre_can = (byte)uVar3;
+      if (SYS_TIMERTICS_COUNTER <= TOG_SYSTIME + 500) {
+        return;
+      }
+      TOG_SYSTIME = SYS_TIMERTICS_COUNTER;
+      if (tog_level_can == 0) {
+        uVar3 = klu_bint(&kl_tog_level_can.sizeX,tog_rp_level_avg);
+        tog_level_can = (byte)uVar3 | 0xc0;
+        tog_level_pre_can = (byte)uVar3;
+        return;
+      }
+    }
+  }
+  tog_level_can = 0;
+  return;
+}
+

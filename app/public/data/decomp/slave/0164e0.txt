@@ -1,0 +1,24 @@
+
+/* Flap Close Event Handler
+   - Drives the actuator with the "close" command for a set duration (event timer).
+   - When the timer expires, stops actuator output and clears the "flap open/actuated" */
+
+void ask_flap_driver_close(void)
+
+{
+  if (ask_flap_driver_timer != 0) {
+                    /* While the event/cycle timer is active, repeatedly call the actuator output
+                       function with a positive (close) control value for the flap actuator */
+    ask_flap_driver_write(k_ask_flap_driver_value);
+                    /* Decrement event timer */
+    ask_flap_driver_timer = ask_flap_driver_timer + -1;
+    return;
+  }
+                    /* When timer expires, send a "0" (neutral/stop output) to the actuator, and
+                       clear the "flap open/actuated" bit in ask_zustand_dpr */
+  ask_flap_driver_write(0);
+                    /* Clear bit 0: "flap open/actuated" flag */
+  ask_zustand_dpr = ask_zustand_dpr & 0xfe;
+  return;
+}
+

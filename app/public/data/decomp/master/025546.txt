@@ -1,0 +1,11 @@
+
+void fra_diag_write(short param_1)
+
+{
+  FRA_TIMER = 0;
+  fra_ml_start_long = (int)param_1 << 0x10;
+  FRA_ML_START = param_1;
+  FRA_FLAGS = 0;
+  return;
+}
+

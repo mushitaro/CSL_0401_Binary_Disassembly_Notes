@@ -1,0 +1,63 @@
+
+/* This function runs in the 10ms task IF the gearbox type is SMG */
+
+void smg_ipk_tx_status_frame(void)
+
+{
+  byte bVar1;
+  uint8_t *puVar2;
+  undefined4 *puVar3;
+  uint8_t auStack_1e [8];
+  undefined2 local_16;
+  short local_14;
+  undefined2 local_12;
+  byte local_10;
+  char local_f;
+  struct_ipk_send_desc_t local_e;
+  
+  if ((((ZUSTAND_MOTOR & Start) == 0) && ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) ||
+     (DAT_00ffd950 == '\x02')) {
+    DAT_00ffd963 = 0;
+  }
+  else if (DAT_00ffd963 < 6) {
+    DAT_00ffd963 = DAT_00ffd963 + 1;
+  }
+  else {
+    DAT_00ffd964 = 3;
+  }
+  DAT_00ffd950 = 0;
+  bVar1 = 0;
+  puVar2 = auStack_1e;
+  puVar3 = &ASC2_BYTE_1OF4_;
+  do {
+    *(undefined4 *)puVar2 = *puVar3;
+    bVar1 = bVar1 + 1;
+    puVar2 = puVar2 + 4;
+    puVar3 = puVar3 + 1;
+  } while (bVar1 < 2);
+  local_16 = MD_IND_WUNSCH_BEGR;
+  local_14 = MD_LLRI + MD_IND_SCHLEPP + MD_IND_VERBRAUCHER;
+  local_12 = MD_WUNSCH_REL;
+  if (((CAN_TEL_EMPF & 2) == 0) || (K_____DAT_0008d000 <= DAT_00ffd968)) {
+    local_10 = DAT_00ffd964 & 0xf;
+  }
+  else {
+    local_10 = DAT_00ffd964 & 0xf | 0x10;
+    DAT_00ffd968 = DAT_00ffd968 + 1;
+  }
+  local_f = '\0';
+  bVar1 = 0;
+  puVar2 = auStack_1e;
+  do {
+    local_f = *puVar2 + local_f;
+    bVar1 = bVar1 + 1;
+    puVar2 = puVar2 + 1;
+  } while (bVar1 < 0xf);
+  local_e.cmd = 0x22;
+  local_e.len = '\x10';
+  local_e.ack = (uint8_t *)&DAT_00ffd950;
+  local_e.src = auStack_1e;
+  ipk_enqueue_tx(&local_e);
+  return;
+}
+

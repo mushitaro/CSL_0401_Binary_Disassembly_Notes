@@ -1,0 +1,84 @@
+
+void smg_build_clutch_ff_curve(void)
+
+{
+  byte *curve;
+  uint uVar1;
+  short sVar4;
+  int iVar2;
+  int iVar3;
+  ushort uVar5;
+  byte bVar6;
+  byte bVar7;
+  byte bVar8;
+  byte *pbVar9;
+  
+  bVar7 = 0;
+  DAT_00ffdb82 = 0;
+  curve = (&PTR_KL_SMG_KUPP_M_AB_SR_0003757c)[(short)(DAT_00ffdb6c & 3)];
+  DAT_00ffdb84 = 0;
+  if ((DAT_00ffdb6c & 1) == 0) {
+    DAT_00ffdba4 = 0;
+  }
+  else {
+    uVar1 = klu_wint(&KL_SMG_____DAT_0008A9CC.sizeX,DAT_00ffdb5a);
+    DAT_00ffdba4 = (ushort)uVar1;
+  }
+  DAT_00ffdba6 = DAT_00ffdba4;
+  sVar4 = (short)((int)((uint)DAT_00ffdb9c + ((uint)DAT_00ffdba4 + (int)DAT_00ffdb5c) * 0x100) /
+                 (int)(uint)DAT_00ffdb9a);
+  DAT_00ffdba8 = DAT_00ffdb16__SMGCAN_Power_at_clutch_;
+  bVar8 = 0;
+  pbVar9 = &DAT_00ffdb91;
+  do {
+    bVar7 = bVar7 + 2;
+    uVar5 = (ushort)(((uint)bVar7 << 7) / (uint)DAT_00ffdc62);
+    if (0x80 < uVar5) {
+      uVar5 = 0x80;
+    }
+    uVar1 = klu_bint(curve,(byte)uVar5);
+    iVar2 = (int)(short)((ushort)uVar1 & 0xff) * (int)sVar4;
+    iVar3 = iVar2 + 0x40;
+    if (iVar2 < -0x40) {
+      iVar3 = iVar2 + 0xbf;
+    }
+    bVar6 = (byte)(iVar3 >> 7);
+    if ((uint)DAT_00ffdba8 < (iVar3 >> 7 & 0xffffU)) {
+      bVar6 = DAT_00ffdba8;
+    }
+    *pbVar9 = bVar6;
+    bVar8 = bVar8 + 1;
+    pbVar9 = pbVar9 + 1;
+  } while (bVar8 < 4);
+  uVar1 = klu_bint(curve,0x80);
+  iVar2 = (int)(short)((ushort)uVar1 & 0xff) * (int)sVar4;
+  iVar3 = iVar2 + 0x40;
+  if (iVar2 < -0x40) {
+    iVar3 = iVar2 + 0xbf;
+  }
+  DAT_00ffdb95 = (byte)(iVar3 >> 7);
+  if ((uint)DAT_00ffdba8 < (iVar3 >> 7 & 0xffffU)) {
+    DAT_00ffdb95 = DAT_00ffdba8;
+  }
+  uVar1 = klu_bint(curve,0);
+  DAT_00ffdb86 = (byte)uVar1;
+  DAT_00ffdb96 = 0x80;
+  uVar1 = (int)(short)(ushort)(byte)uVar1 * (int)sVar4 + 0x40 >> 7;
+  uVar5 = (ushort)uVar1;
+  if ((uint)DAT_00ffdba8 < (uVar1 & 0xffff)) {
+    uVar5 = (ushort)DAT_00ffdba8;
+  }
+  DAT_00ffdb88 = uVar5 & 0xff;
+  DAT_00ffdb8a = (short)((uint)DAT_00ffdb9a * (uint)(uVar5 & 0xff) + 0x80 >> 8);
+  DAT_00ffdb85 = DAT_00ffdc62;
+  DAT_00ffdb9e = (short)(((uint)(byte)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] *
+                         (uint)DAT_00ffdb26) / (uint)K_SMG_I_GANG_1);
+  if ((((cfg_s_betriebsmode != '\x02') && (CFG_ROLLENBETRIEB == '\0')) && (0x20 < V_VORDERACHSE)) &&
+     ((int)(uint)K_SMG_KUPP_N_KSCHUTZ < (int)((uint)N - (uint)DAT_00ffdb7e))) {
+    DAT_00ffdb83 = DAT_00ffdb83 | 8;
+    return;
+  }
+  DAT_00ffdb83 = DAT_00ffdb83 & 0xf7;
+  return;
+}
+

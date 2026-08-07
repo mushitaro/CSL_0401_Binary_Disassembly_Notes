@@ -1,0 +1,38 @@
+
+undefined1 edk_write(char edk_switch,byte edk_vorgabe)
+
+{
+  if (b_diag != 0) {
+    if (edk_switch != 1) {
+      if (edk_switch == 2) {
+        if (edk_vorgabe < 101) {
+          DAT_00ffef0e = (ushort)edk_vorgabe * 0x32;
+          edk_ds2_st = 2;
+          return 0;
+        }
+      }
+      else {
+        if (edk_switch != 3) {
+          edk_ds2_st = 0;
+          return 2;
+        }
+        if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+          return 4;
+        }
+                    /* If 49 < param_2 < 251  */
+        if ((49 < edk_vorgabe) && (edk_vorgabe < 251)) {
+          DAT_00ffef10 = (ushort)edk_vorgabe * 10;
+          edk_ds2_st = 4;
+          return 0;
+        }
+      }
+      return 2;
+    }
+    if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+      edk_ds2_st = 1;
+      return 0;
+    }
+  }
+  return 4;
+}
+

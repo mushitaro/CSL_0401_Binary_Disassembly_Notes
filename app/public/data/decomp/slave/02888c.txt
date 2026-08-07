@@ -1,0 +1,50 @@
+
+void llsync_aktiv_calc(void)
+
+{
+  int iVar1;
+  byte bVar2;
+  
+  bVar2 = 0;
+  if ((((((ZUSTAND_MOTOR & LL) != 0) && (K_LL_TMOT_MIN <= TMOT)) && (TMOT <= K_LL_TMOT_MAX)) &&
+      ((K_LL_TAN_MIN <= TAN && (TAN <= K_LL_TAN_MAX)))) && ((MD_ST & 2) == 0)) {
+    iVar1 = abs((uint)N - (uint)LLR_N_SOLL);
+    if (((iVar1 <= (int)(uint)K_LL_DN_MAX) && (N <= K_LL_N_MAX)) && (V <= K_LL_V_MAX))
+    goto LAB_00028936;
+  }
+  bVar2 = 1;
+LAB_00028936:
+  if (((LA_ST_EIN1 & 1) == 0) || ((LA_ST_EIN2 & 1) == 0)) {
+    bVar2 = bVar2 | 2;
+  }
+  if ((((TE_ED & 0x40) != 0) ||
+      (((0xf < TEFC_LL_ST && (TEFC_LL_ST < 0x16)) || ((TEFC_ED & 0x40) != 0)))) ||
+     ((TEA1_F < K_LL_TEA_MIN || (TEA2_F < K_LL_TEA_MIN)))) {
+    bVar2 = bVar2 | 4;
+  }
+  if ((((rf_diag_ed_st != '\0') || ((LLS_ST & 0x80) != 0)) ||
+      (((TMOT_ED & 0x40) != 0 ||
+       ((((TMOT_ST1 & 0x10) != 0 || ((TAN_ED & 0x40) != 0)) || (TI_ED_EV_SUMME != '\0')))))) ||
+     (((TZ_ED_STATUS != '\0' || ((VAN_ED_ST & 0xf) != 0)) ||
+      (((VAN_ED_ST & 0xf0) != 0 || ((VAN_ADAP_ST & 0x30) != 0)))))) {
+    bVar2 = bVar2 | 8;
+  }
+  if ((KATH_ST & 0xf) != 0) {
+    bVar2 = bVar2 | 0x10;
+  }
+  if (KA_DTZ_SUM != 0 || KR_DTZ_SUM != 0) {
+    bVar2 = bVar2 | 0x20;
+  }
+  if (((KKOS_ST & 1) != 0) || ((KKOS_ST_TREIBER & 0x40) != 0)) {
+    bVar2 = bVar2 | 0x40;
+  }
+  if (sk_mode_state_latched != '\0') {
+    bVar2 = bVar2 | 0x80;
+  }
+  if ((K_LL_AKTIV_CONTROL & bVar2) != 0) {
+    DAT_00ffeb4e = SYS_TIMERTICS_COUNTER;
+  }
+  LLSYNC_AKTIV = K_LL_AKTIV_CONTROL & bVar2;
+  return;
+}
+

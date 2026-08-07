@@ -1,0 +1,25 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void p_egbp_calc(void)
+
+{
+  uint p_egbp_rel_temp;
+  
+                    /* 0401 Specific */
+  p_egbp_rel_temp = klu_wint(&kl_rg_egbp_rel.sizeX,ML + (ushort)SLP_ML * 4);
+  _p_egbp_rel = (short)p_egbp_rel_temp;
+  p_egbp_no_filter = P_UMG_FILTER + _p_egbp_rel;
+  p_egbp_filter = PT1_Filter_US(p_egbp_no_filter,p_egbp_filter,k_rg_p_egbp_tau);
+  if (p_egbp_filter < k_rg_p_egbp_min) {
+    p_egbp = k_rg_p_egbp_min;
+    return;
+  }
+  if (k_rg_p_egpb_max < p_egbp_filter) {
+    p_egbp = k_rg_p_egpb_max;
+    return;
+  }
+  p_egbp = p_egbp_filter;
+  return;
+}
+

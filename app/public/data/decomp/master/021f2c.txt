@@ -1,0 +1,132 @@
+
+/* Calculates rf_p_saug_i which is an integral feedback loop component used to adjust RF (relative
+   fill) from the CSL AlphaN table to remove error between the value from the AlphaN table and
+   actual manifold vacuum.
+   
+   Input variables: TMOT, ZUSTAND_MOTOR, KATH_ST, VAN_ED_ST, P_UMG_DIAG_ST, rf_diag_ed_st (error
+   status flag byte that feeds into RF calculation), RF_DYN_ST, SSP_DIAG_ST, SYS_TIMERTICKS_COUNTER,
+   n_start_exit_time (timertics since N_START_EXIT was reached), N, p_kvd (manifold vacuum
+   pressure), RF
+   
+   Output variables: rf_p_saug_i (RF integral controller component based off measured manifold
+   vacuum)
+   
+   Global Variables explained:
+   rf_diag_ed_st: a number of different rf diag error states are relevant to the RF calculation.
+   This status byte is maintained based on the presence, or not, of errors.
+   
+   n_start_exit_time: The calculation of rf_p_saug_i is contingent on it having been a certain
+   amount of time (k_rf_p_saug_i_ll_wait) since N_START_EXIT was reached. n_start_exit_time records
+   SYS_TIMERTICS_COUNTER at the time N_START_EXIT was reached.
+   
+   p_kvd: Pressure Krümmervakuumdruck (Manifold Vacuum Pressure). This is calculated as
+   P_UMG_FILTER - p_saug (manifold absolute pressure)
+   
+   This function is run in the 10ms task */
+
+void rf_p_saug_i_calc(void)
+
+{
+  uint rf_p_saug_i_fakt_temp;
+  ushort p_kvd_filter_temp;
+  int rf_p_saug_i_10ms;
+  int rf_p_saug_diff;
+  int rf_p_saug_i__n_1_;
+  
+                    /* Check a whole range of conditions */
+  if ((((((k_rf_p_saug_i_tmot_min < TMOT) && ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) &&
+        ((KATH_ST & 0xf) == 0)) && (((VAN_ED_ST & 0xf0) == 0 && ((VAN_ED_ST & 0xf) == 0)))) &&
+      ((P_UMG_DIAG_ST == error_free && ((rf_diag_ed_st == 0 && ((RF_DYN_ST & 2) == 0)))))) &&
+     (((SSP_DIAG_ST & 2) == 0 &&
+      ((uint)k_rf_p_saug_i_ll_wait <= SYS_TIMERTICS_COUNTER - n_start_exit_time >> 10)))) {
+    rf_p_saug_i_st = rf_p_saug_i_st | 1;
+  }
+  else {
+    rf_p_saug_i_st = 0;
+  }
+                    /* If all of the conditions at the top are met then */
+  if ((rf_p_saug_i_st & 1) != 0) {
+    p_kvd_filter_temp = p_kvd;
+                    /* if p_kvd (manifold vacuum pressure) is less than zero then limit it to zero
+                       (e.g. we're not interested in conditions where there is positive pressure in
+                       the manifold) */
+    if ((short)p_kvd < 0) {
+      p_kvd_filter_temp = 0;
+    }
+                    /* Look up the integral gain based on current N (rpm) and manifold vacuum
+                       pressure and store it in rf_p_saug_i_fakt. */
+    rf_p_saug_i_fakt_temp = kfu_wint(&kf_rf_p_saug_i_gain.sizeX,N,p_kvd_filter_temp);
+    rf_p_saug_i_fakt = (short)rf_p_saug_i_fakt_temp;
+                    /* If the faktor is zero then set a flag in rf_p_saug_i_st to guide the function
+                       flow */
+    if (rf_p_saug_i_fakt == 0) {
+      rf_p_saug_i_st = rf_p_saug_i_st | 2;
+    }
+    else {
+                    /* Otherwise clear bit 1 in the logic_flag */
+      rf_p_saug_i_st = rf_p_saug_i_st & 0xfd;
+    }
+                    /* if rf_p_saug_i_st bit 1 is 0 then it means rf_p_saug_i_fakt is non-zero */
+    if ((rf_p_saug_i_st & 2) == 0) {
+                    /* calculate the difference between rf_p_saug (rf from manifold absolute
+                       pressure) and the latest final RF value */
+      rf_p_saug_diff = ((uint)rf_p_saug - (uint)RF) * 64;
+                    /* Then take that value and multiply it by rf_p_saug_i_fakt. This gives us the
+                       integral component adjustment from the last 10ms. */
+      rf_p_saug_i_10ms = (int)(rf_p_saug_diff * (rf_p_saug_i_fakt_temp & 0xffff)) >> 0x10;
+                    /* if the result is equal to zero (e.g. it's very small) then check
+                       rf_p_saug_diff and increment/decrement rf_p_saug_i_10ms by 1 based on whether
+                       rf_p_saug_diff is positive or negative. This is to account for situations
+                       where calculated rf_p_saug_i_10ms is less in magnitude than its lsb. */
+      if (rf_p_saug_i_10ms == 0) {
+        if (0 < rf_p_saug_diff) {
+          rf_p_saug_i_10ms = 1;
+        }
+        if (rf_p_saug_diff < 0) {
+          rf_p_saug_i_10ms = -1;
+        }
+      }
+                    /* Now we add rf_p_saug_i_10ms to our rf_p_saug_i (this is the integral
+                       controller bit). */
+      rf_p_saug_i__n_1_ = rf_p_saug_i + rf_p_saug_i_10ms;
+                    /* We now need to ensure that we limit the integral component to prevent
+                       integral wind-up. This is where k_rf_p_saug_i_min and k_rf_p_saug_i_max come
+                       in which limits the integral component to +- 2.5 percentage points of nominal
+                       max RF (100%). */
+      if (rf_p_saug_i__n_1_ < k_rf_p_saug_i_min) {
+        rf_p_saug_i__n_1_ = (int)k_rf_p_saug_i_min;
+      }
+      if (k_rf_p_saug_i_max < rf_p_saug_i__n_1_) {
+        rf_p_saug_i__n_1_ = (int)k_rf_p_saug_i_max;
+      }
+                    /* Then we can write the new value of rf_p_saug_i */
+      rf_p_saug_i = (int16_t)rf_p_saug_i__n_1_;
+    }
+  }
+                    /* If there is an rf_diag error state then check if rf_p_saug_i is less than
+                       negative k_rf_p_saug_i_begr (Integral component limit when rf diag error
+                       state exists) and if it is then bring rf_p_saug_i towards zero by
+                       k_rf_p_saug_i_begr. The effect of this is that when a rf diag error state
+                       occurs rf_p_saug_i will be ramped to zero at the rate of k_rf_p_saug_i_begr
+                       per 10ms. */
+  if (rf_diag_ed_st != 0) {
+    if ((int)rf_p_saug_i < -(int)k_rf_p_saug_i_begr) {
+      rf_p_saug_i = k_rf_p_saug_i_begr + rf_p_saug_i;
+      return;
+    }
+                    /* If the above condition wasn't met check if rf_p_saug_i is greater than
+                       k_rf_p_saug_i_begr (Integral component limit when rf diag error state exists)
+                       and if it is then bring rf_p_saug_i towards zero by k_rf_p_saug_i_begr. The
+                       effect of this is that when an error state occurs rf_p_saug_i will be ramped
+                       to zero at the rate of k_rf_p_saug_i_begr per 10ms. */
+    if (k_rf_p_saug_i_begr < rf_p_saug_i) {
+      rf_p_saug_i = rf_p_saug_i - k_rf_p_saug_i_begr;
+      return;
+    }
+                    /* If neither of the above conditions are met then set rf_p_saug_i to zero (e.g.
+                       integral feedback is zero) */
+    rf_p_saug_i = 0;
+  }
+  return;
+}
+

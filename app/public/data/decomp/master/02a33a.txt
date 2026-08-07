@@ -1,0 +1,157 @@
+
+void ka_can_calc(uint param_1)
+
+{
+  int iVar1;
+  byte bVar2;
+  short sVar4;
+  undefined4 uVar3;
+  char cVar5;
+  ushort uVar6;
+  word wVar7;
+  byte bVar8;
+  byte bVar9;
+  
+  bVar9 = (zyl_count + TPU_SEGM_INDEX_TASK) - 3;
+  if (zyl_count <= bVar9) {
+    bVar9 = bVar9 - zyl_count;
+  }
+  bVar8 = (byte)param_1;
+  DAT_00ffe887 = bVar8 + (-((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 1U) * '\b';
+  DAT_00ffe888 = bVar8 + (-(((uint)DAT_00ffe858 & 1 << (param_1 & 0x3f)) != 0) & 1U) * '\b';
+  DAT_00ffe858 = ~('\x01' << (param_1 & 0x3f)) & DAT_00ffe858;
+  if ((((((uint)K_KA_DA_AUS & 1 << (param_1 & 0x3f)) != 0) && ((CFG_RAM_SG_TYP & 2) != 0)) &&
+      (K_DA_CONTROL != '\0')) && ((K_DA_SEITE_M == '\x01' || (K_DA_SEITE_M == '\x02')))) {
+    DAT_00ff2000 = bVar8 << 4;
+    iVar1 = (int)(uint)KM_TEL_MW[param_1 & 0xff][km_signal_source[KD_CFG]] >> (K_KA_DA_SHFT & 0x3f);
+    if ((ushort)iVar1 < 0x100) {
+      DAT_00ff2001 = (undefined1)iVar1;
+    }
+    else {
+      DAT_00ff2001 = 0xff;
+    }
+    iVar1 = (int)(uint)KD_MEM[param_1 & 0xff] >> (K_KA_DA_SHFT & 0x3f);
+    if ((ushort)iVar1 < 0x100) {
+      DAT_00ff2002 = (undefined1)iVar1;
+    }
+    else {
+      DAT_00ff2002 = 0xff;
+    }
+    DAT_00ff2003 = (undefined1)
+                   ((short)(&DAT_00ffe836_knock_retard_adjustment_)[param_1 & 0xff] + 0x80 >> 1);
+    if (K_DA_SEITE_M == '\x01') {
+      if ((KM_TEL_ST[param_1 & 0xff] & 0x1000) == 0) {
+        DAT_00ff2004 = 0;
+      }
+      else {
+        DAT_00ff2004 = 0xff;
+      }
+      sVar4 = (&DAT_00ffe88c)[param_1 & 0xff];
+    }
+    else {
+      if (K_DA_SEITE_M != '\x02') goto LAB_0002a51e;
+      DAT_00ff2004 = (undefined1)((short)TZ[(short)((ushort)param_1 & 0xff)] + 0x80 >> 3);
+      sVar4 = DYN_DBGR_TZ;
+    }
+    DAT_00ff2005 = (undefined1)(sVar4 + 0x80 >> 1);
+  }
+LAB_0002a51e:
+  if (K_KA_CAN_AUS == 0) {
+    return;
+  }
+  uVar3 = FUN_00029f64();
+  bVar2 = DAT_00ff8270;
+  if ((char)uVar3 == '\0') {
+    return;
+  }
+  if (K_KA_CAN_AUS < 3) {
+    iVar1 = (uint)DAT_00ff8270 * 10;
+    (&DAT_00ff8273)[iVar1] = bVar8 + 1;
+    if (bVar8 == 0) {
+      DAT_00ffe8c2_per_cyl_knock_sensor_active_ = -((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 1;
+    }
+    else {
+      DAT_00ffe8c2_per_cyl_knock_sensor_active_ =
+           ((-((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 1U) << (param_1 & 0x3f)) +
+           DAT_00ffe8c2_per_cyl_knock_sensor_active_;
+    }
+    if (K_KA_CAN_AUS == 1) {
+      (&DAT_00ff8274)[iVar1] = -((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 1;
+    }
+    if (K_KA_CAN_AUS == 2) {
+      switch(bVar9) {
+      case 0:
+        (&DAT_00ff8274)[iVar1] = KM_FHIP;
+        break;
+      case 1:
+        (&DAT_00ff8274)[iVar1] = N40;
+        break;
+      case 2:
+        (&DAT_00ff8274)[iVar1] = RF5;
+        break;
+      case 3:
+        (&DAT_00ff8274)[iVar1] = DAT_00ffe834_knock_evaluation_status_;
+        break;
+      case 4:
+        wVar7 = V;
+        if (0xff < V) {
+          wVar7 = 0xff;
+        }
+        (&DAT_00ff8274)[iVar1] = (char)wVar7;
+        break;
+      default:
+        (&DAT_00ff8274)[iVar1] = DAT_00ffe8c2_per_cyl_knock_sensor_active_;
+      }
+    }
+    wVar7 = KM_TEL_MW[param_1 & 0xff][km_signal_source[KD_CFG]];
+    (&DAT_00ff8275)[iVar1] = (char)wVar7;
+    (&DAT_00ff8276)[iVar1] = (char)(wVar7 >> 8);
+    wVar7 = KD_MEM[param_1 & 0xff];
+    (&DAT_00ff8277)[iVar1] = (char)wVar7;
+    (&DAT_00ff8278)[iVar1] = (char)(wVar7 >> 8);
+    uVar6 = (&DAT_00ffe836_knock_retard_adjustment_)[param_1 & 0xff] + 0x9b;
+    if (0xff < uVar6) {
+      uVar6 = 0xff;
+    }
+    (&DAT_00ff8279)[iVar1] = (char)uVar6;
+    uVar6 = (&DAT_00ffe88c)[param_1 & 0xff] + 0x9b;
+    if (0xff < uVar6) {
+      uVar6 = 0xff;
+    }
+    (&DAT_00ff827a)[iVar1] = (char)uVar6;
+    (&DAT_00ff8272)[(uint)bVar2 * 10] = 1;
+  }
+  else {
+    if (DAT_00ffe834_knock_evaluation_status_ == 8) {
+      cVar5 = bVar8 + (-((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 0x1U) * 0x10 + -0x3f;
+    }
+    else {
+      cVar5 = (DAT_00ffe834_knock_evaluation_status_ >> 1) * 0x40 +
+              bVar8 + (-((KM_TEL_ST[param_1 & 0xff] & 0x1000) != 0) & 0x1U) * 0x10 + 0x1;
+    }
+    (&DAT_00ff8273)[(uint)DAT_00ff8270 * 10] = cVar5;
+    uVar6 = -(&DAT_00ffe836_knock_retard_adjustment_)[param_1 & 0xff];
+    if (0xff < uVar6) {
+      uVar6 = 0xff;
+    }
+    iVar1 = (uint)bVar2 * 10;
+    (&DAT_00ff8274)[iVar1] = (char)uVar6;
+    wVar7 = KM_TEL_MW[param_1 & 0xff][km_signal_source[KD_CFG]];
+    (&DAT_00ff8275)[iVar1] = (char)wVar7;
+    (&DAT_00ff8276)[iVar1] = (char)(wVar7 >> 8);
+    (&DAT_00ff8277)[iVar1] = 0;
+    (&DAT_00ff8278)[iVar1] = 0;
+    (&DAT_00ff8279)[iVar1] = RF5;
+    (&DAT_00ff827a)[iVar1] = 0;
+    (&DAT_00ff8272)[iVar1] = 1;
+    if (2 < bVar8) {
+      bVar9 = 0xc;
+      goto LAB_0002a7d4;
+    }
+  }
+  bVar9 = 0xb;
+LAB_0002a7d4:
+  can_a_tx(bVar9);
+  return;
+}
+

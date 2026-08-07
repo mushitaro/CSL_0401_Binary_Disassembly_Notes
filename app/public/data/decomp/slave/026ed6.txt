@@ -1,0 +1,96 @@
+
+void tetv_calc(short param_1)
+
+{
+  undefined4 uVar1;
+  ushort uVar2;
+  int iVar3;
+  uint uVar4;
+  byte bVar5;
+  
+  if ((((ZUSTAND_MOTOR & LL) == 0) && ((ZUSTAND_MOTOR & TL) == 0)) && ((ZUSTAND_MOTOR & VL) == 0)) {
+    bVar5 = 0;
+  }
+  else {
+    uVar1 = kfus_bint(&KF_TE_N_RF_TVTE.sizeX,N,RF);
+    bVar5 = (byte)uVar1;
+  }
+  iVar3 = (int)param_1 + (int)(short)TE_F_VENTIL;
+  if (((TE_SONDER_ST & 1) == 0) && (0x4000 < iVar3)) {
+    if ((((TE_ST & 8) != 0) || ((TE_ST & 0x20) != 0)) || ((TE_ST & 1) != 0)) {
+      if ((ZUSTAND_MOTOR & LL) == 0) {
+        uVar1 = kfu_wint(&KF_TEA_FMIN1_N_RF.sizeX,N,RF);
+        if ((TEA1_F <= (ushort)uVar1) || (TEA2_F <= (ushort)uVar1)) goto LAB_00026fe2;
+      }
+      else if ((TEA1_F <= K_TEA_FMIN1_LL) || (TEA2_F <= K_TEA_FMIN1_LL)) {
+LAB_00026fe2:
+        iVar3 = (int)(short)TE_F_VENTIL - (uint)K_TE_AUF1;
+        goto LAB_00026ff0;
+      }
+      iVar3 = (uint)K_TE_AUF1 + (int)(short)TE_F_VENTIL;
+    }
+LAB_00026ff0:
+    if ((int)(uint)K_TE_F_VENTIL_MAX <= iVar3) {
+      TE_F_VENTIL = K_TE_F_VENTIL_MAX;
+      goto LAB_0002701c;
+    }
+  }
+  else {
+    if (iVar3 < 0) {
+      TE_F_VENTIL = 0;
+      goto LAB_0002701c;
+    }
+    if (0x4000 < iVar3) {
+      TE_F_VENTIL = 0x4000;
+      goto LAB_0002701c;
+    }
+  }
+  TE_F_VENTIL = (ushort)iVar3;
+LAB_0002701c:
+  uVar4 = (uint)K_TE_TV_MIN +
+          ((int)((uint)bVar5 * (int)(short)(ushort)K_TE_TVTE_GA * (int)(short)TE_F_VENTIL) >> 0xe);
+  if (uVar4 < 0x7fff) {
+    if (uVar4 <= K_TE_TV_MIN) {
+      uVar4 = 0;
+    }
+  }
+  else {
+    uVar4 = 0x7fff;
+  }
+  uVar2 = (ushort)uVar4;
+  if ((K_TE_TV_MIN < TETV_FUNC) && (TETV_FUNC < uVar4)) {
+    uVar2 = IIR_Filter_US(uVar2,TETV_FUNC,K_TE_TVTE_TAU);
+  }
+  TETV_FUNC = uVar2;
+  if ((TEFC_LL_ST < 0x10) || (0x15 < TEFC_LL_ST)) {
+    if ((TEFC_FLAGS & 4) == 0) {
+      TETV = TETV_FUNC;
+      return;
+    }
+    uVar4 = abs((uint)TETV - (uint)TETV_FUNC);
+    if (uVar4 <= K_TEFC_RAMPE_ABBRUCH) {
+      TETV = TETV_FUNC;
+      TEFC_FLAGS = TEFC_FLAGS & 0xfb;
+      return;
+    }
+    if (TETV_FUNC < TETV) {
+      TETV = TETV - K_TEFC_RAMPE_ABBRUCH;
+      if (TETV <= K_TE_TV_MIN) {
+        TETV = 0;
+        return;
+      }
+    }
+    else {
+      TETV = K_TEFC_RAMPE_ABBRUCH + TETV;
+      if (TETV <= K_TE_TV_MIN) {
+        TETV = K_TE_TV_MIN;
+        return;
+      }
+    }
+  }
+  else {
+    TETV = TETV_FC;
+  }
+  return;
+}
+

@@ -1,0 +1,48 @@
+
+/* This seems to handle connection from the likes of DIS and calls the appropriate function. e.g.
+   this seems to be how DIS puts the DME into dyno mode, etc. */
+
+byte diag_command_dispatch_handler(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  char *pcVar3;
+  byte *pbVar4;
+  int in_VBR;
+  
+  rsp_ptr[1] = 0;
+  pbVar4 = diag_command_table_last_entry;
+  pcVar3 = diag_command_table_first_entry;
+  if (in_VBR == 0) {
+    pcVar3 = "";
+    pbVar4 = &DAT_000037ea;
+    DAT_00ffd003 = DAT_00ffd003 & 0x3c;
+    bVar1 = 0;
+  }
+  else {
+    bVar1 = (*(code *)PTR_FUN_00010238)();
+  }
+  bVar2 = 0;
+  for (; (bVar2 < *pbVar4 && (req_ptr[2] != *pcVar3)); pcVar3 = pcVar3 + 6) {
+    bVar2 = bVar2 + 1;
+  }
+  if (*pbVar4 <= bVar2) {
+    rsp_ptr[2] = 0xff;
+    return bVar1;
+  }
+  bVar1 = DAT_00ffd003 & pcVar3[1];
+  if (bVar1 != 0) {
+    if ((bootloader_diag_state._0_1_ & 0x20) != 0) {
+      FUN_00001af4(0x40);
+      FUN_00001b14(4);
+      bVar1 = FUN_00001b20();
+    }
+    rsp_ptr[2] = 0xa2;
+    return bVar1;
+  }
+  DAT_00ffd001 = 0;
+  bVar1 = (**(code **)(pcVar3 + 2))();
+  return bVar1;
+}
+

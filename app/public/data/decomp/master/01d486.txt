@@ -1,0 +1,21 @@
+
+void d_v_calc(void)
+
+{
+  int iVar1;
+  
+  if (V_ANTRIEB < 0x51) {
+    D_V = 0;
+  }
+  else {
+    iVar1 = ((uint)V_ANTRIEB - (uint)v_antrieb__t_2_) * 0x364;
+    if (((int)(((uint)V_ANTRIEB - (uint)v_antrieb__t_2_) * 0xd9) < 0 != iVar1 < 0) != iVar1 < 0) {
+      iVar1 = iVar1 + 0x3ff;
+    }
+    D_V = PT1_Filter_SS((short)(iVar1 >> 10),D_V,K_V_TAU_GRAD);
+  }
+  v_antrieb__t_2_ = v_antrieb__t_1_;
+  v_antrieb__t_1_ = V_ANTRIEB;
+  return;
+}
+

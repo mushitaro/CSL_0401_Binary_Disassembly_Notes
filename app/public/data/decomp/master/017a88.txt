@@ -1,0 +1,37 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void MD_Maximum_Moment_FUN_00017a76(void)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  uint uVar3;
+  int iVar4;
+  ushort uVar5;
+  
+  uVar1 = klu_wint(&KL_MD_MAX_VL_RF_SU1.sizeX,N);
+  _md_max_vl_rf_su1 = (undefined2)uVar1;
+  uVar5 = (ushort)((uVar1 & 0xffff) / 5);
+  if (0xff < uVar5) {
+    uVar5 = 0xff;
+  }
+  uVar2 = kfu_bint(&KF_MD_MAX_LA_VL.sizeX,N40,(byte)uVar5);
+  md_max_la_vl = (byte)uVar2;
+  uVar3 = klu_bint(&KL_MD_MAX_MD_LA.sizeX,md_max_la_vl);
+  md_max_md_la = (byte)uVar3;
+  uVar3 = klu_bint(&KL_MD_MAX_MD_LA.sizeX,MD_LA_IST);
+  MD_ETA_LAMBDA = (undefined1)uVar3;
+  iVar4 = (uVar1 & 0xffff) * (uint)RF_PT_KORR;
+  if (iVar4 < 0) {
+    iVar4 = iVar4 + 0xfff;
+  }
+  uVar1 = kfu_wint(&KF_MD_MAX_MD_IND_OPT.sizeX,(short)(iVar4 >> 0xc) * 10,N);
+  MD_IND_MAX = (ushort)((int)((uint)md_max_md_la * (uVar1 & 0xffff)) >> 7);
+  if (MD_IND_MAX < MD_IND_OPT_KORR) {
+    MD_IND_MAX = MD_IND_OPT_KORR;
+  }
+  _md_ind_max_dpr = MD_IND_MAX;
+  return;
+}
+

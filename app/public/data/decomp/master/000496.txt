@@ -1,0 +1,15 @@
+
+/* WARNING: Removing unreachable block (ram,0x00000500) */
+/* WARNING: Removing unreachable block (ram,0x0000050a) */
+
+void boot_config_check_and_sram_test(void)
+
+{
+  DAT_0013fff0 = 0xa55a;
+  DAT_0013fffc = 0x1248;
+  DAT_0013fffe = 0x96f0;
+  CFG_RAM_SG_TYP = 2;
+  CFG_RAM_SG_MODE = 0x12;
+  return;
+}
+

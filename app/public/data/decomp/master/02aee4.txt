@@ -1,0 +1,83 @@
+
+uint tz_related_2_(void)
+
+{
+  byte bVar1;
+  undefined2 extraout_D0u;
+  uint uVar2;
+  ushort uVar3;
+  short sVar4;
+  byte bVar5;
+  short *psVar6;
+  short *psVar7;
+  short *psVar8;
+  short *psVar9;
+  
+  if ((DAT_00ffe63c != '\0') && ((SA_WE_ST & 8) == 0)) {
+    DAT_00ffe63c = DAT_00ffe63c + -1;
+  }
+  if (TZ_KL15AUS_COUNT != '\0') {
+    TZ_KL15AUS_COUNT = TZ_KL15AUS_COUNT + -1;
+  }
+  sVar4 = DAT_00ffe63e + TZ_TKORR + TZ_GRUND;
+  if (((ZUSTAND_MOTOR & S) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    sVar4 = sVar4 - TZ_ZWB;
+    if (sVar4 < 0) {
+      if ((int)sVar4 < -(int)TZ_ZWB_INCR) {
+        sVar4 = (short)-(int)TZ_ZWB_INCR;
+      }
+    }
+    else if (TZ_ZWB_INCR < sVar4) {
+      sVar4 = TZ_ZWB_INCR;
+    }
+    sVar4 = sVar4 + TZ_ZWB;
+  }
+  TZ_ZWB = sVar4;
+  TZ_DYN_OFFSET = dyn_dynamic_lead_FUN_0002b0cc();
+  TZ_STAT = K_TZ_MCS + TZ_SA_OFFSET + TZ_ZWB;
+  bVar1 = zyl_count - 1;
+  psVar9 = &DAT_00ffe88c + (char)bVar1;
+  psVar6 = (short *)((int)TZ_MD + (int)(short)((char)bVar1 * 2));
+  psVar7 = (short *)((int)TZ + (int)(short)((char)bVar1 * 2));
+  uVar2 = CONCAT22((short)((uint)((char)bVar1 * 2) >> 0x10),(char)bVar1 * 2);
+  psVar8 = (short *)((int)TZ_VE + (int)(short)((char)bVar1 * 2));
+  for (; -1 < (char)bVar1; bVar1 = bVar1 - 1) {
+    sVar4 = K_TZ_MCS_Z[(short)(char)bVar1] + TZ_STAT + TZ_OFFSET_Z[(short)(char)bVar1];
+    uVar2 = CONCAT22((short)(uVar2 >> 0x10),(short)(char)bVar1) & 0xffffff00;
+    if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+      uVar2 = CONCAT22((char)bVar1 >> 7,*psVar9);
+      if (*psVar9 < TZ_DYN_OFFSET) {
+        sVar4 = *psVar9 + (&DAT_00ffe836_knock_retard_adjustment_)[(char)bVar1] + sVar4;
+      }
+      else {
+        sVar4 = TZ_DYN_OFFSET + (&DAT_00ffe836_knock_retard_adjustment_)[(char)bVar1] + sVar4;
+      }
+    }
+    *psVar8 = sVar4;
+    bVar5 = '\x01' << (bVar1 & 0x3f);
+    uVar2 = CONCAT31((int3)(uVar2 >> 8),bVar5 & TPU_ZW);
+    if ((bVar5 & TPU_ZW) != 0) {
+      TPU_ZW = ~bVar5 & TPU_ZW;
+      if (((((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (K_TZ_MD_CONTROL != '\0')) &&
+          ((K_TZ_MD_CONTROL == '\x01' || ((K_TZ_MD_CONTROL == '\x02' && (MD_ST_TZ != 0)))))) &&
+         (((bVar5 & MD_ST_TZ) != 0 && (*psVar6 < sVar4)))) {
+        sVar4 = *psVar6;
+      }
+      if (sVar4 < TZ_MIN) {
+        sVar4 = TZ_MIN;
+      }
+      if (K_TZ_MAX < sVar4) {
+        sVar4 = K_TZ_MAX;
+      }
+      *psVar7 = sVar4;
+      uVar3 = FUN_0002b18c(bVar1);
+      uVar2 = CONCAT22(extraout_D0u,uVar3);
+    }
+    psVar8 = psVar8 + -1;
+    psVar7 = psVar7 + -1;
+    psVar6 = psVar6 + -1;
+    psVar9 = psVar9 + -1;
+  }
+  return uVar2;
+}
+

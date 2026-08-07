@@ -1,0 +1,27 @@
+
+void CAN_ARBID_513(int param_1)
+
+{
+  byte bVar1;
+  bool bVar2;
+  
+  bVar1 = DAT_00ffdb2e;
+  bVar2 = (*(byte *)(*(int *)(param_1 + 6) + 2) & 8) == 0;
+  if (bVar2) {
+    DAT_00ffdb2c = '\x01';
+  }
+  (&DAT_00ff0f20)[(uint)DAT_00ffdb2e * 0x10] = 0x7f;
+  can_slot_status_table[(short)(ushort)bVar1].transfer_flags =
+       can_slot_status_table[(short)(ushort)bVar1].transfer_flags & 0xfd;
+  if (DAT_00ffdb2d != '\0') {
+    if (bVar2) {
+      FUN_0002f4de((int *)&DAT_00041aa0,&DAT_00ffdb2c,param_1);
+      return;
+    }
+    if (DAT_00ffdb2c == '\x02') {
+      FUN_0002f5c0((int *)&DAT_00041aa0,&DAT_00ffdb2c);
+    }
+  }
+  return;
+}
+

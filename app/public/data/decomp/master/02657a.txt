@@ -1,0 +1,23 @@
+
+void lfr_init(void)
+
+{
+  MD_LLRP = 0;
+  MD_LLR_TZ = 0;
+  MD_LLRI = 0;
+  MD_LLRA = 0;
+  MD_LLRA_KO = 0;
+  DAT_00ffea12 = 1;
+  DAT_00ffea0e = 0;
+  LFR_ST = 0;
+  LFR_I_AFR = 0;
+  LFR_FLAGS = 0;
+  LFR_ZUSTAND = 1;
+  FUN_00025946();
+  FUN_000265ea();
+  LFR_N_N_SOLL = LFR_N_N_STAT;
+  LFR_MD_ADAPTION = 0;
+  lfr_calc();
+  return;
+}
+

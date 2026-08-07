@@ -1,0 +1,122 @@
+
+uint s_bls_ed_filter(void)
+
+{
+  uint in_D0;
+  undefined4 uVar1;
+  uint uVar2;
+  byte errortype;
+  
+  if (cfg_m_betriebsmode == '\x01') {
+    S_BLS_TIME_BTS_E36_7 = 0;
+    S_BLS_EPZ_BTS_E36_7 = 0;
+    S_BLS_EPZ_BLS_E36_7 = 0;
+  }
+  else {
+    if ((ZUSTAND_MOTOR & KI.15 aus) == 0) {
+      if (((((((SCHALT_S_ST & 4) == 0) && ((cfg_m_baureihe & 0xf8) != 8)) &&
+            ((K_S_BLS_CFG & 1) == 0)) ||
+           (((SCHALT_S_ST & 0x10) != 0 || ((SCHALT_M_ST & 0x40) != 0)))) ||
+          ((ASC_BLS != '\0' && (((CAN_TEL_EMPF & 1) != 0 && ((K_S_BLS_CFG & 2) == 0)))))) &&
+         ((((SCHALT_S_ST & 4) != 0 && (((cfg_m_baureihe & 0xf8) != 8 && ((K_S_BLS_CFG & 1) == 0))))
+          || ((((SCHALT_S_ST & 0x10) == 0 || ((SCHALT_M_ST & 0x40) == 0)) ||
+              (((ASC_BLS != '\x01' && ((CAN_TEL_EMPF & 1) != 0)) && ((K_S_BLS_CFG & 2) == 0))))))))
+      {
+        if (S_BLS_ED_FILTER < K_S_BLS_ED_FILTER) {
+          S_BLS_ED_FILTER = S_BLS_ED_FILTER + 1;
+        }
+        else if ((S_BLS_ED & 0x40) == 0) {
+          uVar1 = ed_report(DTC_6A_BRAKELIGHTSWITCH_SIGNAL,1);
+          S_BLS_ED_DPR = (byte)uVar1;
+          S_BLS_ED = S_BLS_ED_DPR;
+        }
+      }
+      else {
+        S_BLS_ED_FILTER = 0;
+      }
+      uVar2 = cfg_m_baureihe & 0xf8;
+      if (uVar2 != 8) {
+        return uVar2;
+      }
+      if ((K_S_BLS_CFG & 1) != 0) {
+        return 8;
+      }
+      if (((SCHALT_M_ST & 0x40) != 0) || ((SCHALT_S_ST & 0x10) != 0)) {
+        if ((SCHALT_S_ST & 4) == 0) {
+          S_BLS_TIME_BTS_E36_7 = 0;
+          if ((S_BLS_ED & 1) == 0) {
+            S_BLS_EPZ_BTS_E36_7 = 0;
+          }
+          else if ((DAT_00ffedbd == '\0') && (DAT_00ffedbd = '\x01', S_BLS_EPZ_BTS_E36_7 != 0)) {
+            S_BLS_EPZ_BTS_E36_7 = S_BLS_EPZ_BTS_E36_7 - 1;
+          }
+          if (S_BLS_EPZ_BLS_E36_7 == 0) {
+            S_BLS_TIME_BTS_E36_7 = 0;
+            return 8;
+          }
+          S_BLS_EPZ_BLS_E36_7 = S_BLS_EPZ_BLS_E36_7 - 1;
+          return uVar2;
+        }
+        if (K_S_BLS_TIME_BTS_E36_7 <= S_BLS_TIME_BTS_E36_7) {
+          return (uint)S_BLS_TIME_BTS_E36_7;
+        }
+        if ((S_BLS_ED & 1) != 0) {
+          return (uint)S_BLS_TIME_BTS_E36_7;
+        }
+        S_BLS_TIME_BTS_E36_7 = S_BLS_TIME_BTS_E36_7 + 1;
+        if (S_BLS_TIME_BTS_E36_7 < K_S_BLS_TIME_BTS_E36_7) {
+          return (uint)S_BLS_TIME_BTS_E36_7;
+        }
+        S_BLS_EPZ_BTS_E36_7 = S_BLS_EPZ_BTS_E36_7 + 1;
+        if (S_BLS_EPZ_BTS_E36_7 < K_S_BLS_EPZI_BTS_E36_7) {
+          return (uint)CONCAT11((char)(S_BLS_TIME_BTS_E36_7 >> 8),S_BLS_EPZ_BTS_E36_7);
+        }
+        uVar2 = ed_report(DTC_6A_BRAKELIGHTSWITCH_SIGNAL,1);
+        S_BLS_ED = (char)uVar2;
+        S_BLS_ED_DPR = (char)uVar2;
+        S_BLS_EPZ_BTS_E36_7 = K_S_BLS_EPZO_BTS_E36_7;
+        return uVar2;
+      }
+      S_BLS_TIME_BTS_E36_7 = 0;
+      if ((SCHALT_S_ST & 4) != 0) {
+        DAT_00ffedbd = 0;
+        return uVar2;
+      }
+      uVar2 = (uint)K_S_BLS_EPZ_BLS_INC_E36_7 + (uint)S_BLS_EPZ_BLS_E36_7;
+      if (uVar2 < K_S_BLS_EPZ_BLS_E36_7) {
+        S_BLS_EPZ_BLS_E36_7 = K_S_BLS_EPZ_BLS_INC_E36_7 + S_BLS_EPZ_BLS_E36_7;
+        return CONCAT31((int3)(uVar2 >> 8),K_S_BLS_EPZ_BLS_INC_E36_7);
+      }
+      S_BLS_EPZ_BLS_E36_7 = K_S_BLS_EPZ_BLS_E36_7;
+      if ((S_BLS_ED & 2) != 0) {
+        S_BLS_TIME_BTS_E36_7 = 0;
+        S_BLS_EPZ_BLS_E36_7 = K_S_BLS_EPZ_BLS_E36_7;
+        return uVar2;
+      }
+      errortype = 2;
+      goto LAB_0001dcc6;
+    }
+    in_D0 = cfg_m_baureihe & 0xf8;
+    if (in_D0 == 8) {
+      S_BLS_TIME_BTS_E36_7 = 0;
+      if ((S_BLS_EPZ_BLS_E36_7 | S_BLS_EPZ_BTS_E36_7) != 0) {
+        S_BLS_ED_FILTER = 0;
+        S_BLS_TIME_BTS_E36_7 = 0;
+        return (uint)(S_BLS_EPZ_BLS_E36_7 | S_BLS_EPZ_BTS_E36_7);
+      }
+      in_D0 = 0;
+    }
+  }
+  S_BLS_ED_FILTER = 0;
+  if ((S_BLS_ED & 0xe0) == 0) {
+    S_BLS_ED_FILTER = 0;
+    return CONCAT31((int3)(in_D0 >> 8),S_BLS_ED) & 0xffffffe0;
+  }
+  errortype = 0;
+LAB_0001dcc6:
+  uVar2 = ed_report(DTC_6A_BRAKELIGHTSWITCH_SIGNAL,errortype);
+  S_BLS_ED = (char)uVar2;
+  S_BLS_ED_DPR = (char)uVar2;
+  return uVar2;
+}
+

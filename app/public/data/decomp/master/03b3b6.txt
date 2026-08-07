@@ -1,0 +1,51 @@
+
+uint can_b_rx_frame_data(byte *payload_data,struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined *puVar1;
+  byte bVar2;
+  uint uVar3;
+  uint uVar4;
+  char cVar5;
+  byte *pbVar6;
+  
+  bVar2 = rx_frame_struct->slot_id;
+  puVar1 = rx_frame_struct->slot_state_table_entry_ptr;
+  uVar4 = (uint)(can_b_control_message_table.message_block + (bVar2 - 1)) & 0xffffff00;
+  if ((can_b_control_message_table.control_block.un4 & 8) != 0) {
+    pbVar6 = puVar1 + 2;
+    *pbVar6 = *pbVar6 | 1;
+  }
+  if (bVar2 < 0xf) {
+    while( true ) {
+      can_b_control_message_table.message_block[bVar2 - 1].slot_control_2 = 0xf5;
+      cVar5 = '\b';
+      pbVar6 = payload_data;
+      do {
+        uVar3 = uVar4 >> 8;
+        uVar4 = uVar4 & 0xffffff00;
+        *pbVar6 = can_b_control_message_table.control_block.un4;
+        cVar5 = cVar5 + -1;
+        pbVar6 = pbVar6 + 1;
+      } while (cVar5 != '\0');
+      uVar4 = CONCAT31((int3)uVar3,
+                       can_b_control_message_table.message_block[bVar2 - 1].slot_control_2);
+      if ((can_b_control_message_table.control_block.un4 & 1) != 0) break;
+      pbVar6 = puVar1 + 2;
+      *pbVar6 = *pbVar6 | 1;
+    }
+  }
+  else {
+    cVar5 = '\b';
+    pbVar6 = can_b_control_message_table.message_block[bVar2 - 1].data_payload;
+    do {
+      uVar4 = CONCAT31((int3)(uVar4 >> 8),*pbVar6);
+      *payload_data = can_b_control_message_table.control_block.un4;
+      cVar5 = cVar5 + -1;
+      pbVar6 = pbVar6 + 1;
+      payload_data = payload_data + 1;
+    } while (cVar5 != '\0');
+  }
+  return uVar4;
+}
+

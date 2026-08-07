@@ -1,0 +1,146 @@
+
+undefined4 smg_engine_speed_controller_step(ushort param_1,short param_2)
+
+{
+  short sVar1;
+  int iVar2;
+  byte xValue;
+  uint uVar3;
+  uint uVar4;
+  undefined *puVar5;
+  undefined *puVar6;
+  ushort uVar7;
+  byte bVar8;
+  byte bVar9;
+  byte bVar10;
+  KL_6_1byte_1byte *curve;
+  
+  if ((int)(short)param_1 < (int)(uint)LLR_N_SOLL) {
+    param_1 = LLR_N_SOLL;
+  }
+  if ((short)(N_BEGRENZER - (ushort)K_SMG_____DAT_0008a852) < (short)param_1) {
+    param_1 = N_BEGRENZER - (ushort)K_SMG_____DAT_0008a852;
+  }
+  iVar2 = abs((uint)DAT_00ffdb50 - (int)(short)param_1);
+  if (iVar2 < 0x97) {
+    DAT_00ffdbb3 = DAT_00ffdbb3 & 0xfe;
+  }
+  else {
+    DAT_00ffdbb3 = DAT_00ffdbb3 | 1;
+    DAT_00ffdbc2 = 0;
+    DAT_00ffdbfa = 0;
+  }
+  xValue = (byte)((int)(short)param_1 / 0x28);
+  sVar1 = param_1 - N;
+  DAT_00ffdb50 = param_1;
+  DAT_00ffdbd8 = param_1;
+  uVar3 = abs((int)sVar1);
+  bVar9 = K_SMG_MOT_N_REG_I;
+  if (param_2 == 0) {
+    DAT_00ffdbc2 = 0;
+    DAT_00ffdbfa = 0;
+    bVar8 = 0;
+    bVar10 = 0;
+    DAT_00ffdb46 = sVar1;
+  }
+  else {
+    bVar8 = 0x1e;
+    bVar10 = 0x96;
+  }
+  if (sVar1 < (short)(ushort)bVar8) {
+    if ((int)sVar1 < (int)-(uint)bVar8) {
+      DAT_00ffdbc0 = DAT_00ffdbc0 & 0xfe;
+    }
+  }
+  else {
+    DAT_00ffdbc0 = DAT_00ffdbc0 | 1;
+  }
+  if ((int)DAT_00ffdb30 < (int)-(uint)bVar10) {
+    DAT_00ffdbc0 = DAT_00ffdbc0 | 2;
+  }
+  else if ((short)(ushort)bVar10 < DAT_00ffdb30) {
+    DAT_00ffdbc0 = DAT_00ffdbc0 & 0xfd;
+  }
+  if (smg_can_fahrzustand == Anfahrhilfe(TractionAid)) {
+    DAT_00ffdbce = 0;
+    if (KATH_ZUSTAND == '\0') {
+      DAT_00ffdbca = (uint)K_SMG_MOT_N_REG_P_AH;
+      bVar9 = K_SMG_MOT_N_REG_I_AH;
+    }
+    else {
+      DAT_00ffdbca = (uint)K_SMG_MOT_N_REG_P_KH;
+      bVar9 = K_SMG_MOT_N_REG_I_KH;
+    }
+  }
+  else {
+    if ((DAT_00ffdbc0 & 1) == 0) {
+      uVar4 = klu_bint(&KL_SMG_MOT_N_REG_P_D.sizeX,xValue);
+      curve = &KL_SMG_MOT_N_REG_D_D;
+    }
+    else {
+      uVar4 = klu_bint(&KL_SMG_MOT_N_REG_P_U.sizeX,xValue);
+      curve = &KL_SMG_MOT_N_REG_D_U;
+    }
+    DAT_00ffdbca = uVar4 & 0xff;
+    uVar4 = klu_bint(&curve->sizeX,xValue);
+    DAT_00ffdbce = uVar4 & 0xff;
+  }
+  uVar7 = (ushort)K_SMG_MOT_N_REG_I_T;
+  if (smg_can_fahrzustand == Radabriss(WheelBreakage)) {
+    uVar7 = uVar7 * 2;
+  }
+  if ((((ushort)uVar3 < K_SMG_MOT_N_REG_I_SCHW) ||
+      (((uVar7 < DAT_00ffdbfa && (smg_can_fahrzustand != Racestart)) &&
+       (smg_fahrzustand != Abwuergen(Stalling))))) || (DAT_00ffdbc2 != 0)) {
+    if ((smg_can_fahrzustand != Radabriss(WheelBreakage)) || (DAT_00ffdbec < DAT_00ffdbb6)) {
+      DAT_00ffdbc2 = DAT_00ffdbc2 + (int)(short)(ushort)bVar9 * (int)sVar1;
+    }
+  }
+  else {
+    DAT_00ffdbc2 = 0;
+  }
+  if (100000 < DAT_00ffdbc2) {
+    DAT_00ffdbc2 = 100000;
+  }
+  if (DAT_00ffdbc2 < -100000) {
+    DAT_00ffdbc2 = -100000;
+  }
+  if (((uVar3 & 0xffff) < (uint)K_SMG_MOT_N_REG_D_MIN) || (K_SMG_MOT_N_REG_D_MAX < (ushort)uVar3)) {
+    DAT_00ffdbce = 0;
+  }
+  else {
+    DAT_00ffdbce = DAT_00ffdbce * ((int)sVar1 - (int)DAT_00ffdb46) * 100;
+  }
+  DAT_00ffdbca = DAT_00ffdbca * (int)sVar1 * 10;
+  DAT_00ffdb46 = sVar1;
+  uVar3 = klu_bint(&KL_SMG_MOT_N_REG_P_K.sizeX,(byte)((uVar3 & 0xffff) / 0x28));
+  iVar2 = DAT_00ffdbca * ((uVar3 & 0xff) + 0x80);
+  if (iVar2 < 0) {
+    iVar2 = iVar2 + 0x7f;
+  }
+  DAT_00ffdbca = iVar2 >> 7;
+  puVar5 = (undefined *)((int)(DAT_00ffdbce + DAT_00ffdbc2 + (iVar2 >> 7)) / 100);
+  puVar6 = puVar5;
+  if ((((DAT_00ffdb01 & 1) == 0) &&
+      (puVar6 = (undefined *)((uint)puVar5 & 0xffff0000), (DAT_00ffdc16 & 0x2000) == 0)) &&
+     (smg_can_fahrzustand != Radabriss(WheelBreakage))) {
+    uVar7 = DAT_00ffdb18;
+    if ((int)(uint)K_SMG_MOT_N_REG_M_STG < (int)(short)DAT_00ffdb18) {
+      uVar7 = K_SMG_MOT_N_REG_M_STG;
+    }
+    if ((DAT_00ffdbc0 & 2) == 0) {
+      uVar7 = -uVar7;
+    }
+    puVar6 = (undefined *)(int)(short)uVar7;
+    puVar5 = puVar6 + (int)puVar5;
+  }
+  DAT_00ffdbfa = DAT_00ffdbfa + 1;
+  if ((int)puVar5 < -32000) {
+    puVar5 = (undefined *)0xffff8300;
+  }
+  if (32000 < (int)puVar5) {
+    puVar5 = &DAT_00007d00;
+  }
+  return CONCAT22((short)((uint)puVar6 >> 0x10),(short)puVar5);
+}
+

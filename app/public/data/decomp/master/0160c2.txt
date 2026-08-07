@@ -1,0 +1,85 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void MD_Torque_Limitation_FUN_00016088(void)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  int iVar3;
+  byte bVar5;
+  uint uVar4;
+  bool bVar6;
+  
+  bVar5 = GANG;
+  if (7 < GANG) {
+    bVar5 = 0;
+  }
+  DAT_00ffd8fa = KL_MD_LS_W_GANG.y[(short)(ushort)bVar5];
+  if ((S_KRAFTSCHLUSS == '\0') || (bVar5 == 0)) {
+    MD_BEGR_ST = 0;
+    MD_BEGR_T = 0;
+  }
+  _P_MOTOR = (short)((int)((uint)N * (int)MD_MOTOR) >> 10);
+  if ((K_MD_P_MAX < _P_MOTOR) && (1000 < N)) {
+    uVar2 = ((int)K_MD_P_MAX << 10) / (int)(uint)N;
+  }
+  else {
+    uVar2 = 10000;
+  }
+  uVar4 = (uint)KL_MD_BEGR_GANG.y[(short)(ushort)bVar5];
+  if (uVar2 < KL_MD_BEGR_GANG.y[(short)(ushort)bVar5]) {
+    uVar4 = uVar2;
+  }
+  uVar4 = (uint)MD_IND_VERBRAUCHER + (uint)MD_IND_SCHLEPP + uVar4;
+  if (0 < D_N_GEFILTERT) {
+    iVar3 = (int)D_N_GEFILTERT * (uint)K_MD_J_MOTOR;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0xff;
+    }
+    uVar4 = (iVar3 >> 8) + uVar4;
+  }
+  if (10000 < uVar4) {
+    uVar4 = 10000;
+  }
+  MD_MAX_BEGR_SOLL = (ushort)uVar4;
+  if ((MD_BEGR_ST == 0) && (MD_MAX_BEGR_SOLL < DAT_00ffd8c0)) {
+    MD_BEGR_ST = 1;
+  }
+  if ((MD_BEGR_ST == 1) &&
+     (bVar5 = MD_BEGR_T + 1, bVar6 = K_MD_BEGR_T <= MD_BEGR_T, MD_BEGR_T = bVar5, bVar6)) {
+    if (DAT_00ffd8c0 < MD_MAX_BEGR_SOLL) {
+      MD_BEGR_ST = 4;
+      MD_MAX_BEGR_IST = MD_MAX_BEGR_SOLL;
+    }
+    else {
+      MD_BEGR_ST = 2;
+      MD_MAX_BEGR_IST = DAT_00ffd8c0;
+    }
+  }
+  if ((MD_BEGR_ST == 2) &&
+     (MD_MAX_BEGR_IST = MD_MAX_BEGR_IST - K_MD_BEGR_RAMPE, MD_MAX_BEGR_IST < MD_MAX_BEGR_SOLL)) {
+    MD_BEGR_ST = 4;
+    MD_MAX_BEGR_IST = MD_MAX_BEGR_SOLL;
+  }
+  uVar1 = MD_MAX_BEGR_IST;
+  if (MD_BEGR_ST == 4) {
+    if ((uint)K_MD_BEGR_DELTA + (uint)MD_MAX_BEGR_IST < (uVar4 & 0xffff)) {
+      uVar1 = K_MD_BEGR_DELTA + MD_MAX_BEGR_IST;
+    }
+    else {
+      uVar1 = MD_MAX_BEGR_SOLL;
+      if ((int)(uVar4 & 0xffff) < (int)((uint)MD_MAX_BEGR_IST - (uint)K_MD_BEGR_DELTA)) {
+        uVar1 = MD_MAX_BEGR_IST - K_MD_BEGR_DELTA;
+      }
+    }
+  }
+  MD_MAX_BEGR_IST = uVar1;
+  if (MD_BEGR_ST < 2) {
+    MD_MAX_BEGR = 10000;
+    return;
+  }
+  MD_MAX_BEGR = MD_MAX_BEGR_IST;
+  return;
+}
+

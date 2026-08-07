@@ -1,0 +1,12 @@
+
+void nw_sync_init(void)
+
+{
+  NO_ZAEHLER_M = 0;
+  nw_edge_valid_counter = 0;
+  nw_edge_invalid_counter = 0;
+  NW_ST_M = 1;
+  nw_sync_clear_requests();
+  return;
+}
+

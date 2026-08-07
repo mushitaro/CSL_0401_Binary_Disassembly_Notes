@@ -1,0 +1,41 @@
+
+int FR_____FUN_00025572(int *param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar1 = *param_1;
+  if ((*(byte *)((int)param_1 + 6) & 7) == 0) {
+                    /* The below line differs from 1801 */
+    FRA_TIMER = CONCAT11(K_FR_T_ADAPT,(undefined1)FRA_TIMER);
+    *(undefined1 *)((int)param_1 + 6) = 1;
+  }
+  else if (FRA_TIMER == 0) {
+    *(byte *)((int)param_1 + 6) = *(byte *)((int)param_1 + 6) | 2;
+    if (K_FR_ADAPT_TOL < FR_REG_I) {
+      FRA_TEMP_OFFSET = K_FR_MLADAPT_OFFSET;
+    }
+    else if ((int)FR_REG_I < -(int)K_FR_ADAPT_TOL) {
+      FRA_TEMP_OFFSET = -K_FR_MLADAPT_OFFSET;
+    }
+    else {
+      FRA_TEMP_OFFSET = 0;
+    }
+    iVar1 = (uint)K_FR_TAU_ADAPT * (int)FRA_TEMP_OFFSET + iVar1;
+    iVar2 = ((int)K_FR_DMLADAPT_MAX + (int)*(short *)(param_1 + 1)) * 0x10000;
+    if ((iVar2 < iVar1) ||
+       (iVar2 = ((int)*(short *)(param_1 + 1) - (int)K_FR_DMLADAPT_MAX) * 0x10000, iVar1 < iVar2)) {
+      iVar1 = iVar2;
+      *(byte *)((int)param_1 + 6) = *(byte *)((int)param_1 + 6) | 4;
+    }
+    else {
+      *(byte *)((int)param_1 + 6) = *(byte *)((int)param_1 + 6) & 0xfb;
+    }
+  }
+  else {
+    FRA_TIMER = FRA_TIMER + -1;
+  }
+  return iVar1;
+}
+

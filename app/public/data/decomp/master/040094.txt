@@ -1,0 +1,26 @@
+
+/* This function calculates the position of the most significant bit (MSB) that is set to 1 in the
+   input param_1. Here's how:
+   
+   Right shifts param_1 until it becomes 0.
+   Each shift reduces param_1, and the function counts how many shifts are required to clear all
+   bits.
+   The return value 0x1f - uVar1 represents the position of the MSB in the 32-bit integer (because
+   it starts at 0x1f or 31 in decimal, which is the highest bit position in a 32-bit value). */
+
+int Find_Position_of_MSB(uint param_1)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  uVar1 = 0x1f;
+  do {
+    param_1 = param_1 >> 1;
+    if (param_1 == 0) break;
+    uVar2 = (short)uVar1 - 1;
+    uVar1 = (uint)uVar2;
+  } while (uVar2 != 0xffff);
+  return 0x1f - uVar1;
+}
+

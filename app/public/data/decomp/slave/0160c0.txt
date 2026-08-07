@@ -1,0 +1,112 @@
+
+/* This function calculates the state of the CSL air intake flap */
+
+void ask_zustand_calc(void)
+
+{
+  ushort uVar1;
+  bool bVar2;
+  
+                    /* Check if flap control is in "normal" logic mode (LSB 0) */
+  if (k_ask_diag_mode == 0) {
+                    /* If engine off, key off, catalyst not ready, or another "do not run flap"
+                       state, and not in config mode 6 */
+    if (((((ZUSTAND_MOTOR & KI.15 aus) != 0) || ((KATH_ST & 0xf) != 0)) ||
+        (sk_mode_state_latched != 0)) && (k_ask_zustand_cfg != 6)) {
+                    /* Force flap closed */
+      ask_zustand = ask_zustand & ~Flap_Open;
+      return;
+    }
+                    /* If flap is currently closed... */
+    if ((ask_zustand & Flap_Open) == Flap_Closed) {
+                    /* If (RPM < open threshold + hysteresis OR load < min) AND (not in SMG Race
+                       mode OR temp < min) AND (RPM < 1001 OR not config 6) */
+      if ((((((uint)N <= (uint)k_ask_n_aktiv_tol + (uint)ask_n_aktiv) || (ML <= k_ask_ml_min)) &&
+           (smg_can_fahrzustand != Racestart)) || (T_UMG <= k_ask_tumg_min)) &&
+         ((N < 1001 || (k_ask_zustand_cfg != 6)))) {
+                    /* Set flap open debounce/hysteresis counter */
+        ask_zustand_hys_cnt = k_ask_zustand_hys;
+                    /* Set hysteresis counter */
+        return;
+      }
+                    /* Otherwise, open flap (set LSB) */
+      ask_zustand = ask_zustand | Flap_Open;
+    }
+    else {
+                    /* Flap is open
+                       If (RPM > open threshold - hysteresis AND load > min) OR (RPM > 799 AND
+                       config==6) OR (SMG race mode active or SMG shifting) AND temp > min */
+      if ((((((int)((uint)ask_n_aktiv - (uint)k_ask_n_aktiv_tol) <= (int)(uint)N) &&
+            (k_ask_ml_min <= ML)) || ((799 < N && (k_ask_zustand_cfg == 6)))) ||
+          ((smg_can_fahrzustand == Racestart || (smg_fahrzustand == Schalten(Shifting))))) &&
+         ((int)(k_ask_tumg_min - 1) <= (int)(uint)T_UMG)) {
+        ask_zustand_hys_cnt = k_ask_zustand_hys;
+        return;
+      }
+                    /* If hysteresis counter not expired, decrement and return (debounce, keep flap
+                       open for N cycles) */
+      if (ask_zustand_hys_cnt != 0) {
+        ask_zustand_hys_cnt = ask_zustand_hys_cnt + -1;
+        return;
+      }
+                    /* Otherwise, close flap (clear LSB) and start debounce counter (flap closing)
+                        */
+      ask_zustand = ask_zustand & ~Flap_Open;
+      ask_zustand_hys_cnt = -1;
+    }
+                    /* Update status/trigger byte for monitoring/diagnostic */
+    ask_flap_driver_timer = k_ask_flap_driver_actuation_time;
+    return;
+  }
+                    /* Flap force-open mode (config 0) */
+  if (k_ask_zustand_cfg == 0) {
+    if ((ask_zustand & Flap_Open) == Flap_Closed) {
+      ask_flap_driver_timer = k_ask_flap_driver_actuation_time;
+    }
+    ask_zustand = ask_zustand | Flap_Open;
+    if (k_ask_flap_driver_sperre <= ask_flap_driver_block_timer) {
+      ask_flap_driver_open();
+      return;
+    }
+  }
+  else {
+                    /* Flap force-close mode (config 1) */
+    if (k_ask_zustand_cfg == 1) {
+      if ((ask_zustand & Flap_Open) != Flap_Closed) {
+        ask_flap_driver_timer = k_ask_flap_driver_actuation_time;
+      }
+      ask_zustand = ask_zustand & ~Flap_Open;
+      if (k_ask_flap_driver_sperre <= ask_flap_driver_block_timer) {
+        ask_flap_driver_close();
+        return;
+      }
+    }
+    else {
+                    /* Diagnostic/test mode: toggle flap every 100 cycles */
+      if ((k_ask_zustand_cfg == 5) &&
+         (uVar1 = ask_diag_cycle_cnt + 1, bVar2 = 99 < ask_diag_cycle_cnt,
+         ask_diag_cycle_cnt = uVar1, bVar2)) {
+                    /* Every 100 cycles, toggle flap state */
+        if ((ask_zustand & Flap_Open) == Flap_Closed) {
+          ask_flap_driver_timer = k_ask_flap_driver_actuation_time;
+          ask_zustand = ask_zustand | Flap_Open;
+          if (k_ask_flap_driver_sperre <= ask_flap_driver_block_timer) {
+            ask_flap_driver_open();
+          }
+        }
+        else if ((ask_zustand & Flap_Open) != Flap_Closed) {
+          ask_flap_driver_timer = k_flap_driver_transition_timer;
+          ask_zustand = ask_zustand & ~Flap_Open;
+          if (k_ask_flap_driver_sperre <= ask_flap_driver_block_timer) {
+            ask_flap_driver_close();
+          }
+        }
+        ask_diag_cycle_cnt = 0;
+                    /* cycle count or event count */
+        ask_diag_toggle_cnt = ask_diag_toggle_cnt + 1;
+      }
+    }
+  }
+  return;
+}
+

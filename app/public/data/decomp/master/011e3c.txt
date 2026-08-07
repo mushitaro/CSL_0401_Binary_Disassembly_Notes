@@ -1,0 +1,17 @@
+
+/* debug function that appears to monitor how frequently the background task is running.
+   DB_TBGND_MAX seems to store the maximum time between executions */
+
+void db_tbgnd_calc(void)
+
+{
+  DB_TBGND = SYS_TIMERTICS_COUNTER._2_2_ - db_sys_timertics_counter_previous._2_2_;
+  if (DB_TBGND_MAX < DB_TBGND) {
+    DB_TBGND_MAX = DB_TBGND;
+  }
+  dv_tbgnd_av_filter = PT1_Filter_UI((uint)DB_TBGND << 0xb,dv_tbgnd_av_filter,8);
+  DB_TBGND_AV = (word)(dv_tbgnd_av_filter + 0x80 >> 8);
+  db_sys_timertics_counter_previous = SYS_TIMERTICS_COUNTER;
+  return;
+}
+

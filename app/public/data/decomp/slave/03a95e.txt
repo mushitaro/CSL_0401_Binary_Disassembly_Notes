@@ -1,0 +1,54 @@
+
+void smg_clutch_slip_plaus_update(void)
+
+{
+  int iVar1;
+  byte bVar2;
+  byte bVar3;
+  
+  if (N == 0) {
+    if (DAT_00ffdb08 == 0) {
+      iVar1 = 0;
+    }
+    else {
+      iVar1 = -0x400;
+    }
+  }
+  else {
+    iVar1 = 0x400 - ((uint)DAT_00ffdb08 << 10) / (uint)N;
+  }
+  if (iVar1 < -0x400) {
+    iVar1 = -0x400;
+  }
+  if (0x400 < iVar1) {
+    iVar1 = 0x400;
+  }
+  DAT_00ffdb74 = PT1_Filter_SS((short)iVar1,DAT_00ffdb74,K_SMG_TAU_KSCHLUPF);
+  if ((DAT_00ffdb3a == 3) || (DAT_00ffdb3a == 4)) {
+    bVar2 = K_SMG_KSCHLUPF_SCHW_AUF;
+    if ((ASC_ST & 1) != 0) {
+      bVar2 = K_SMG_____DAT_0008a816;
+    }
+    bVar3 = K_SMG_____0401_DAT0008a814;
+    if (DAT_00ffdb35 != 0) {
+      bVar2 = bVar2 * '\x02';
+    }
+  }
+  else {
+    bVar2 = 0x14;
+    bVar3 = 0;
+  }
+  iVar1 = abs((int)DAT_00ffdb74);
+  if (((int)(uint)bVar2 <= iVar1) && (bVar3 <= DAT_00ffdb32)) {
+    DAT_00ffdb73 = 0;
+    DAT_00ffdb35 = 0;
+    return;
+  }
+  if (DAT_00ffdb35 < K_SMG_____DAT_0008a817) {
+    DAT_00ffdb35 = DAT_00ffdb35 + 1;
+    return;
+  }
+  DAT_00ffdb73 = 1;
+  return;
+}
+

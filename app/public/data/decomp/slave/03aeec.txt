@@ -1,0 +1,19 @@
+
+void smg_update_ki_regulation_params(void)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = kfu_bint(&KF_SMG_T_ABREGEL.sizeX,ki_ab,smg_can_istgang);
+  DAT_00ffdc62 = (char)uVar1;
+  if (DAT_00ffdc62 == '\0') {
+    DAT_00ffdc62 = '\x01';
+  }
+  uVar1 = kfu_bint(&KF_SMG_T_AUFREGEL.sizeX,ki_auf,smg_can_istgang);
+  DAT_00ffdc66 = (char)uVar1;
+  if (DAT_00ffdc66 == '\0') {
+    DAT_00ffdc66 = '\x01';
+  }
+  return;
+}
+

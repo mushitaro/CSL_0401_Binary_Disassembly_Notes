@@ -1,0 +1,57 @@
+
+void EGAS_SOLL_BESTIMM(void)
+
+{
+  if ((((((EDK_STATUS & 0x80) == 0) && ((ZUSTAND_MOTOR & KI.15 aus) != 0)) && (N == 0)) &&
+      (K_EGAS_UBMIN < UB)) ||
+     ((((EDK_STATUS & 0x40) != 0 && (b_diag != '\0')) && ((ZUSTAND_MOTOR & S) != 0)))) {
+    if ((EDK_DS2_ADAPT_STAT & 2) == 0) {
+      if (((((WDK_ADAPT & 3) == 0) && (K_WDK_A100_ADAPT == '\0')) ||
+          (((WDK_ADAPT & 0x10) != 0 || ((WDK_ADAPT & 0x20) != 0)))) &&
+         ((EDK_DS2_ADAPT_STAT & 1) == 0)) {
+        EDK_STATUS = EDK_STATUS & 0xbf | 0x80;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+        EDK_SOLL_ADAPT = 0;
+        EGAS_SOLL_STATUS = 2;
+        return;
+      }
+      EGAS_SOLL_STATUS = 4;
+      edk_full_load_adaptation();
+      return;
+    }
+  }
+  else {
+    EDK_STATUS = EDK_STATUS & 0xbf;
+    EDK_SOLL_ADAPT = 0;
+    DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+    if ((PDR_STATUS & 1) == 0) {
+      if ((EDK_TR_DIAG_STAT & 0x80) != 0) {
+        EGAS_SOLL_STATUS = 3;
+        return;
+      }
+      if (cfg_m_egas != '\0') {
+        EDK_SOLL_ADAPT = 0;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+        EGAS_SOLL_STATUS = 2;
+        return;
+      }
+      if ((ZUSTAND_MOTOR & S) != 0) {
+        EDK_SOLL_ADAPT = 0;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+        EGAS_SOLL_STATUS = 2;
+        return;
+      }
+      if ((ZUSTAND_MOTOR & KI.15 aus) != 0) {
+        EDK_SOLL_ADAPT = 0;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+        EGAS_SOLL_STATUS = 2;
+        return;
+      }
+      EGAS_SOLL_STATUS = 1;
+      return;
+    }
+  }
+  EGAS_SOLL_STATUS = DAT_00ffda83;
+  return;
+}
+

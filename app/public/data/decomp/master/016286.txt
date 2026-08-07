@@ -1,0 +1,193 @@
+
+void md_limiter_calc(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  short sVar3;
+  ushort uVar4;
+  byte bVar7;
+  word wVar6;
+  int iVar5;
+  ushort uVar8;
+  uint unaff_D5;
+  char cVar9;
+  KL_5_2byte_2byte *curve;
+  
+  uVar8 = V_DIREKT;
+  if ((V_DIREKT_ED & 0x40) != 0) {
+    uVar8 = V_ANTRIEB;
+  }
+  uVar4 = (ushort)GANG;
+  if (7 < uVar4) {
+    uVar4 = 0;
+  }
+  bVar7 = SK_VMAX_CONTR;
+  if (SK_VMAX_CONTR < DAT_00ffda37) {
+    bVar7 = DAT_00ffda37;
+  }
+  if (4 < bVar7) {
+    bVar7 = 4;
+  }
+  if (bVar7 == 0) {
+    wVar6 = KL_V_MAX_GANG.y[(short)uVar4];
+  }
+  else {
+    wVar6 = KL_V_MAX_SK.y[(short)(ushort)bVar7];
+  }
+  uVar4 = wVar6 - K_V_MAX_HYS;
+  if (uVar8 < uVar4) {
+    VMAX_ST = 0;
+  }
+  if ((((uVar4 < uVar8) && ((VMAX_ST & 1) == 0)) && (cfg_m_betriebsmode != '\x02')) &&
+     (CFG_ROLLENBETRIEB == 0)) {
+    cVar9 = ASC_AX;
+    if (ASC_AX < '\0') {
+      cVar9 = '\0';
+    }
+    VMAX_ST = VMAX_ST | 1;
+    uVar1 = ((uint)wVar6 << 10) / (uint)uVar8;
+    iVar2 = (int)cVar9 * (uint)K_MD_J_FZ;
+    if (iVar2 < 0) {
+      iVar2 = iVar2 + 0xff;
+    }
+    MD_IND_VMAX = (ushort)((int)((uVar1 & 0xffff) *
+                                ((int)((uVar1 & 0xffff) *
+                                      ((uint)MD_IND_WUNSCH_RED_KORR - (iVar2 >> 8))) >> 10)) >> 10);
+    if ((int)(short)MD_IND_VMAX < (int)(uint)K_MD_VMAX_MIN) {
+      MD_IND_VMAX = K_MD_VMAX_MIN;
+    }
+    if ((int)(uint)K_MD_VMAX_MAX < (int)(short)MD_IND_VMAX) {
+      MD_IND_VMAX = K_MD_VMAX_MAX;
+    }
+  }
+  if ((wVar6 < uVar8) && (VMAX_ST == 1)) {
+    VMAX_ST = 3;
+  }
+  if (uVar8 < uVar4) {
+    VMAX_ST = 0;
+  }
+  if ((VMAX_ST & 2) != 0) {
+    iVar2 = (uint)K_MD_I_VMAX * ((uint)wVar6 - (uint)uVar8);
+    if (iVar2 < 0) {
+      iVar2 = iVar2 + 0xf;
+    }
+    MD_IND_VMAX = MD_IND_VMAX + (short)(iVar2 >> 4);
+    if ((int)(short)MD_IND_VMAX < (int)(uint)K_MD_VMAX_MIN) {
+      MD_IND_VMAX = K_MD_VMAX_MIN;
+    }
+    if ((int)(uint)K_MD_VMAX_MAX < (int)(short)MD_IND_VMAX) {
+      MD_IND_VMAX = K_MD_VMAX_MAX;
+    }
+  }
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) ||
+     (bVar7 = AUSS_ANZ_ZYL_OFF, zyl_count < AUSS_ANZ_ZYL_OFF)) {
+    bVar7 = 0;
+  }
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (KATS_MD == '\n')) {
+    uVar1 = klu_wint(&KL_MD_BEGR_FST.sizeX,N);
+    MD_BEGR_AUSS = (ushort)uVar1;
+    MD_BEGR_AUSS_ST = 0xf;
+  }
+  if ((bVar7 != 0) && (MD_BEGR_AUSS_ST == 0)) {
+    MD_BEGR_AUSS_ST = 2;
+    DAT_00ffd911 = K_MD_BEGR_AUSS_TIME;
+  }
+  if ((MD_BEGR_AUSS_ST & 2) != 0) {
+    if ((MD_BEGR_AUSS_ST & 1) == 0) {
+      curve = &KL_MD_BEGR_AUSS;
+    }
+    else {
+      curve = &KL_MD_BEGR_FST;
+    }
+    uVar1 = klu_wint(&curve->sizeX,N);
+    unaff_D5 = uVar1 & 0xffff;
+    if ((MD_BEGR_AUSS_ST & 4) == 0) {
+      if (DAT_00ffd911 == '\0') {
+        MD_BEGR_AUSS = MD_IND_WUNSCH;
+        MD_BEGR_AUSS_ST = MD_BEGR_AUSS_ST | 4;
+      }
+      else {
+        DAT_00ffd911 = DAT_00ffd911 + -1;
+      }
+    }
+  }
+  uVar8 = MD_BEGR_AUSS;
+  if (((MD_BEGR_AUSS_ST & 4) != 0) && (uVar8 = (ushort)unaff_D5, (MD_BEGR_AUSS_ST & 8) == 0)) {
+    if ((int)(unaff_D5 & 0xffff) < (int)((uint)MD_BEGR_AUSS - (uint)K_MD_BEGR_AUSS_ABREG)) {
+      uVar8 = MD_BEGR_AUSS - K_MD_BEGR_AUSS_ABREG;
+    }
+    else {
+      MD_BEGR_AUSS_ST = MD_BEGR_AUSS_ST | 8;
+    }
+  }
+  MD_BEGR_AUSS = uVar8;
+  sVar3 = kls_wint(&KL_NMAX_PROFIL_DI.sizeX,N);
+  iVar2 = (int)NMAX_PROFIL_I + (int)sVar3;
+  if ((cfg_m_betriebsmode == '\x02') || (CFG_ROLLENBETRIEB != '\0')) {
+    iVar5 = (int)K_NMAX_PROFIL_ROLLE;
+  }
+  else {
+    iVar5 = 0;
+  }
+  if (iVar2 < 0) {
+    iVar2 = 0;
+  }
+  if (iVar5 + K_NMAX_PROFIL_I_MAX < iVar2) {
+    iVar2 = iVar5 + K_NMAX_PROFIL_I_MAX;
+  }
+  if (0x7fff < iVar2) {
+    iVar2 = 0x7fff;
+  }
+  NMAX_PROFIL_I = (short)iVar2;
+  if ((iVar5 + K_NMAX_PROFIL_AKTIV < iVar2) && ((MD_NMAX_ST & 1) == 0)) {
+    if ((MD_NMAX_ST & 2) == 0) {
+      if (K_NMAX_DAUER < N) {
+        NMAX_DAUER = N;
+      }
+      else {
+        NMAX_DAUER = K_NMAX_DAUER;
+      }
+    }
+    MD_NMAX_ST = MD_NMAX_ST | 3;
+    MD_NMAX_BEGR = MD_IND_WUNSCH_BEGR;
+  }
+  if (((MD_NMAX_ST & 1) != 0) && (iVar2 < (iVar5 + K_NMAX_PROFIL_AKTIV) - (int)K_NMAX_PROFIL_HYS)) {
+    MD_NMAX_ST = MD_NMAX_ST & 0xfe;
+  }
+  if ((MD_NMAX_ST & 1) != 0) {
+    if ((uint)K_NMAX_DAUER_RAMPE + (uint)K_NMAX_DAUER < (uint)NMAX_DAUER) {
+      NMAX_DAUER = NMAX_DAUER - K_NMAX_DAUER_RAMPE;
+    }
+    else {
+      NMAX_DAUER = K_NMAX_DAUER;
+    }
+  }
+  if ((MD_NMAX_ST & 3) == 2) {
+    if (NMAX_DAUER < N_BEGRENZER) {
+      NMAX_DAUER = K_NMAX_DAUER_RAMPE + NMAX_DAUER;
+    }
+    else {
+      NMAX_DAUER = N_BEGRENZER;
+      MD_NMAX_ST = MD_NMAX_ST & 0xfd;
+    }
+  }
+  if (MD_NMAX_ST != 0) {
+    uVar1 = (uint)MD_NMAX_BEGR +
+            ((int)((int)(short)(NMAX_DAUER - N) * (uint)K_MD_NMAX_BEGR_I) >> 10);
+    if ((int)uVar1 < (int)(uint)K_MD_NMAX_MIN) {
+      uVar1 = (uint)K_MD_NMAX_MIN;
+    }
+    if ((int)(uint)K_MD_NMAX_MAX < (int)uVar1) {
+      uVar1 = (uint)K_MD_NMAX_MAX;
+    }
+    MD_NMAX_BEGR = (ushort)uVar1;
+    if ((short)(NMAX_DAUER - N) < 100) {
+      MD_NMAX_ST = MD_NMAX_ST | 4;
+      return;
+    }
+    MD_NMAX_ST = MD_NMAX_ST & 0xfb;
+  }
+  return;
+}
+

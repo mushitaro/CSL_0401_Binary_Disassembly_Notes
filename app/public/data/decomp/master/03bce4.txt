@@ -1,0 +1,59 @@
+
+void can_tx_329(struct_rx_tx_frame *tx_frame_struct)
+
+{
+  uint uVar1;
+  byte b0;
+  byte b1;
+  byte b2;
+  byte b3;
+  byte b4;
+  byte b5;
+  byte b6;
+  byte b7;
+  
+  b0 = 0;
+  b4 = 0;
+  b7 = 0;
+  switch((byte)(SYS_TIMERTICS_COUNTER >> 6) & 3) {
+  case 0:
+    b0 = 0x11;
+    break;
+  case 1:
+    b0 = 0x40;
+    break;
+  case 2:
+    b0 = 0x80;
+    break;
+  case 3:
+    b0 = MD_NORM_CAN | 0xc0;
+  }
+  b1 = tmot_can;
+  b2 = p_umg_can;
+  b3 = DAT_00ffeb02 << 5 | 4;
+  if (S_KRAFTSCHLUSS == '\0') {
+    b3 = DAT_00ffeb02 << 5 | 5;
+  }
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+    b3 = b3 | 0x10;
+  }
+  if (DAT_00ffeb62 == '\x01') {
+    uVar1 = ((uint)MD_WUNSCH_REL << 8) / 1000;
+    if (0xfe < uVar1) {
+      uVar1 = 0xfe;
+    }
+    b4 = (byte)uVar1;
+  }
+  b5 = pwg_soll_can;
+  b6 = (SCHALT_M_ST & 0x80) != 0;
+  if ((S_BLS_ED & 0x40) != 0) {
+    b6 = b6 | 2;
+  }
+  if ((pwg_kickdown_st & 1) != 0) {
+    b6 = b6 | 4;
+  }
+  b6 = (fgr_b_aktiv & 7) << 3 | b6;
+  can_a_tx_frame_data(&b0,tx_frame_struct);
+  return;
+}
+

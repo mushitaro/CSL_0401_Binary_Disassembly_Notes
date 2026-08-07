@@ -1,0 +1,17 @@
+
+void sk_timeout_counter(void)
+
+{
+  bool bVar1;
+  int iVar2;
+  
+  iVar2 = DAT_00ffd1e2 + 1;
+  bVar1 = 3000 < DAT_00ffd1e2;
+  DAT_00ffd1e2 = iVar2;
+  if (bVar1) {
+    sk_init();
+    DAT_00ffd1e2 = 0;
+  }
+  return;
+}
+

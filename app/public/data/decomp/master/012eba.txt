@@ -1,0 +1,29 @@
+
+void task_20ms(void)
+
+{
+  s_bls_ed_filter();
+  tdme_calc();
+  v_direkt_calc();
+  v_calc();
+  asc_a_calc();
+  FUN_00016010();
+  EGAS_SK_PCNTRL_Monitor_Partner_Processor_Timer();
+  FUN_00024434();
+  edk_tr_diag_stat();
+  if (K_FGR_CONFIG != 0x63) {
+    FUN_00013f50();
+  }
+  dyn_st_calc();
+  kath_zustand_calc();
+  tz_kath_faktor_calc();
+  lfr_calc();
+  if (cfg_m_egas != '\0') {
+    llr_qsoll_calc();
+  }
+  rf_dyn_st_calc();
+  FUN_0002cd80();
+  pcntrl_m = pcntrl_m | 0x2000;
+  return;
+}
+

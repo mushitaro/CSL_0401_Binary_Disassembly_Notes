@@ -1,0 +1,63 @@
+
+uint32_t flash_req_parse(uint32_t *out_len)
+
+{
+  uint8_t variant_idx;
+  uint32_t addr_hi;
+  uint8_t entry_idx;
+  struct_flash_req_region_table *psVar1;
+  uint8_t *puVar2;
+  uint resolved_addr;
+  
+  rsp_ptr[1] = 0;
+  entry_idx = 0;
+  psVar1 = region_table;
+  do {
+    if (req_ptr[3] == psVar1->id) {
+      if (region_table[entry_idx].variant != 0xff) {
+        variant_idx = 0;
+        puVar2 = &region_table[entry_idx].variant;
+        goto LAB_000028f8;
+      }
+      variant_idx = 0;
+      break;
+    }
+    psVar1 = psVar1 + 1;
+    entry_idx = entry_idx + 1;
+  } while (entry_idx < 0x41);
+  goto LAB_00002926;
+  while( true ) {
+    puVar2 = puVar2 + 10;
+    variant_idx = variant_idx + 1;
+    if (0xd < variant_idx) break;
+LAB_000028f8:
+    if (*puVar2 == (req_ptr[4] & 0xf0)) {
+      entry_idx = variant_idx + entry_idx;
+      break;
+    }
+  }
+LAB_00002926:
+  if ((entry_idx < 0x41) && (variant_idx < 0xe)) {
+    addr_hi = (uint32_t)(byte)req_ptr[4];
+    if (region_table[entry_idx].variant != 0xff) {
+      addr_hi = addr_hi & 0xf;
+    }
+    resolved_addr = (uint)(byte)req_ptr[6] | ((uint)(byte)req_ptr[5] | addr_hi << 8) << 8;
+    if ((((region_table[entry_idx].start_addr != 0) || (region_table[entry_idx].end_addr != 0)) &&
+        (region_table[entry_idx].start_addr <= resolved_addr)) &&
+       (resolved_addr < region_table[entry_idx].end_addr)) {
+      *out_len = (uint)(byte)req_ptr[7];
+      if (region_table[entry_idx].end_addr < *out_len + resolved_addr) {
+        *out_len = region_table[entry_idx].end_addr - resolved_addr;
+      }
+      if (0x80 < (int)*out_len) {
+        *out_len = 0x80;
+      }
+      return resolved_addr;
+    }
+  }
+  rsp_ptr[2] = 0xb0;
+  *out_len = 0xffffffff;
+  return 0;
+}
+

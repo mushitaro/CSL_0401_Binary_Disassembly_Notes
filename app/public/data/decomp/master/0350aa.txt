@@ -1,0 +1,20 @@
+
+/* part of OBD readiness? */
+
+void obd_warm_up_readiness(void)
+
+{
+  if (((((OBD_STATE & 2) == 0) && (TSTART < TMOT)) && (0x15 < (int)((uint)TMOT - (uint)TSTART))) &&
+     ((0x77 < TMOT && (TSTART < 0x76)))) {
+    OBD_STATE = OBD_STATE | 2;
+    OBD_STEUER = OBD_STEUER | 1;
+    if (FF_WUC_CNT != -1) {
+      FF_WUC_CNT = FF_WUC_CNT + 1;
+    }
+    if (DAT_00ffd7d2 != -1) {
+      DAT_00ffd7d2 = DAT_00ffd7d2 + 1;
+    }
+  }
+  return;
+}
+

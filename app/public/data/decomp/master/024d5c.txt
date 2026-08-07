@@ -1,0 +1,12 @@
+
+/* EGAS Safety Concept Computer Core Test Task 7&8 - error healing & error reporting */
+
+uint SK_TR_Test_7_8(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = ed_report(DTC_63_INTERNAL,0);
+  return uVar1 & 0xffffff6f;
+}
+

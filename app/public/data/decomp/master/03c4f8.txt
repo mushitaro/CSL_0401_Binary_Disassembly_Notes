@@ -1,0 +1,62 @@
+
+void can_rx_1f3(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  short sVar1;
+  ushort uVar2;
+  byte bVar3;
+  ushort uVar4;
+  byte abStack_c [2];
+  byte local_a;
+  byte local_9;
+  byte local_8;
+  byte local_7;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    can_a_rx_frame_data(abStack_c,rx_frame_struct);
+    sVar1 = (ushort)local_9 + (local_8 & 3) * 0x100;
+    if (sVar1 == 0x3ff) {
+      ASC_A_ST = ASC_A_ST | 1;
+      ASC_AX_DPR = 0x3ff;
+    }
+    else {
+      ASC_A_ST = ASC_A_ST & 0xfe;
+      ASC_AX_DPR = sVar1 + -0x200;
+    }
+    if (K_DSC_STAND == '\0') {
+      uVar4 = (ushort)(local_8 >> 6) << 8;
+      uVar2 = (ushort)local_7;
+    }
+    else {
+      uVar4 = (ushort)(local_8 >> 6);
+      uVar2 = (ushort)local_7 << 2;
+    }
+    if ((ushort)(uVar2 + uVar4) == 0x3ff) {
+      ASC_A_ST = ASC_A_ST | 2;
+      ASC_AY_DPR = 0x3ff;
+    }
+    else {
+      ASC_AY_DPR = uVar2 + uVar4 + -0x200;
+      if (K_DSC_STAND == '\x01') {
+        ASC_AY_DPR = -ASC_AY_DPR;
+      }
+      ASC_A_ST = ASC_A_ST & 0xfd;
+    }
+    bVar3 = (local_a >> 2) << 6;
+    if ((local_8 & 4) == 4) {
+      ASC_SCHALTER = ASC_SCHALTER & 0x3f | bVar3 | 0x20;
+    }
+    else {
+      ASC_SCHALTER = ASC_SCHALTER & 0x1f | bVar3;
+    }
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 4;
+  }
+  else {
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xfffb;
+    ASC_A_ST = 3;
+    ASC_SCHALTER = ASC_SCHALTER & 0x1f;
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+  }
+  return;
+}
+

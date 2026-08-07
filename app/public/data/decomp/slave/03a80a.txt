@@ -1,0 +1,43 @@
+
+uint smg_init(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  byte bVar3;
+  undefined1 *puVar4;
+  
+  iVar1 = abs((uint)md_ind_asc_abs_dpr - (int)DAT_00ffdb58);
+  DAT_00ffdb64 = (undefined2)iVar1;
+  DAT_00ffdb66 = 0x80;
+  DAT_00ffdc62 = 1;
+  DAT_00ffdc66 = 1;
+  smg_bw_null = 5;
+  ki_ab = 1;
+  ki_scha = 1;
+  ki_auf = 1;
+  DAT_00ffdb6c = 1;
+  DAT_00ffdb2c = 0xffff;
+  DAT_00ffdb78 = 1;
+  DAT_00ffdb8a = (ushort)K_SMG_KUPP_M_NORM * 0x28;
+  DAT_00ffdb86 = 0xff;
+  DAT_00ffdb95 = 0xff;
+  DAT_00ffdb88 = 0xff;
+  bVar3 = 0;
+  puVar4 = &DAT_00ffdb91;
+  DAT_00ffdb9a = DAT_00ffdb8a;
+  do {
+    *puVar4 = 0xff;
+    bVar3 = bVar3 + 1;
+    puVar4 = puVar4 + 1;
+  } while (bVar3 < 5);
+  DAT_00ffdbe0 = 0x80;
+  DAT_00ffdbe4 = 0x80;
+  DAT_00ffdbe3 = 0x80;
+  uVar2 = EE_ERROR_MASK & 0x1101;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    uVar2 = smg_reset_adaptations(0xff);
+  }
+  return uVar2;
+}
+

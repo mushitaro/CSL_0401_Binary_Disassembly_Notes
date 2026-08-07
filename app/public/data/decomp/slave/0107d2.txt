@@ -1,0 +1,14 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void TPU_Init(void)
+
+{
+  _DAT_00fffe00 = 0x3a4a;
+  _DAT_00fffe08 = 0x530;
+  DAT_00fffe0a = 0;
+  TPU_CPR._0_2_ = 0;
+  TPU_CPR._2_2_ = 0;
+  return;
+}
+

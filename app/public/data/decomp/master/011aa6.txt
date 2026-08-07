@@ -1,0 +1,15 @@
+
+void pcntrl_reset_handler(void)
+
+{
+  byte bVar1;
+  
+  bVar1 = SIM_PFPAR._1_1_;
+  SIM_PFPAR._1_1_ = bVar1 & 0x7f;
+  pcntrl_engine_state_reset();
+  if (PCNTRL_RESET_COUNT != -1) {
+    PCNTRL_RESET_COUNT = PCNTRL_RESET_COUNT + 1;
+  }
+  return;
+}
+

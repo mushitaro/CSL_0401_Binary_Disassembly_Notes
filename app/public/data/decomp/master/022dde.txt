@@ -1,0 +1,74 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void pwg_init(void)
+
+{
+  byte bVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  
+  DAT_00ffe6c8 = 0;
+  DAT_00ffe6c0 = 0;
+  DAT_00ffe6c9 = 0;
+  DAT_00ffe6ca = 60000;
+  if (((((EE_ERROR_MASK & 0x1101) == 0) && (K_PWG1_A0_MIN <= PWG1_A0)) &&
+      ((uint)K_PWG1_A0_INITINC + (uint)PWG1_A0 <= (uint)K_PWG1_A0_MAX)) &&
+     ((K_PWG1_A0_MIN <= PWG2_A0 && ((uint)K_PWG1_A0_INITINC + (uint)PWG2_A0 <= (uint)K_PWG1_A0_MAX))
+     )) {
+    PWG1_A0 = K_PWG1_A0_INITINC + PWG1_A0;
+    PWG2_A0 = K_PWG1_A0_INITINC + PWG2_A0;
+  }
+  else {
+    PWG1_A0 = K_PWG1_A0_MAX;
+    PWG2_A0 = K_PWG1_A0_MAX;
+  }
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    PWG_MAX_DIFF_ADAPT = 0;
+  }
+  DAT_00ffe6ba = PWG1_A0 << 6;
+  DAT_00ffe6bc = PWG2_A0 << 6;
+  DAT_00ffe6be = 0;
+  PWG1_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+  PWG2_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+  DAT_00ffe6c6 = 0;
+  DAT_00ffe6c4 = 0;
+  DAT_00ffe6c2 = 0;
+  D_PWG = 0;
+  bVar1 = RESET_STATUS;
+  if ((bVar1 & 0x3f) == 0) {
+    if ((PWG_MODE_DPR == 0) || (7 < PWG_MODE_DPR)) {
+      PWG_MODE = 0;
+    }
+    else {
+      PWG_MODE = PWG_MODE_DPR;
+    }
+  }
+  PWG_ZUSTAND = 0;
+  PWG_ST = 0;
+  PWG1_ABS = PWG1_A0 - K_PWG1_A0_INITINC;
+  PWG2_ABS = PWG2_A0 - K_PWG1_A0_INITINC;
+  iVar2 = (uint)K_PWG1_NORM * -(uint)K_PWG1_A0_INITINC;
+  iVar4 = iVar2 + 0x400;
+  iVar3 = iVar4;
+  if (iVar4 < 0) {
+    iVar3 = iVar2 + 0xbff;
+  }
+  PWG1 = (undefined2)(iVar3 >> 0xb);
+  if (iVar4 < 0) {
+    iVar4 = iVar2 + 0xbff;
+  }
+  PWG2 = (undefined2)(iVar4 >> 0xb);
+  PWG = 0;
+  PWG_SOLL = 0;
+  _PWG_SOLL_DPR = 0;
+  PWG_SOLL_ANF_2 = 0;
+  PWG_SOLL_ANF_2_FAK = 0x80;
+  pwg_soll_can = 0;
+  pwg_kickdown_st = 0;
+  PWG_MODE_DPR = PWG_MODE;
+  pwg_calc();
+  return;
+}
+

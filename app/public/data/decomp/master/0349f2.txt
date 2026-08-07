@@ -1,0 +1,15 @@
+
+void obd_reset_phases_1_to_3(void)
+
+{
+  byte bVar1;
+  
+  bVar1 = 1;
+  do {
+    obd_reset_phase_slot(bVar1);
+    bVar1 = bVar1 + 1;
+  } while (bVar1 < 4);
+  DAT_00ffd85a = DAT_00ffd85a & 0xf1ff;
+  return;
+}
+

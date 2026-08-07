@@ -1,0 +1,30 @@
+
+uint32_t flash_erase_sector_ramstub(uint16_t *sector_base)
+
+{
+  uint32_t uVar1;
+  int iVar2;
+  code *pcVar3;
+  code **ppcVar4;
+  char in_XF;
+  char in_NF;
+  char in_ZF;
+  char in_VF;
+  byte in_CF;
+  code *apcStack_64 [24];
+  ushort local_2;
+  
+  local_2 = (ushort)(byte)(in_XF << 4 | in_NF << 3 | in_ZF << 2 | in_VF << 1 | in_CF);
+  iVar2 = 0x62;
+  pcVar3 = flash_erase_sector;
+  ppcVar4 = apcStack_64;
+  do {
+    *(undefined2 *)ppcVar4 = *(undefined2 *)pcVar3;
+    iVar2 = iVar2 + -2;
+    pcVar3 = pcVar3 + 2;
+    ppcVar4 = (code **)((int)ppcVar4 + 2);
+  } while (iVar2 != 0);
+  uVar1 = (*apcStack_64[0])();
+  return uVar1;
+}
+

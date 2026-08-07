@@ -1,0 +1,48 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint can_rx_1f5(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  byte local_c;
+  byte local_b;
+  byte local_a;
+  byte local_9;
+  byte local_7;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    can_a_rx_frame_data(&local_c,rx_frame_struct);
+    lws_stat_can = local_7 & 0xf;
+    LWS_LRW = (ushort)local_c + (ushort)local_b * 0x100;
+    if ((short)LWS_LRW < 0) {
+      LWS_LRW = -(LWS_LRW & 0x7fff);
+    }
+    uVar1 = (uint)local_a;
+    _LWS_LRWPKT = (ushort)local_a + (ushort)local_9 * 0x100;
+    if ((short)_LWS_LRWPKT < 0) {
+      _LWS_LRWPKT = -(_LWS_LRWPKT & 0x7fff);
+    }
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 8;
+    LWS_STAT = lws_stat_can;
+    if (CAN_ED_LWS != '\0') {
+      uVar1 = ed_report(DTC_85_STEERINGANGLE_CAN_TIMEOUT,0);
+      CAN_ED_LWS = (char)uVar1;
+    }
+  }
+  else {
+    LWS_STAT = 0x83;
+    LWS_LRW = 0;
+    lws_stat_can = 3;
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xfff7;
+    uVar1 = CONCAT22((short)((uint)in_D0 >> 0x10),CAN_TEL_ST) & 0xffff0008;
+    if ((CAN_TEL_ST & 8) != 0) {
+      uVar1 = ed_report(DTC_85_STEERINGANGLE_CAN_TIMEOUT,4);
+      CAN_ED_LWS = (char)uVar1;
+    }
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+  }
+  return uVar1;
+}
+

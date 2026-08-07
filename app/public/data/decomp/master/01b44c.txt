@@ -1,0 +1,27 @@
+
+void tan_init(void)
+
+{
+  ushort xValue;
+  int iVar1;
+  uint uVar2;
+  int iVar3;
+  
+                    /* This function has additional code to 1801 */
+  xValue = tan_ad;
+  uVar2 = klu_wint(&KL_TAN_NTC.sizeX,xValue);
+  TAN_ROH = (ushort)uVar2;
+  tan_filter = tan_filter_calc(TAN_ROH);
+  iVar1 = (uint)tan_filter * 5;
+  iVar3 = iVar1 + 1;
+  if (iVar1 < -1) {
+    iVar3 = iVar1 + 2;
+  }
+  tan_m = (short)(iVar3 >> 1) + 0x8cc;
+  TAN = (undefined1)((int)(tan_filter + 2) >> 2);
+  T_UMG_ERSATZ = TAN;
+  TAN_DIAG_TIME = K_TAN_DIAG_TIME;
+  TAN_DIAG_START = 0xff;
+  return;
+}
+

@@ -1,0 +1,45 @@
+
+/* this function is run once at init */
+
+void rf_init(void)
+
+{
+  int m_norm_roh;
+  byte current_cylinder;
+  word *pwVar1;
+  byte num_cylinders_temp;
+  
+                    /* 0401 Specific */
+  num_cylinders_temp = zyl_count;
+                    /* Luftdichte = 1136
+                       HubVolumen = 3201 */
+  m_norm_roh = (uint)K_RF_LUFTDICHTE * (uint)K_RF_HUBVOLUMEN;
+  m_norm = (short)(m_norm_roh / 10000) * 30;
+  if (m_norm_roh < 0) {
+    m_norm_roh = m_norm_roh + 0xff;
+  }
+                    /* ivar2 >> 8 = 14204.4375 */
+                    /* DAT_00ffeeb6 = 10813.5222 */
+  m_norm_fakt = (undefined2)(153600000 / (m_norm_roh >> 8));
+  pwVar1 = ml_720;
+  for (current_cylinder = 0; current_cylinder < num_cylinders_temp;
+      current_cylinder = current_cylinder + 1) {
+    *pwVar1 = 0;
+    pwVar1 = pwVar1 + 1;
+  }
+  ml_720_akt_zyl = 0;
+  DAM = 0;
+  if (rf_p_saug_i < k_rf_p_saug_i_min) {
+    rf_p_saug_i = 0;
+  }
+  if (k_rf_p_saug_i_max < rf_p_saug_i) {
+    rf_p_saug_i = 0;
+  }
+  rf_diag_index_mask = 0xf;
+  rf_diag_ed_st = 0;
+  rf_diag_sk_st = 0;
+  rf_korr = 0x400;
+  rf_korr_st = 0;
+  return;
+}
+

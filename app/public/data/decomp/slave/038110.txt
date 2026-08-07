@@ -1,0 +1,19 @@
+
+undefined4 smg_asc_cap_request(short param_1,byte param_2)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  if (param_2 == 0) {
+    param_2 = 1;
+  }
+  uVar1 = ((int)DAT_00ffdb64 << 7) / (int)(uint)param_2;
+  uVar2 = uVar1;
+  if (((ASC_ST & 1) != 0) && (uVar2 = (uint)param_1, (int)(uVar1 & 0xffff) < (int)uVar2)) {
+    DAT_00ffdb82 = DAT_00ffdb82 | 0x80;
+    param_1 = (short)uVar1;
+  }
+  return CONCAT22((short)(uVar2 >> 0x10),param_1);
+}
+

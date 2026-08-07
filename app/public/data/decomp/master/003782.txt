@@ -1,0 +1,23 @@
+
+undefined4 flash_word_write_verify_byte(void)
+
+{
+  undefined4 uVar1;
+  ushort in_D1w;
+  ushort uVar2;
+  uint unaff_D6;
+  ushort *unaff_A5;
+  
+  *unaff_A5 = in_D1w;
+  uVar1 = 2;
+  uVar2 = *unaff_A5;
+  if ((unaff_D6 & 1) == 0) {
+    in_D1w = in_D1w >> 8;
+    uVar2 = uVar2 >> 8;
+  }
+  if ((char)in_D1w == (char)uVar2) {
+    uVar1 = 0;
+  }
+  return uVar1;
+}
+

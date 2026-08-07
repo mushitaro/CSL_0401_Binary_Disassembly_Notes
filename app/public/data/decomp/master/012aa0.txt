@@ -1,0 +1,9 @@
+
+void nw_sync_clear_requests(void)
+
+{
+  NW_SYNCREQUEST_M = 0;
+  NW_SYNCREQUEST_S = 0;
+  return;
+}
+

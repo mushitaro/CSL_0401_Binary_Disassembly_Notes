@@ -1,0 +1,28 @@
+
+uint ti_load_factor(void)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  KF_18x3_2byte_2byte_1byte *table;
+  
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+    if (((ZUSTAND_MOTOR & LL) == 0) || ((LLS_ST & 0x80) == 0)) {
+      if ((ZUSTAND_MOTOR & VL) == 0) {
+        table = (KF_18x3_2byte_2byte_1byte *)&KF_TI_N_RF;
+      }
+      else {
+        table = &KF_TI_N_RF_VL;
+      }
+      uVar1 = kfus_bint(&table->sizeX,N,RF);
+    }
+    else {
+      uVar1 = klu_bint(&KL_TI_N_ZWD_LL.sizeX,N40);
+    }
+    TI_F_STAT = (char)uVar1;
+    return uVar1;
+  }
+  TI_F_STAT = 0x80;
+  return CONCAT31((int3)((uint)in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+}
+

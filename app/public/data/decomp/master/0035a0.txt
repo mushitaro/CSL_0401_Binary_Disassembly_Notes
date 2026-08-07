@@ -1,0 +1,13 @@
+
+uint32_t memcpy_bytewise(uint8_t *dst,uint8_t *src,uint32_t len)
+
+{
+  do {
+    *dst = *src;
+    len = len - 1;
+    dst = dst + 1;
+    src = src + 1;
+  } while (len != 0);
+  return 0;
+}
+

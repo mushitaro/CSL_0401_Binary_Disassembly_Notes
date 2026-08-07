@@ -1,0 +1,60 @@
+
+/* WARNING: Removing unreachable block (ram,0x00040b68) */
+/* WARNING: Removing unreachable block (ram,0x00040ba8) */
+
+undefined4 kfu_wint(byte *table,ushort xValue,ushort yValue)
+
+{
+  byte bVar1;
+  byte bVar2;
+  short sVar3;
+  ushort uVar4;
+  undefined4 uVar5;
+  ushort uVar6;
+  uint uVar7;
+  undefined4 uVar8;
+  ushort *puVar9;
+  ushort *puVar11;
+  ushort *puVar10;
+  
+  bVar1 = *table;
+  bVar2 = table[1];
+  puVar9 = (ushort *)(table + (short)(ushort)bVar1 * 2);
+  if (xValue < *(ushort *)(table + 2)) {
+    xValue = *(ushort *)(table + 2);
+  }
+  else if (*puVar9 < xValue) {
+    xValue = *puVar9;
+  }
+  uVar6 = (ushort)bVar2;
+  if (yValue < puVar9[1]) {
+    yValue = puVar9[1];
+  }
+  else if (puVar9[(short)uVar6] < yValue) {
+    yValue = puVar9[(short)uVar6];
+  }
+  puVar11 = puVar9 + 1 + (short)uVar6;
+  puVar9 = puVar9 + 1;
+  do {
+    puVar10 = puVar9;
+    puVar9 = puVar10 + -1;
+    uVar6 = (ushort)bVar2;
+  } while (xValue < *puVar9);
+  do {
+    puVar11 = puVar11 + -1;
+    if (*puVar11 <= yValue) break;
+    uVar6 = uVar6 - 1;
+  } while (uVar6 != 0xffff);
+  uVar4 = *puVar10 - *puVar9;
+  uVar7 = (uint)uVar4;
+  if (uVar4 == 0) {
+    uVar7 = 1;
+  }
+  uVar7 = ((uint)(ushort)(xValue - *puVar9) << 8) / uVar7;
+  sVar3 = (ushort)bVar2 + uVar6 * bVar1;
+  uVar5 = tableLookup(uVar7,puVar9[sVar3]);
+  uVar8 = tableLookup(uVar7,puVar9[(short)((ushort)bVar1 + sVar3)]);
+  uVar5 = interpolate(uVar5,uVar8);
+  return uVar5;
+}
+

@@ -1,0 +1,88 @@
+
+undefined ** belu_st_calc(void)
+
+{
+  undefined3 uVar1;
+  undefined **in_D0;
+  undefined4 uVar2;
+  uint uVar3;
+  bool bVar4;
+  byte errortype;
+  
+  if (((ZUSTAND_MOTOR & S) == 0) &&
+     (in_D0 = (undefined **)(CONCAT31((int3)((uint)in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c),
+     (ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) goto LAB_00020328;
+  uVar1 = (undefined3)((uint)in_D0 >> 8);
+  in_D0 = (undefined **)CONCAT31(uVar1,UB);
+  if ((UB <= K_ED_UBMIN_M) ||
+     (((((UB_HR_ST & 2) == 0 || ((UB_ED & 0x20) != 0)) || ((BELU_ST & 0x10) == 0)) ||
+      ((BELU_ST & 0x80) != 0)))) goto LAB_00020328;
+  if ((BELU_ST & 0xf) == 0) {
+    BELU_OPEN_ED = 0;
+    in_D0 = (undefined **)(CONCAT31(uVar1,BELU_ED) & 0xffffffe0);
+    if ((BELU_ED & 0xe0) == 0) goto LAB_00020328;
+    in_D0 = (undefined **)(CONCAT31(uVar1,BELU_ED) & 0xffffff60);
+    if ((BELU_ED & 0x60) == 0) {
+      bVar4 = (BELU_ST & 0x40) == 0;
+LAB_0002031a:
+      if (bVar4) goto LAB_00020328;
+    }
+    else {
+      uVar3 = ed_report(DTC_8F_EBOX_FAN,0x80);
+      in_D0 = (undefined **)(uVar3 & 0xffffff0f);
+      if ((BELU_ST & 0x40) == 0) {
+        bVar4 = (uVar3 & 2) == 0;
+        goto LAB_0002031a;
+      }
+      if ((uVar3 & 1) == 0) {
+        bVar4 = (uVar3 & 4) == 0;
+        goto LAB_0002031a;
+      }
+    }
+    errortype = 0;
+  }
+  else {
+    if ((BELU_ST & 2) != 0) {
+      uVar2 = ed_report(DTC_8F_EBOX_FAN,2);
+      BELU_ED = (byte)uVar2;
+    }
+    if ((BELU_ST & 1) != 0) {
+      if (BELU_SH_TO_UB_ED == '\0') {
+        BELU_SH_TO_UB_ED = '\x01';
+      }
+      else {
+        if ((((cfg_m_baureihe & 0xf8) == 8) || (K_BELU_DIAG_TDME <= TDME)) &&
+           (K_BELU_DIAG_ANLAUF_SPERRE <= (undefined *)(SYS_TIMERTICS_COUNTER - DAT_00ffe950))) {
+          uVar2 = ed_report(DTC_8F_EBOX_FAN,1);
+          BELU_ED = (byte)uVar2;
+        }
+        if ((BELU_ST & 0x40) != 0) {
+          FUN_0003b7b4('\0',0x10);
+          FUN_0003b7b4('\0',0x10);
+          FUN_0003b7b4('\0',0x10);
+        }
+      }
+    }
+    in_D0 = (undefined **)(cfg_m_baureihe & 0xf8);
+    if ((((in_D0 == &PTR_ivr_bootloader_cpu_reset_00000008) &&
+         ((in_D0 = (undefined **)(uint)TDME, TDME < K_BELU_DIAG_TDME ||
+          (in_D0 = (undefined **)(SYS_TIMERTICS_COUNTER - DAT_00ffe950),
+          in_D0 < K_BELU_DIAG_ANLAUF_SPERRE)))) || ((BELU_ST & 4) == 0)) || ((BELU_ED & 2) != 0))
+    goto LAB_00020328;
+    if (((cfg_m_baureihe & 0xf8) == 8) &&
+       (in_D0 = (undefined **)(uint)BELU_OPEN_ED, BELU_OPEN_ED < K_BELU_DIAG_OPEN_E36_7)) {
+      BELU_OPEN_ED = BELU_OPEN_ED + 1;
+      goto LAB_00020328;
+    }
+    errortype = 4;
+  }
+  in_D0 = (undefined **)ed_report(DTC_8F_EBOX_FAN,errortype);
+  BELU_ED = (byte)in_D0;
+LAB_00020328:
+  BELU_ST = BELU_ST & 0xe0;
+  if (DAT_00ffe94e != '\0') {
+    in_D0 = (undefined **)FUN_0003b7b4('\0',0x10);
+  }
+  return in_D0;
+}
+

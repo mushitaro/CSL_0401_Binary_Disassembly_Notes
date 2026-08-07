@@ -1,0 +1,118 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* I think this might be the calculation of residual exhaust gases in the cylinder perhaps? */
+
+void rg_m_calc(void)
+
+{
+  uint rg_evc_effectiveness_factor;
+  uint uVar1;
+  uint rg_temp_density_correction;
+  uint rg_evan1_molmasse_roh;
+  ushort rg_avan1_ist_offset;
+  ushort p_saug_egbp_ratio;
+  uint rg_evan1_MV;
+  uint rg_evan1_molmasse;
+  int rg_m_temp;
+  int rg_avan1_ist_offset_temp;
+  ushort rg_t;
+  
+                    /* 0401 Specific */
+                    /* rg_t (temperature in Kelvin to be used for calculation of residual gas mass)
+                       = Convert tabg from degrees C to degrees K */
+  rg_t = trg + 273;
+                    /* offset AVAN1_IST (actual exhaust cam position) by k_rg_avan1_offset for table
+                       lookup, check for overflow. */
+  rg_avan1_ist_offset_temp = (int)k_rg_avan1_offset + (int)AVAN1_IST;
+  if (rg_avan1_ist_offset_temp == 0 ||
+      SCARRY4((int)k_rg_avan1_offset,(int)AVAN1_IST) != rg_avan1_ist_offset_temp < 0) {
+    rg_avan1_ist_offset = 0;
+  }
+  else {
+    rg_avan1_ist_offset = k_rg_avan1_offset + AVAN1_IST;
+  }
+                    /* Lookup rg_avan1_factor based on rg_avan1_ist_offset. This is the bit I'm not
+                       100% sure on, wish I knew exactly what kl_rg_avan1_factor represented. */
+  rg_evc_effectiveness_factor = klu_wint(&kl_rg_evc_effectiveness_factor.sizeX,rg_avan1_ist_offset);
+  if (N == 0) {
+    uVar1 = 0;
+  }
+  else {
+                    /* avan1_offset_zyl is a scaling factor,it’s a normalized exhaust camshaft
+                       offset contribution, scaled by engine RPM and per-cylinder-per-cycle.  */
+    uVar1 = (((uint)rg_avan1_ist_offset * 1000) / 6) / (uint)N;
+  }
+  if (uVar1 < 1251) {
+    if ((int)uVar1 < 0) {
+      avan1_effective_evcduration_per_cycle = 0;
+    }
+    else {
+      avan1_effective_evcduration_per_cycle = (ushort)uVar1;
+    }
+  }
+  else {
+    avan1_effective_evcduration_per_cycle = 1250;
+  }
+                    /* do a divide by zero check for p_egbp and if we're good then calculate
+                       p_kad/p_egbp ratio */
+  if (p_egbp == 0) {
+    p_saug_egbp_ratio = 0;
+  }
+  else {
+    p_saug_egbp_ratio = (ushort)(((uint)p_saug * 1000) / (uint)p_egbp);
+  }
+                    /* This lookup gives a scaling factor based on whether pressure_from_ML is
+                       greater or less than p_kad_filter_korr */
+  rg_evc_pressure_gradient_factor =
+       kls_wint(&kl_rg_evc_pressure_gradient_factor.sizeX,p_saug_egbp_ratio);
+  rg_temp_density_correction =
+       klu_wint(&kl_rg_temperature_density_correction.sizeX,
+                (ushort)(((200000 / rg_t) * 10000) / (uint)K_RG_R));
+  _rg_intake_density_scaled = (short)((int)(p_saug * rg_temp_density_correction) / 32000);
+  rg_m_avan1 = (short)(((((int)rg_evc_pressure_gradient_factor * (int)_rg_intake_density_scaled) /
+                        10000) * ((int)((rg_evc_effectiveness_factor & 0xffff) *
+                                       (uint)avan1_effective_evcduration_per_cycle) / 100)) / 1000);
+                    /* rg_mol_density (units: mol/cc). This is essentially the ideal gas formula
+                       (n/V = P/RT) */
+  rg_mol_density = (ushort)((((uint)p_egbp * 3125) / (uint)rg_t) / (uint)K_RG_R);
+                    /* Calculate EVAN1_with_offset to facilitate curve lookup */
+  EVAN1_with_offset = EVAN1_IST + 3000;
+  if ((short)EVAN1_with_offset < 3000) {
+    EVAN1_with_offset = 3000;
+  }
+                    /* lookup molar mass based on intake cam position. The position of the intake
+                       camshaft affects the amount of scavenging */
+  rg_evan1_molmasse_roh = klu_wint(&kl_rg_evan1_molmasse.sizeX,EVAN1_with_offset);
+  rg_evan1_molmasse = rg_evan1_molmasse_roh & 0xffff;
+  if ((ushort)rg_evan1_molmasse_roh < k_rg_evan1_molmasse_min) {
+    rg_evan1_molmasse = (uint)k_rg_evan1_molmasse_min;
+  }
+  if (k_rg_evan1_molmasse_min + 10000 < rg_evan1_molmasse) {
+    rg_evan1_molmasse = (uint)(ushort)(k_rg_evan1_molmasse_min + 10000);
+  }
+                    /* rg_evan1_MV is a representation of the molar mass of residual gas * engine
+                       volume, divided by the number of cylinders in the bank */
+  rg_evan1_MV = ((int)(rg_evan1_molmasse * K_RG_V_HUB) / (int)(uint)K_RG_ZYLANZ_BANK) / 20000;
+  DAT_00ffef28 = (short)rg_evan1_MV;
+                    /* rg_m_evan1 is the component of residual gas as a result of the intake cam
+                       timing. Ideal gas formula again plus formula for moles and mass (n (number of
+                       moles) = m (mass)/M (molar mass of gas). 
+                       rg_m_evan1 (m = gas mass) = rg_evan1_MV (MV) * rg_mol_density (n/V).
+                       Simplified this is m = MVn/V which is m = Mn. */
+  rg_m_evan1 = (short)((int)((rg_evan1_MV & 0xffff) * (uint)rg_mol_density) / 100);
+                    /* rg_m (total mass of residual gas) = )rg_m_evan1 (mass of residual gas as a
+                       result of intake camshaft behaviour) + rg_m_avan1 (mass of residual gas as a
+                       result of exhaust camshaft behaviour) */
+  rg_m_temp = (int)rg_m_evan1 + (int)rg_m_avan1;
+  if (k_rg_m_min <= rg_m_temp) {
+    if (rg_m_temp <= k_rg_m_max) {
+      rg_m = (short)rg_m_temp;
+      return;
+    }
+    rg_m = k_rg_m_max;
+    return;
+  }
+  rg_m = k_rg_m_min;
+  return;
+}
+

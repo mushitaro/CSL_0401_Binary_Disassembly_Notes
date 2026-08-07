@@ -1,0 +1,22 @@
+
+void sys_task_scheduler_init(void)
+
+{
+  byte slot_index;
+  undefined1 *task_schedule_table_entry;
+  
+  SYS_TIMERTICS_COUNTER = 0;
+  SYS_SEC_COUNTER = 0;
+  TimerTics_To_Next_Sec = 0x400;
+  task_schedule_table_entry = &sys_task_schedule_table;
+  slot_index = 8;
+  do {
+    *task_schedule_table_entry = 0;
+    task_schedule_table_entry[1] = slot_index;
+    *(undefined2 *)(task_schedule_table_entry + 2) = 0;
+    task_schedule_table_entry = task_schedule_table_entry + 4;
+    slot_index = slot_index - 1;
+  } while ('\0' < (char)slot_index);
+  return;
+}
+

@@ -1,0 +1,61 @@
+
+void can_tx_43f(struct_rx_tx_frame *tx_frame_struct)
+
+{
+  uint uVar1;
+  byte bVar2;
+  byte b0;
+  byte b1;
+  byte b2;
+  byte b3;
+  byte b4;
+  byte b5;
+  byte b6;
+  byte b7;
+  
+  b0 = (byte)((DAT_00ffd953 & 0xe) >> 1);
+  if ((DAT_00ffd954 & 8) != 0) {
+    b0 = b0 | 8;
+  }
+  if ((DAT_00ffd954 & 4) != 0) {
+    b0 = b0 | 0x20;
+  }
+  bVar2 = DAT_00ffd960 >> 4;
+  if (3 < bVar2) {
+    bVar2 = 3;
+  }
+  b0 = bVar2 << 6 | b0;
+  b1 = DAT_00ffd953 >> 4;
+  b2 = DAT_00ffd952 << 5 | DAT_00ffd952 >> 4;
+  if ((DAT_00ffd954 & 2) != 0) {
+    b2 = b2 | 0x10;
+  }
+  DAT_00ffefbc = DAT_00ffefbc + 1 & 0xf;
+  b3 = DAT_00ffefbc | ~(DAT_00ffefbc ^ b1) << 4;
+  b4 = DAT_00ff8297;
+  b5 = 4;
+  if (DAT_00ffd955 == 0x8) {
+    b5 = 0xc;
+  }
+  b5 = (byte)((CAN_dt_reinf__drivetrain_reinforcement_ & 3) << 6) | b5;
+  if ((DAT_00ffd954 & 0x80) != 0) {
+    b5 = b5 | 1;
+  }
+  if ((DAT_00ffd954 & 1) != 0) {
+    b5 = b5 | 0x20;
+  }
+  b6 = (byte)((int)(uint)CAN_dt_reinf__drivetrain_reinforcement_ >> 2);
+  if (CAN_tq_clu__torque_on_clutch_ == 0xffff) {
+    b7 = 0xff;
+  }
+  else {
+    uVar1 = (CAN_tq_clu__torque_on_clutch_ + 10) / 0x14;
+    b7 = (byte)uVar1;
+    if (0xfe < (ushort)uVar1) {
+      b7 = 0xfe;
+    }
+  }
+  can_a_tx_frame_data(&b0,tx_frame_struct);
+  return;
+}
+

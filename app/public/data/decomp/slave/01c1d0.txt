@@ -1,0 +1,60 @@
+
+void ti_bgnd(void)
+
+{
+  undefined4 uVar1;
+  byte curr_zyl;
+  char zyl_aus;
+  
+  zyl_aus = 0;
+  for (curr_zyl = 0; curr_zyl < zyl_count; curr_zyl = curr_zyl + 1) {
+    if (((int)(TI_ST_PSP & 0x3fc) >> 2 & 1 << (curr_zyl & 0x3f)) != 0) {
+      zyl_aus = zyl_aus + 1;
+    }
+  }
+  TI_AUSBLEND_IST = zyl_count - zyl_aus;
+  ti_n_begrenzer_update();
+  ti_start_sequence_controller();
+  ti_start_factor();
+  ti_base_load_factor();
+  ti_load_factor();
+  ti_ptkorr_factor();
+  ti_full_load_per_cyl();
+  ti_idle_sync_offset_per_cyl();
+  ti_moment_factor();
+  ti_ende_calc();
+                    /* Injector Driver Diagnosis */
+  ti_diag_tr_update(&TI_ED_TR1,0xc1);
+  ti_diag_tr_update(&TI_ED_TR2,0xc2);
+  ti_diag_ev_update(1,&TI_ED_EV1,0xa1);
+  ti_diag_ev_update(2,&TI_ED_EV2,0xa2);
+  ti_diag_ev_update(3,&TI_ED_EV3,0xa3);
+  ti_diag_ev_update(4,&TI_ED_EV4,0xa4);
+  if (((cfg_s_motortyp & 0xf7) == 4) || ((cfg_s_motortyp & 0xef) == 0x20)) {
+    ti_diag_ev_update(5,&TI_ED_EV5,0xa5);
+    ti_diag_ev_update(6,&TI_ED_EV6,0xa6);
+  }
+  if ((cfg_s_motortyp & 0xef) == 0x20) {
+    ti_diag_ev_update(7,&TI_ED_EV7,0xa7);
+    ti_diag_ev_update(8,&TI_ED_EV8,0xa8);
+  }
+  ti_diag_update();
+  if ((TI_ED_EV_SUMME == '\0') && (AUSS_ZYL_OFF == '\0')) {
+    TI_ST_HELP = TI_ST_HELP & 0xef;
+  }
+  else {
+    TI_ST_HELP = TI_ST_HELP | 0x10;
+  }
+  if (((SK_TI_CONTR & 1) == 0) && ((DAT_00ffe6d0 & 1) == 0)) {
+    if ((TI_ST_HELP & 0x10) != 0) {
+      uVar1 = kfus_bint(&KF_TI_EV_ABGESCH_N_RF.sizeX,N,RF);
+      TI_F_SKS = (char)uVar1;
+      return;
+    }
+    TI_F_SKS = 0x80;
+    return;
+  }
+  TI_F_SKS = K_TI_SKS;
+  return;
+}
+

@@ -1,0 +1,14 @@
+
+void dyn_init(void)
+
+{
+  DYN_KR_TZ = 0;
+  DYN_KR_ST = 0;
+  DYN_DBGR_TZ = 0;
+  DYN_DBGR_ST = 0;
+  DYN_ST = 0;
+  DYN_SPERRFLAG = 0;
+  FUN_0002c080();
+  return;
+}
+

@@ -1,0 +1,272 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001674e) */
+/* CSL Intake Flap State Machine (runs every 100 ms)
+   
+    - Stepped state machine for managing actuator tests, position validation, and diagnostic checks.
+    * - Controls timers and flags for event sequencing, actuator output, error handling, and test
+   reporting.
+    - Ensures that the flap can be opened/closed as commanded, validates plausibility of the flap
+   position sensor,
+       and triggers error recovery or resets as needed.
+    - Uses a state variable (DAT_00ffdc99) to sequence through test/monitor states.
+    - Coordinates with actuator output, diagnostic timer, and DTC logic to ensure system robustness.
+    */
+
+void ask_st_calc(void)
+
+{
+  short sVar1;
+  byte value;
+  ushort uVar4;
+  int iVar2;
+  uint uVar3;
+  byte bVar6;
+  short sVar5;
+  bool bVar7;
+  
+  bVar6 = 0;
+  value = 0;
+                    /* Update desired/commanded flap state (open/close/diag) based on logic and
+                       configuration */
+  ask_zustand_calc();
+                    /* Only allow issuing a new open/close command if flap is not in blocked
+                       (transition) state */
+  if (k_ask_flap_driver_sperre <= ask_flap_driver_block_timer) {
+    if ((ask_zustand & Flap_Open) != Flap_Closed) {
+                    /* If flap should be open but confirmation bit isn't set, do nothing */
+      if ((ask_zustand_dpr & 1) != 0) {
+        return;
+      }
+                    /* Command actuator to open flap */
+      ask_flap_driver_open();
+      return;
+    }
+    if ((ask_zustand_dpr & 1) == 0) {
+      return;
+    }
+                    /* Command actuator to close flap */
+    ask_flap_driver_close();
+    return;
+  }
+                    /* If a diagnostic test is running, handle test logic */
+  if ((ask_flap_diag_st & 0x10) != 0) {
+    if (((ask_flap_diag_st & 4) != 0) || ((ask_flap_diag_st & 2) != 0)) {
+      ask_diag();
+    }
+    ask_st = 0;
+  }
+                    /* If test bit is still set, skip rest of function */
+  if ((ask_flap_diag_st & 0x10) != 0) {
+    return;
+  }
+  switch(ask_st) {
+  case 0:
+                    /* Initial state — wait for actuation trigger */
+    ask_flap_driver_decel_offset = 0;
+    value = bVar6;
+    if (((ask_flap_driver_timer != 0) || ((ask_ed & 0x40) != 0)) || (ask_roh == 0)) {
+LAB_000165ea:
+      ask_flap_driver_timer = ask_flap_driver_timer - 1;
+                    /* Countdown timer during idle or startup */
+      goto LAB_000169e4;
+    }
+    ask_flap_driver_timer = 0;
+    if ((ask_flap_diag_st & 1) != 0) goto LAB_000165fc;
+                    /* If flap position is already open beyond max tolerance, skip to closing logic
+                        */
+    if ((uint)k_ask_flap_pot_tol + (uint)ask_flap_pot_learned_close_pos <= (uint)ask_roh)
+    goto LAB_0001663a;
+                    /* Begin open transition */
+    ask_st = 1;
+    break;
+  case 1:
+                    /* Transition condition check — should flap open or run self-test? */
+    if ((ask_zustand & Flap_Open) == Flap_Closed) {
+      if ((((V == 0) && ((ZUSTAND_MOTOR & LL) != 0)) && (600 < T_MOTOR_STEHT)) &&
+         ((k_ask_tan_min < TAN && (DAT_00ffdc98 == '\0')))) {
+                    /* If engine is stopped and warm, start self-test */
+        DAT_00ffdc98 = '\x01';
+        ask_st = 7;
+        ask_flap_diag_st = ask_flap_diag_st | 0x80;
+      }
+      goto LAB_000169e4;
+    }
+                    /* Begin opening flap */
+    ask_st = 2;
+    ask_flap_driver_energised_cycles = 0;
+    value = 0;
+    break;
+  case 2:
+                    /* Opening: calculate error between setpoint and actual */
+    sVar5 = (short)((int)((uint)k_ask_flap_pot_setpoint - (uint)ask_filter) / 10);
+    if (sVar5 < 0) {
+      sVar5 = 0;
+    }
+    if (0xff < sVar5) {
+      sVar5 = 0xff;
+    }
+                    /* Lookup actuator output for this delta */
+    uVar3 = kls_bint(&kl_ask_flap_delta_to_driver.sizeX,(byte)sVar5);
+    value = (byte)uVar3;
+    bVar7 = ask_flap_driver_timer == 0;
+    ask_flap_driver_timer = ask_flap_driver_timer - 1;
+    if (bVar7) {
+                    /* If opening timed out, move to blocking/settling state */
+      ask_flap_driver_block_timer = ask_flap_driver_block_timer + 1;
+      ask_st = 5;
+      value = 0;
+      ask_flap_driver_timer = k_flap_driver_transition_timer;
+    }
+                    /* If position reached minimum setpoint, go to hold state */
+    if ((int)((uint)k_ask_flap_pot_setpoint - (uint)k_ask_flap_pot_min) < (int)(uint)ask_filter) {
+      ask_st = 3;
+      ask_flap_close_reference_position = ask_filter;
+      goto LAB_000169e4;
+    }
+                    /* If flap command was cancelled, go to closing state */
+    if ((ask_zustand & Flap_Open) != Flap_Closed) goto LAB_000169e4;
+LAB_0001663a:
+    ask_st = 4;
+    break;
+  case 3:
+                    /* Holding flap open */
+    ask_flap_driver_decel_offset = '\0';
+    value = 0;
+                    /* If flap should now close, begin closing sequence */
+    if ((ask_zustand & Flap_Open) == Flap_Closed) {
+      ask_st = 4;
+      ask_flap_driver_energised_cycles = 0;
+      ask_flap_driver_timer = k_flap_driver_transition_timer;
+    }
+                    /* If flap is still too open, go to close-ramp state */
+    if ((int)((uint)ask_flap_close_reference_position - (uint)k_ask_flap_pot_min) <=
+        (int)(uint)ask_filter) goto LAB_000169e4;
+    ask_st = 6;
+    ask_flap_driver_decel_offset = '\0';
+    value = 0;
+    break;
+  case 4:
+                    /* Actively closing flap */
+    uVar4 = ask_filter / 10;
+    if (0xff < uVar4) {
+      uVar4 = 0xff;
+    }
+                    /* Ramp down actuator offset if too high and flap is still open */
+    if (((int)ask_flap_driver_decel_offset < -(int)(char)k_ask_flap_driver_decel_offset_max) &&
+       (uVar4 < k_ask_flap_decel_enable_threshold)) {
+      iVar2 = (int)k_ask_flap_driver_decel_gain * -(int)(short)uVar4;
+      if (iVar2 < 0) {
+        iVar2 = iVar2 + 0xf;
+      }
+      ask_flap_driver_decel_offset = (char)(iVar2 >> 4) + ask_flap_driver_decel_offset;
+    }
+                    /* Map sensor value to actuator PWM, then subtract from correction offset */
+    uVar3 = kls_bint(&kl_ask_flap_delta_to_driver.sizeX,(byte)uVar4);
+    uVar4 = (short)ask_flap_driver_decel_offset - (short)(char)uVar3;
+                    /* Clamp to max correction */
+    if (-(int)(char)k_ask_flap_driver_decel_offset_max < (int)(short)uVar4) {
+      uVar4 = (ushort)(byte)-k_ask_flap_driver_decel_offset_max;
+    }
+    value = (byte)uVar4;
+    bVar7 = ask_flap_driver_timer == 0;
+    ask_flap_driver_timer = ask_flap_driver_timer - 1;
+    if (bVar7) {
+      ask_flap_driver_timer = k_flap_driver_transition_timer;
+      ask_flap_driver_block_timer = ask_flap_driver_block_timer + 1;
+      ask_st = 5;
+      value = 0;
+    }
+                    /* If flap is now closed or within tolerance, stop ramping */
+    if (((uint)ask_roh < (uint)k_ask_flap_pot_tol + (uint)ask_flap_pot_learned_close_pos) ||
+       (((uint)ask_roh < (uint)k_ask_flap_pot_tol * 2 + (uint)ask_flap_pot_learned_close_pos &&
+        (ask_flap_driver_timer < 0xb)))) {
+      ask_flap_driver_decel_offset = '\0';
+      goto LAB_0001682a;
+    }
+                    /* If flap should reopen, return to opening */
+    if ((ask_zustand & Flap_Open) == Flap_Closed) goto LAB_000169e4;
+    ask_st = 2;
+    break;
+  case 5:
+                    /* Settling window after actuation */
+    if ((ask_flap_driver_block_timer < k_ask_flap_driver_sperre) && (k_ask_flap_diag_tan_min <= TAN)
+       ) {
+                    /* Wait minimum number of diagnostic cycles before returning to idle */
+      bVar7 = k_ask_diag_min_cycles <= ask_diag_cycle_cnt;
+      ask_diag_cycle_cnt = ask_diag_cycle_cnt + 1;
+      if (bVar7) {
+        ask_st = 0;
+        ask_flap_diag_st = 0;
+        ask_flap_driver_timer = k_flap_driver_transition_timer;
+        ask_diag_cycle_cnt = 0;
+      }
+      goto LAB_000169e4;
+    }
+  default:
+switchD_000165bc_caseD_9:
+                    /* Else, return to idle */
+    value = 0;
+    goto LAB_000169e4;
+  case 6:
+                    /* deceleration during closing */
+    sVar5 = (short)((int)((uint)ask_flap_close_reference_position - (uint)ask_filter) / 10);
+    if (sVar5 < 0) {
+      sVar5 = 0;
+    }
+    if (0xff < sVar5) {
+      sVar5 = 0xff;
+    }
+    sVar1 = (short)ask_flap_driver_decel_offset + k_ask_flap_driver_decel_gain * sVar5;
+    if ((int)(char)k_ask_flap_driver_decel_offset_max < (int)sVar1) {
+      ask_flap_driver_decel_offset = (char)sVar1;
+    }
+    uVar3 = kls_bint(&kl_ask_flap_delta_to_driver.sizeX,(byte)sVar5);
+    sVar5 = (short)ask_flap_driver_decel_offset + (short)(char)uVar3;
+    value = k_ask_flap_driver_decel_offset_max;
+    if ((int)(char)k_ask_flap_driver_decel_offset_max < (int)sVar5) {
+      value = (byte)sVar5;
+    }
+    if ((int)((uint)ask_flap_close_reference_position - (uint)(k_ask_flap_pot_min >> 2)) <
+        (int)(uint)ask_filter) {
+      ask_st = 3;
+      ask_flap_driver_decel_offset = '\0';
+    }
+    bVar6 = ask_flap_driver_timer - 1;
+    bVar7 = ask_flap_driver_timer != 0;
+    ask_flap_driver_timer = bVar6;
+    if (bVar7) goto LAB_000169e4;
+    ask_flap_close_reference_position = ask_filter;
+    ask_st = 3;
+    goto switchD_000165bc_caseD_9;
+  case 7:
+    value = bVar6;
+                    /* Begin closed-position calibration */
+    if ((ask_flap_diag_st & 0x80) != 0) {
+LAB_000165fc:
+      ask_flap_driver_energised_cycles = k_ask_flap_driver_energised_cycles_threshold;
+      value = ask_flap_pot_closed_calibration();
+      goto LAB_000169e4;
+    }
+LAB_0001682a:
+    ask_st = 1;
+    goto LAB_000169e4;
+  case 8:
+                    /* Self-test return (flap closing) */
+    if (ask_flap_driver_timer != 0) {
+      value = -k_flap_closed_calibration_driver_value;
+      goto LAB_000165ea;
+    }
+    value = bVar6;
+    if ((uint)ask_roh < (uint)k_ask_flap_pot_tol + (uint)ask_flap_pot_learned_close_pos)
+    goto LAB_0001682a;
+    ask_flap_driver_block_timer = ask_flap_driver_block_timer + 1;
+    ask_st = 5;
+    goto switchD_000165bc_caseD_9;
+  }
+                    /* Final output: write calculated driver value */
+  ask_flap_driver_timer = k_flap_driver_transition_timer;
+LAB_000169e4:
+  ask_flap_driver_write(value);
+  return;
+}
+

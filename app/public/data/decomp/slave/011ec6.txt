@@ -1,0 +1,9 @@
+
+void tpu_disable_channel(byte param_1)
+
+{
+  TPU_CPR = ~(3 << ((uint)param_1 * 2 & 0x3f)) & TPU_CPR;
+  tpu_settle_delay();
+  return;
+}
+

@@ -1,0 +1,32 @@
+
+short km_sim_simulate_knock_sensor_output(uint param_1)
+
+{
+  ushort uVar1;
+  char cVar3;
+  short sVar2;
+  ushort uVar4;
+  
+  DAT_00ffe752 = DAT_00ffe752 * 0x41c64e6d + 0x3039;
+  uVar4 = (ushort)((uint)DAT_00ffe752 >> 0x10);
+  cVar3 = ka_offs;
+  if ((ZUSTAND_MOTOR & VL) != 0) {
+    cVar3 = ka_offs_vl;
+  }
+  uVar1 = (short)cVar3 +
+          (-(&DAT_00ffe88c)[param_1 & 0xff] -
+          (&DAT_00ffe836_knock_retard_adjustment_)[param_1 & 0xff]);
+  if (uVar1 < 0x201) {
+    sVar2 = (short)((int)(uint)N >> 1) +
+            (short)((int)(((int)((uVar4 & 0x7fff) & 0x7f00) >> 8) * (0x200 - (uint)uVar1)) >> 4) +
+            2000;
+  }
+  else {
+    sVar2 = 0;
+  }
+  if ((uVar1 < (byte)K_KM_SIM_KG[param_1 & 0xff]) && ((uVar4 & 0xff) < (ushort)K_KM_SIM_KW)) {
+    sVar2 = sVar2 << 2;
+  }
+  return sVar2;
+}
+

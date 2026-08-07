@@ -1,0 +1,7 @@
+
+int dyn_trigger_calc(ushort param_1)
+
+{
+  return (int)((uint)param_1 * (uint)RF_TI_CONST) / 2000;
+}
+

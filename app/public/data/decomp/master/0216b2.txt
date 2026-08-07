@@ -1,0 +1,9 @@
+
+void hubvolumen_r_verh_calc(void)
+
+{
+                    /* 0401 Specific */
+  hubvolumen_r_verh = (short)(((uint)K_RF_HUBVOLUMEN * 100000) / ((uint)k_rf_r_luft * 6));
+  return;
+}
+
