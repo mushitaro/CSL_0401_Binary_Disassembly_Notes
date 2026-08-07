@@ -6,7 +6,7 @@
 #   export GHIDRA_INSTALL_DIR=/path/to/ghidra_12.1.2_PUBLIC
 #   ./tools/run_pipeline.sh
 #
-# Stages 1, 3 and 4 need no Ghidra; only stage 2 does.
+# Only stage 2 needs Ghidra; the rest read what it wrote.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -24,10 +24,13 @@ else
   echo "== 2/4  skipped (GHIDRA_INSTALL_DIR unset); reusing any existing export"
 fi
 
-echo "== 3/4  Funktionsrahmen -> build/funktionsrahmen.json"
+echo "== 3/5  Funktionsrahmen -> build/funktionsrahmen.json"
 PYTHONPATH=tools/pipeline "$PY" tools/pipeline/parse_fr.py
 
-echo "== 4/4  join -> app/public/data/graph.json"
+echo "== 4/5  decompiled C -> build/logic.json  (the formulas in each block)"
+"$PY" tools/pipeline/parse_logic.py
+
+echo "== 5/5  join -> app/public/data/graph.json"
 "$PY" tools/pipeline/build_graph.py
 
 echo

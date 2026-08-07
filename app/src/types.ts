@@ -17,6 +17,20 @@ export interface Axis {
   error?: string;
 }
 
+export interface Statement {
+  out: string;
+  expr: string;
+  guards: string[];
+  reads: string[];
+  calls: string[];
+  interp: {
+    helper: string;
+    shape: "map" | "curve" | "table" | "filter";
+    tables: string[];
+    axes: string[];
+  }[];
+}
+
 export interface GraphNode {
   id: string;
   t: NodeKind;
@@ -41,6 +55,8 @@ export interface GraphNode {
   size?: number;
   plate?: string;
   hasCode?: boolean;
+  /** Formulas recovered from the decompiler; what the block computes. */
+  stmts?: Statement[];
   /** frpage */
   section?: string;
   page?: number;
@@ -94,6 +110,8 @@ export interface Coverage {
   edgesByKind: Record<string, number>;
   ghidraTargetsWithNoNode: number;
   decompiledFunctionFiles?: number;
+  blocksWithFormulas?: number;
+  tableLookupsFound?: number;
 }
 
 export interface Graph {

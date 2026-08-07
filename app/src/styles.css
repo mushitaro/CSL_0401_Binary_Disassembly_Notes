@@ -588,3 +588,231 @@ pre.code {
   line-height: 1.45;
   max-height: 60vh;
 }
+
+/* ---- block diagram ----
+ *
+ * Quantities are shaped by what they are so the picture can be scanned before
+ * it is read: a map carries a grid, a curve carries its curve, a constant is a
+ * pill, a signal is a wire tag.  The palette is the provenance-neutral one -
+ * these hues classify *kinds of data*, which is a different axis from where a
+ * relation came from, so they must not be confused with the origin colours.
+ */
+
+:root {
+  --k-map: #1d5fbf;
+  --k-curve: #0f766e;
+  --k-const: #9a6700;
+  --k-signal: #6b727c;
+  --k-block: #16191d;
+  --diagram-ink: #16191d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --k-map: #7aa9f7;
+    --k-curve: #4dd0c4;
+    --k-const: #d9a520;
+    --k-signal: #98a1ad;
+    --k-block: #e6e9ee;
+    --diagram-ink: #e6e9ee;
+  }
+}
+
+:root[data-theme="dark"] {
+  --k-map: #7aa9f7;
+  --k-curve: #4dd0c4;
+  --k-const: #d9a520;
+  --k-signal: #98a1ad;
+  --k-block: #e6e9ee;
+  --diagram-ink: #e6e9ee;
+}
+
+.view-tabs {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.diagram-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+svg.diagram {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+svg.diagram .wire {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1.4;
+}
+
+svg.diagram .wire-read {
+  stroke: var(--k-signal);
+}
+
+svg.diagram .wire-write {
+  stroke: var(--accent);
+}
+
+svg.diagram .wire-call {
+  stroke: var(--k-block);
+  opacity: 0.55;
+}
+
+/* An input that is one of several selected by operating state. */
+svg.diagram .wire-alt {
+  stroke-dasharray: 4 3;
+}
+
+svg.diagram .arrowhead {
+  fill: var(--k-signal);
+}
+
+svg.diagram .port rect {
+  fill: var(--panel);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+svg.diagram .port text {
+  font-size: 11.5px;
+  fill: var(--diagram-ink);
+}
+
+svg.diagram .glyph rect,
+svg.diagram .glyph circle {
+  fill: none;
+  stroke-width: 1.2;
+}
+
+svg.diagram .glyph path {
+  stroke-width: 1.1;
+  fill: none;
+}
+
+svg.diagram .port-map .glyph rect,
+svg.diagram .port-map .glyph path {
+  stroke: var(--k-map);
+}
+
+svg.diagram .port-map rect:first-of-type {
+  stroke: var(--k-map);
+}
+
+svg.diagram .port-curve .glyph rect,
+svg.diagram .port-curve .glyph path {
+  stroke: var(--k-curve);
+}
+
+svg.diagram .port-curve rect:first-of-type {
+  stroke: var(--k-curve);
+}
+
+svg.diagram .port-constant .glyph circle {
+  stroke: var(--k-const);
+  fill: var(--k-const);
+  fill-opacity: 0.25;
+}
+
+svg.diagram .port-constant rect:first-of-type {
+  stroke: var(--k-const);
+}
+
+svg.diagram .port-signal .glyph path {
+  stroke: var(--k-signal);
+}
+
+svg.diagram .port-block .glyph rect {
+  stroke: var(--k-block);
+}
+
+svg.diagram .clickable {
+  cursor: pointer;
+}
+
+svg.diagram .clickable:hover rect:first-of-type {
+  stroke-width: 2;
+}
+
+svg.diagram .clickable:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+svg.diagram .block > rect:first-of-type {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+
+svg.diagram .block-head {
+  fill: var(--accent);
+  fill-opacity: 0.12;
+  stroke: none;
+}
+
+svg.diagram .block-title {
+  font-size: 12.5px;
+  font-weight: 650;
+  fill: var(--accent);
+}
+
+svg.diagram .block-bank {
+  font-size: 10px;
+  fill: var(--muted);
+}
+
+svg.diagram .formula {
+  font-size: 11.5px;
+  fill: var(--diagram-ink);
+}
+
+svg.diagram .guard {
+  font-size: 10.5px;
+  fill: var(--muted);
+  font-style: italic;
+}
+
+svg.diagram .op-out {
+  fill: var(--accent);
+  font-weight: 650;
+}
+
+svg.diagram .op-eq {
+  fill: var(--muted);
+}
+
+svg.diagram .op-map {
+  fill: var(--k-map);
+  font-weight: 600;
+}
+
+svg.diagram .op-curve {
+  fill: var(--k-curve);
+  font-weight: 600;
+}
+
+svg.diagram .op-const {
+  fill: var(--k-const);
+  font-weight: 600;
+}
+
+svg.diagram .op-helper {
+  fill: var(--muted);
+}
+
+svg.diagram .op-alt {
+  fill: var(--k-map);
+  font-weight: 600;
+}
+
+/* The quantity the reader actually asked about, when the diagram had to centre
+   on a neighbouring block to have a computation to show. */
+svg.diagram .port.highlight rect:first-of-type {
+  stroke-width: 2.4;
+  fill: var(--bg);
+}
+
+svg.diagram .port.highlight text {
+  font-weight: 700;
+}

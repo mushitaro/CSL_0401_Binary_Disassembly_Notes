@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { EdgeOrigin, Graph, GraphNode } from "./types";
 import { type Direction, type Indexed, expand, index, searchNodes } from "./graph";
 import { Detail, TreeView, useAgreement, nodeKindLabel } from "./components";
+import { Diagram } from "./Diagram";
 import { type Lang, pickLocalised, t } from "./i18n";
 
 const LANG_KEY = "mss54.lang";
@@ -103,6 +104,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [openCategory, setOpenCategory] = useState<number | null>(null);
   const [direction, setDirection] = useState<Direction>("downstream");
+  const [view, setView] = useState<"diagram" | "tree">("diagram");
   const [depth, setDepth] = useState(3);
   const [showAbout, setShowAbout] = useState(false);
   const [showDense, setShowDense] = useState(false);
@@ -282,7 +284,30 @@ export default function App() {
             <>
               <Detail node={node} g={graph} lang={lang} onSelect={select} />
               <section className="tree-panel">
-                <h3>{t(lang, "relationTree")}</h3>
+                <div className="view-tabs">
+                  <div className="seg">
+                    <button
+                      className={view === "diagram" ? "active" : ""}
+                      onClick={() => setView("diagram")}
+                    >
+                      {t(lang, "diagramTab")}
+                    </button>
+                    <button
+                      className={view === "tree" ? "active" : ""}
+                      onClick={() => setView("tree")}
+                    >
+                      {t(lang, "treeTab")}
+                    </button>
+                  </div>
+                </div>
+                {view === "diagram" ? (
+                  <>
+                    <Diagram g={graph} focusId={node.id} lang={lang} onSelect={select} />
+                    <p className="note">{t(lang, "legendAlt")}</p>
+                    <p className="note">{t(lang, "legendFormula")}</p>
+                  </>
+                ) : (
+                <>
                 <div className="controls">
                   <div className="seg">
                     <button
@@ -347,6 +372,8 @@ export default function App() {
                     onSelect={select}
                     direction={direction}
                   />
+                )}
+                </>
                 )}
               </section>
             </>

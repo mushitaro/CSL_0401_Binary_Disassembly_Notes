@@ -1,7 +1,10 @@
 export type Lang = "ja" | "en";
 
 const STRINGS = {
-  appTitle: { ja: "MSS54HP CSL '0401' パラメータ関連ツリー", en: "MSS54HP CSL '0401' Parameter Relation Tree" },
+  appTitle: {
+    ja: "MSS54HP CSL '0401' DME ロジック図",
+    en: "MSS54HP CSL '0401' DME Logic Diagram",
+  },
   search: { ja: "検索（日本語・英語・ニーモニック）", en: "Search (name, mnemonic or description)" },
   categories: { ja: "カテゴリ", en: "Categories" },
   results: { ja: "検索結果", en: "Results" },
@@ -35,6 +38,32 @@ const STRINGS = {
   noDocs: {
     ja: "この項目に言及する Funktionsrahmen は見つかりませんでした。",
     en: "No Funktionsrahmen page mentions this.",
+  },
+
+  // diagram
+  blockDiagram: { ja: "ロジック図", en: "Logic diagram" },
+  diagramTab: { ja: "ロジック図", en: "Diagram" },
+  treeTab: { ja: "関連ツリー", en: "Tree" },
+  noDiagram: {
+    ja: "この項目を計算に使っているブロックが見つかりませんでした。",
+    en: "No block computing with this was found.",
+  },
+  diagramVia: { ja: "を使うブロック:", en: "is used by the block" },
+  legend: { ja: "凡例", en: "Legend" },
+  showAllLines: { ja: "残りの式も表示", en: "Show the remaining lines" },
+  showFewerLines: { ja: "主要な式だけ表示", en: "Show only the key lines" },
+  portsHidden: { ja: "表示しきれない入出力", en: "inputs/outputs not shown" },
+  linesRanked: {
+    ja: "式はマップ・カーブ・定数を使う行を優先して表示しています。",
+    en: "Lines touching a map, curve or constant are shown first.",
+  },
+  legendAlt: {
+    ja: "破線 = 運転状態によって切り替わる入力（どれか1つが使われる）",
+    en: "dashed = alternative input, one of them is used depending on state",
+  },
+  legendFormula: {
+    ja: "ブロック内の式は Ghidra の逆コンパイル結果から復元したものです。中間変数は畳み込んであります。",
+    en: "Formulas inside a block are recovered from the Ghidra decompiler, with temporaries folded away.",
   },
 
   // tree

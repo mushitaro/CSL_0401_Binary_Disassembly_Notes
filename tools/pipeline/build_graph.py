@@ -51,12 +51,15 @@ def load(build_dir: Path) -> dict:
             raise SystemExit(f"missing {path}; run the earlier pipeline stages first")
         return json.loads(path.read_text())
 
-    return {
+    out = {
         "params": read("params.json"),
         "master": read("ghidra_master.json"),
         "slave": read("ghidra_slave.json"),
         "fr": read("funktionsrahmen.json"),
     }
+    logic_path = build_dir / "logic.json"
+    out["logic"] = json.loads(logic_path.read_text()) if logic_path.exists() else {"blocks": {}}
+    return out
 
 
 def load_i18n(i18n_dir: Path) -> dict[str, dict[str, str]]:
@@ -170,6 +173,9 @@ def build(data: dict, ja: dict, doc_base: str = DEFAULT_DOC_BASE) -> tuple[dict,
                     for candidate in (m, m - parse_xdf.BLOCK_HEADER_BYTES):
                         addr_index.setdefault((bank, candidate), node_id)
 
+    # The formulas recovered from the decompiler, keyed by the same node id.
+    logic_blocks = data.get("logic", {}).get("blocks", {})
+
     # ----------------------------------------------------- functions and RAM
     for bank in ("master", "slave"):
         g = data[bank]
@@ -188,6 +194,11 @@ def build(data: dict, ja: dict, doc_base: str = DEFAULT_DOC_BASE) -> tuple[dict,
                 node["plate"] = f["plate"]
             if f"{f['addr']:06x}" in (g.get("decompiled") or {}):
                 node["hasCode"] = True
+            block = logic_blocks.get(node_id)
+            if block and block["statements"]:
+                # What the block computes, which is what the diagram draws
+                # inside the box rather than merely around it.
+                node["stmts"] = block["statements"]
             nodes[node_id] = node
             addr_index.setdefault((bank, f["addr"]), node_id)
             if f["named"]:
@@ -309,7 +320,16 @@ def build(data: dict, ja: dict, doc_base: str = DEFAULT_DOC_BASE) -> tuple[dict,
         nodes[pid].get("bank") for pid in referenced
     )
 
+    blocks_with_logic = sum(1 for n in nodes.values() if n.get("stmts"))
+    lookups = sum(
+        len(st.get("interp") or [])
+        for n in nodes.values()
+        for st in (n.get("stmts") or [])
+    )
+
     coverage = {
+        "blocksWithFormulas": blocks_with_logic,
+        "tableLookupsFound": lookups,
         "params": params_total,
         "paramsWithCodeReference": len(referenced),
         "paramsWithCodeReferencePct": round(100 * len(referenced) / params_total, 1),
