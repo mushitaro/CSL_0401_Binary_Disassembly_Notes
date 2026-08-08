@@ -26,6 +26,19 @@ MSS54HP（E46 M3 CSL、プログラム `0401`）の DME の**ロジック図**�
 - `KF_X[A, B]` は2軸マップの補間、`KL_X(A)` はカーブの補間です（元の逆コンパイル結果では `kfs_wint(KF_X,A,B)`）。式にマウスを載せると元の C 表記が出ます。
 - 式の下の細い行は、XDF と純正資料に**実際に説明がある場合だけ**出る和文の意味行です。説明が無い項目には出しません（推測で埋めると、式が読めない人ほど信じてしまうため）。
 - ブロックをクリックしても画面は切り替わりません。`＋` でその場に式が開き、上のパンくずで元に戻れます。
+- **パラメータを選んでも図は動きません。** 図の中の該当箇所が光るだけです。図を動かすのはブロックを選んだときだけ。
+
+### ウィンドウ
+
+数表・グラフ・説明・ツリーは、図の上に浮かぶウィンドウに出ます。ドラッグで移動、右下でリサイズ、`×` で閉じられ、ヘッダのチェックボックスで表示/非表示を切り替えます。位置は次回も引き継ぎます。
+
+| ウィンドウ | 中身 |
+|---|---|
+| パラメータ表 | **テーブル**（実値の格子）と**グラフ**（2Dカーブは折れ線、3Dマップはヒートマップ＋選んだ行の断面）をタブで |
+| 説明 | 説明文・カテゴリ・純正機能仕様書へのリンク。ブロックなら逆コンパイル結果も |
+| ツリー | **パラメータ**（従来の関連ツリー）／**信号の流れ**（あるブロックが書いた信号を読むブロック）／**呼び出し**（call 関係）をタブで |
+
+ブロックのツリーが要るのは、パラメータツリーでは「点火の処理が順にどう流れるか」に答えられないからです。パラメータはその流れの末端であって、流れの一段ではありません。
 
 答えの材料はこのリポジトリに元から3つ揃っていましたが、互いに分断されていました。
 
@@ -211,6 +224,24 @@ those outputs, so a value can be traced back without leaving the page.
   Anything else keeps its mask form rather than being half-guessed.
 - Clicking a neighbour does not replace the view: `+` opens it where it stands,
   and the breadcrumb goes back.
+- **Picking a parameter does not move the picture** — it lights up where it
+  already is. Only picking a block re-roots the diagram.
+
+### Windows
+
+The data, the chart, the description and the trees float over the diagram.
+Drag the title bar to move, the corner to resize, `×` to close; the checkboxes
+in the header show and hide them, and their positions persist.
+
+| Window | Contents |
+|---|---|
+| Parameter data | **Table** (the decoded grid) and **Chart** (a curve as a line, a map as a heat field plus a section through the row you pick) on two tabs |
+| Description | the description, categories and links into the factory documents; for a block, the decompiled C as well |
+| Trees | **Parameters** (the relation tree), **Signal flow** (who reads what this block writes) and **Calls**, on three tabs |
+
+The blocks need their own tree because a parameter tree cannot answer "what
+does the ignition path do, in order" — a parameter is a leaf of that path
+rather than a step in it.
 
 ### Running it
 

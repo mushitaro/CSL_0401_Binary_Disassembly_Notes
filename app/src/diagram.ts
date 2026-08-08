@@ -96,6 +96,14 @@ export interface DiagramOptions {
   depth?: number;
   /** Neighbour block keys the reader has opened. */
   expanded?: ReadonlySet<string>;
+  /**
+   * Draw every relation and every formula, lifting the per-column and
+   * per-block caps. The caps exist to keep a first glance readable; a reader
+   * who has asked for the whole picture should get the whole picture.
+   */
+  showEverything?: boolean;
+  /** Node id to mark as the reader's current selection. */
+  highlight?: string;
 }
 
 const CHAR_W = 6.9; // ui-monospace at 11.5px
@@ -237,9 +245,15 @@ function outName(st: Statement): string {
 // who writes a signal, who reads it
 // --------------------------------------------------------------------------
 
-interface Chain {
+export interface Chain {
+  /** signal name -> ids of blocks that write it */
   writers: Map<string, string[]>;
+  /** signal name -> ids of blocks that read it */
   readers: Map<string, string[]>;
+  /** block id -> signals it writes */
+  writtenBy: Map<string, string[]>;
+  /** block id -> signals it reads */
+  readBy: Map<string, string[]>;
 }
 
 const CHAIN_CACHE = new WeakMap<Indexed, Chain>();
@@ -252,12 +266,14 @@ const CHAIN_CACHE = new WeakMap<Indexed, Chain>();
  * in for the 110 blocks that have no recovered formula, which keeps the older
  * inferred wiring available without letting it outvote the formulas.
  */
-function chainIndex(g: Indexed): Chain {
+export function blockChain(g: Indexed): Chain {
   const cached = CHAIN_CACHE.get(g);
   if (cached) return cached;
 
   const writers = new Map<string, string[]>();
   const readers = new Map<string, string[]>();
+  const writtenBy = new Map<string, string[]>();
+  const readBy = new Map<string, string[]>();
   const add = (m: Map<string, string[]>, key: string, id: string) => {
     const list = m.get(key);
     if (!list) m.set(key, [id]);
@@ -269,10 +285,16 @@ function chainIndex(g: Indexed): Chain {
     if (node.stmts?.length) {
       for (const st of node.stmts) {
         const out = outName(st);
-        if (!isNoise(out) && classify(g, out).kind === "signal") add(writers, out, node.id);
+        if (!isNoise(out) && classify(g, out).kind === "signal") {
+          add(writers, out, node.id);
+          add(writtenBy, node.id, out);
+        }
         for (const r of st.reads) {
           if (isNoise(r) || isHelper(r)) continue;
-          if (classify(g, r).kind === "signal") add(readers, r, node.id);
+          if (classify(g, r).kind === "signal") {
+            add(readers, r, node.id);
+            add(readBy, node.id, r);
+          }
         }
       }
       continue;
@@ -282,10 +304,11 @@ function chainIndex(g: Indexed): Chain {
       const other = g.byId.get(e.d);
       if (other?.t !== "ram") continue;
       add(e.k === "write" ? writers : readers, other.name, node.id);
+      add(e.k === "write" ? writtenBy : readBy, node.id, other.name);
     }
   }
 
-  const chain: Chain = { writers, readers };
+  const chain: Chain = { writers, readers, writtenBy, readBy };
   CHAIN_CACHE.set(g, chain);
   return chain;
 }
@@ -435,16 +458,18 @@ function neighbourLines(
   expanded: boolean,
   ctx: FormatContext,
   showNoise: boolean,
+  everything: boolean,
 ): { lines: FormattedLine[]; more: number } {
   const all = node.stmts ?? [];
-  if (expanded) {
+  if (expanded || everything) {
     const { lines, hidden, noise } = focusLines(node, false, ctx, showNoise);
     return { lines, more: hidden + noise };
   }
   const relevant = all.filter(
     (st) => outName(st) === signal || st.reads.includes(signal),
   );
-  const kept = (relevant.length ? relevant : all).slice(0, MAX_NEIGHBOUR_LINES);
+  const pool = relevant.length ? relevant : all;
+  const kept = everything ? pool : pool.slice(0, MAX_NEIGHBOUR_LINES);
   return {
     lines: kept.map((st) => formatStatement(st, ctx)),
     more: all.length - kept.length,
@@ -542,7 +567,9 @@ export function buildDiagram(
 ): Diagram | null {
   const focus = g.byId.get(focusId);
   if (!focus) return null;
-  const maxPorts = opts.maxPorts ?? 14;
+  const everything = opts.showEverything ?? false;
+  const maxPorts = everything ? Number.MAX_SAFE_INTEGER : (opts.maxPorts ?? 14);
+  const blockCap = everything ? Number.MAX_SAFE_INTEGER : MAX_BLOCKS_PER_COLUMN;
   const depth = clamp(opts.depth ?? 1, 1, 3);
   const expanded = opts.expanded ?? new Set<string>();
   const ctx = opts.ctx;
@@ -578,7 +605,7 @@ export function buildDiagram(
       .map((id) => g.byId.get(id)!)
       .sort((a, b) => (b.stmts?.length ?? 0) - (a.stmts?.length ?? 0));
     if (!users.length) return null;
-    const shown = users.slice(0, MAX_BLOCKS_PER_COLUMN + 1);
+    const shown = users.slice(0, everything ? users.length : MAX_BLOCKS_PER_COLUMN + 1);
     hiddenBlocks += users.length - shown.length;
 
     const anchor = push(
@@ -593,18 +620,18 @@ export function buildDiagram(
 
     for (const user of shown) {
       const isOpen = expanded.has(user.name);
-      const { lines, more } = neighbourLines(user, focus.name, isOpen, ctx, showNoise);
-      const bn = push(0, blockNode(user, 0, lines, { collapsed: !isOpen, more, depth: 1 }));
+      const { lines, more } = neighbourLines(user, focus.name, isOpen, ctx, showNoise, everything);
+      const bn = push(0, blockNode(user, 0, lines, { collapsed: !isOpen && !everything, more, depth: 1 }));
       wires.push({ from: anchor.id, to: bn.id, kind: "read" });
 
       const outs = collectPorts(g, user).outputs.filter((p) => p.kind === "signal");
-      for (const o of outs.slice(0, 3)) {
+      for (const o of everything ? outs : outs.slice(0, 3)) {
         const existing = (layers.get(1) ?? []).find((n) => n.key === o.name);
         const on = existing ?? push(1, portNode(o, 1));
         wires.push({ from: bn.id, to: on.id, kind: "write" });
       }
     }
-    return finish(g, layers, wires, {
+    const anchored = finish(g, layers, wires, {
       focus: focus.id,
       hiddenLines: 0,
       hiddenPorts,
@@ -612,6 +639,8 @@ export function buildDiagram(
       hiddenNoise: 0,
       paramFocus: displayName(focus.name, focus.t),
     });
+    markSelection(anchored, opts.highlight ?? focus.id);
+    return anchored;
   }
 
   // ---- the focused block -------------------------------------------------
@@ -620,7 +649,12 @@ export function buildDiagram(
   const shownOutputs = outputs.slice(0, maxPorts);
   hiddenPorts += inputs.length - shownInputs.length + (outputs.length - shownOutputs.length);
 
-  const { lines, hidden, noise } = focusLines(focus, opts.showAllLines ?? false, ctx, showNoise);
+  const { lines, hidden, noise } = focusLines(
+    focus,
+    everything || (opts.showAllLines ?? false),
+    ctx,
+    showNoise,
+  );
   hiddenLines = hidden;
   hiddenNoise = noise;
   const centre = push(0, blockNode(focus, 0, lines, { depth: 0 }));
@@ -649,32 +683,40 @@ export function buildDiagram(
    */
   const spread = (signalLayer: number, sign: -1 | 1, level: number) => {
     if (level > depth) return;
-    const chain = chainIndex(g);
+    const chain = blockChain(g);
     const blockLayer = signalLayer + sign;
     const signalNodes = (layers.get(signalLayer) ?? []).filter((n) => n.kind === "signal");
     const candidates: { node: GraphNode; signal: string }[] = [];
 
+    // One block often writes several of the signals in the column — dpr_sync
+    // writes both RF and TMOT. Collected once per signal it would be drawn
+    // twice, and since a node's id is derived from its layer and name, the two
+    // copies would share an id and the wires would attach to whichever the
+    // lookup happened to find.
+    const picked = new Set<string>();
     for (const sn of signalNodes) {
       const ids = (sign === -1 ? chain.writers : chain.readers).get(sn.key) ?? [];
       for (const id of ids) {
         const node = g.byId.get(id);
-        if (!node || drawn.has(node.name)) continue;
+        if (!node || drawn.has(node.name) || picked.has(node.id)) continue;
         if (isHelper(node.name)) continue;
+        picked.add(node.id);
         candidates.push({ node, signal: sn.key });
       }
     }
     // Blocks that touch calibration data are the ones worth the space.
     candidates.sort((a, b) => score(b.node) - score(a.node));
-    const shown = candidates.slice(0, MAX_BLOCKS_PER_COLUMN);
+    const shown = candidates.slice(0, blockCap);
     hiddenBlocks += candidates.length - shown.length;
 
     for (const { node, signal } of shown) {
+      if (drawn.has(node.name)) continue;
       drawn.add(node.name);
       const isOpen = expanded.has(node.name);
-      const { lines: nl, more } = neighbourLines(node, signal, isOpen, ctx, showNoise);
+      const { lines: nl, more } = neighbourLines(node, signal, isOpen, ctx, showNoise, everything);
       const bn = push(
         blockLayer,
-        blockNode(node, blockLayer, nl, { collapsed: !isOpen, more, depth: level }),
+        blockNode(node, blockLayer, nl, { collapsed: !isOpen && !everything, more, depth: level }),
       );
       const sn = (layers.get(signalLayer) ?? []).find((n) => n.key === signal)!;
       const inferred = !node.stmts?.length;
@@ -692,7 +734,7 @@ export function buildDiagram(
       const list = (sign === -1 ? ports.inputs : ports.outputs).filter(
         (p) => p.kind === "signal" && !drawn.has(p.name),
       );
-      for (const p of list.slice(0, 3)) {
+      for (const p of everything ? list : list.slice(0, 3)) {
         const existing = (layers.get(nextSignalLayer) ?? []).find((n) => n.key === p.name);
         const pn = existing ?? push(nextSignalLayer, portNode(p, nextSignalLayer));
         if (sign === -1) wires.push({ from: pn.id, to: bn.id, kind: "read" });
@@ -708,21 +750,38 @@ export function buildDiagram(
     if (!node) continue;
     drawn.add(node.name);
     const isOpen = expanded.has(node.name);
-    const { lines: nl, more } = neighbourLines(node, "", isOpen, ctx, showNoise);
-    const bn = push(-2, blockNode(node, -2, nl, { collapsed: !isOpen, more, depth: 1 }));
+    const { lines: nl, more } = neighbourLines(node, "", isOpen, ctx, showNoise, everything);
+    const bn = push(-2, blockNode(node, -2, nl, { collapsed: !isOpen && !everything, more, depth: 1 }));
     wires.push({ from: bn.id, to: centre.id, kind: "call" });
   }
 
   spread(-1, -1, 1);
   spread(1, 1, 1);
 
-  return finish(g, layers, wires, {
+  const built = finish(g, layers, wires, {
     focus: focus.id,
     hiddenLines,
     hiddenPorts,
     hiddenBlocks,
     hiddenNoise,
   });
+  markSelection(built, opts.highlight);
+  return built;
+}
+
+/**
+ * Mark every node that is the reader's current selection.
+ *
+ * Selecting a parameter used to rebuild the diagram around one of its
+ * consumers, which moved the picture out from under the reader and answered a
+ * question they had not asked. The picture now stays where it is and the
+ * parameter lights up in it.
+ */
+function markSelection(d: Diagram, id?: string): void {
+  if (!id) return;
+  for (const n of d.nodes) {
+    if (n.target === id) n.highlight = true;
+  }
 }
 
 /** How much a neighbouring block is likely to be worth showing. */

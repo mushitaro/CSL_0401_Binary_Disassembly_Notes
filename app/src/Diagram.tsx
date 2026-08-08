@@ -1,6 +1,7 @@
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import type { Indexed } from "./graph";
 import { type DiagramNode, buildDiagram } from "./diagram";
+import { owningBlock } from "./block-tree";
 import { type FormattedLine, makeContext } from "./logic-format";
 import { displayName } from "./names";
 import { type Lang, t } from "./i18n";
@@ -69,14 +70,18 @@ function KindGlyph({ kind }: { kind: DiagramNode["kind"] }) {
 
 export function Diagram({
   g,
-  focusId,
+  rootId,
+  selectedId,
   lang,
   trail,
   onSelect,
   onBack,
 }: {
   g: Indexed;
-  focusId: string;
+  /** The block the picture is drawn around. */
+  rootId: string;
+  /** What the reader last picked; lit up in place rather than re-centred. */
+  selectedId: string;
   lang: Lang;
   trail: string[];
   onSelect: (id: string) => void;
@@ -84,6 +89,7 @@ export function Diagram({
 }) {
   const [showAll, setShowAll] = useState(false);
   const [showNoise, setShowNoise] = useState(false);
+  const [everything, setEverything] = useState(true);
   const [depth, setDepth] = useState(1);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const scroller = useRef<HTMLDivElement>(null);
@@ -92,28 +98,41 @@ export function Diagram({
     () => makeContext(g.raw.nodes, g.raw.nameIndex, g.byId, g.raw.glossary, lang),
     [g, lang],
   );
-  const diagram = useMemo(
-    () =>
-      buildDiagram(g, focusId, {
-        ctx,
-        maxPorts: 14,
-        showAllLines: showAll,
-        showNoise,
-        depth,
-        expanded,
-      }),
-    [g, focusId, ctx, showAll, showNoise, depth, expanded],
-  );
+  const diagram = useMemo(() => {
+    const opts = {
+      ctx,
+      maxPorts: 14,
+      showAllLines: showAll,
+      showNoise,
+      showEverything: everything,
+      depth,
+      expanded,
+      highlight: selectedId,
+    };
+    const first = buildDiagram(g, rootId, opts);
+    // The picture only moves when what the reader picked is genuinely not in
+    // it. Rebuilding on every selection was the old behaviour, and it answered
+    // a question nobody had asked.
+    if (first?.nodes.some((n) => n.target === selectedId)) return first;
+    const picked = g.byId.get(selectedId);
+    const owner = picked ? owningBlock(g, picked) : null;
+    if (owner && owner.id !== rootId) return buildDiagram(g, owner.id, opts) ?? first;
+    return first ?? (picked ? buildDiagram(g, selectedId, opts) : null);
+  }, [g, rootId, selectedId, ctx, showAll, showNoise, everything, depth, expanded]);
 
   // With producers on the left the focused block is no longer at x=0, and a
   // wide chain would otherwise open scrolled to a neighbour rather than to the
   // block the reader asked for.
   useEffect(() => {
     const el = scroller.current;
-    const centre = diagram?.nodes.find((n) => n.depth === 0 || n.highlight);
+    // Scroll to what the reader picked, falling back to the block the picture
+    // is drawn around.
+    const centre =
+      diagram?.nodes.find((n) => n.target === selectedId) ??
+      diagram?.nodes.find((n) => n.depth === 0);
     if (!el || !centre) return;
     el.scrollLeft = Math.max(0, centre.x + centre.w / 2 - el.clientWidth / 2);
-  }, [diagram]);
+  }, [diagram, selectedId]);
 
   if (!diagram) {
     return <p className="empty-note">{t(lang, "noDiagram")}</p>;
@@ -170,6 +189,12 @@ export function Diagram({
           />
           <span className="depth-value">{depth}</span>
         </label>
+        <button
+          className={everything ? "active" : ""}
+          onClick={() => setEverything((v) => !v)}
+        >
+          {everything ? t(lang, "showKeyOnly") : t(lang, "showEverything")}
+        </button>
         {(showNoise || diagram.hiddenNoise > 0) && (
           <button onClick={() => setShowNoise((v) => !v)}>
             {showNoise

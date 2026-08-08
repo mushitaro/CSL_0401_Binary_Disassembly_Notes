@@ -59,6 +59,8 @@ export type Direction = "downstream" | "upstream";
 export interface TreeNode {
   node: GraphNode;
   edge?: GraphEdge;
+  /** The signal this block shares with its parent, in the block tree. */
+  via?: string;
   depth: number;
   children: TreeNode[];
   repeated: boolean;

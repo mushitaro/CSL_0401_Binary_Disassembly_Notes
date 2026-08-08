@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import type { EdgeOrigin, Graph, GraphNode } from "./types";
 import { type Direction, type Indexed, expand, index, searchNodes } from "./graph";
-import { Detail, TreeView, useAgreement, nodeKindLabel } from "./components";
+import { Description, MetaLine, TreeView, ValueTable, useAgreement, nodeKindLabel } from "./components";
 import { Diagram } from "./Diagram";
+import { ValueChart } from "./ValueChart";
+import { FloatingWindow, type WindowPos } from "./FloatingWindow";
+import { type BlockTreeKind, expandBlocks, owningBlock } from "./block-tree";
 import { displayNodeName } from "./names";
 import { type Lang, pickLocalised, t } from "./i18n";
 
 const LANG_KEY = "mss54.lang";
 const ORIGIN_KEY = "mss54.origins";
+const WINDOW_KEY = "mss54.windows";
 
 /** localStorage throws in sandboxed frames and in private mode on some
  *  browsers; losing the preference is acceptable, taking the page down is not. */
@@ -39,6 +43,57 @@ function useStoredLang(): [Lang, (l: Lang) => void] {
   }, [lang]);
   return [lang, setLang];
 }
+
+/* ------------------------------------------------------------------ windows */
+
+type WindowId = "table" | "desc" | "tree";
+
+/**
+ * Where each window lands the first time it is opened.
+ *
+ * Laid out from the viewport rather than fixed, so they open beside the
+ * diagram instead of on top of it, and stay on screen on a laptop display.
+ */
+function defaultPositions(): Record<WindowId, WindowPos> {
+  const vw = typeof window === "undefined" ? 1440 : window.innerWidth;
+  const vh = typeof window === "undefined" ? 900 : window.innerHeight;
+  const w = Math.min(620, Math.max(320, vw * 0.42));
+  const right = Math.max(16, vw - w - 24);
+  const half = Math.max(180, (vh - 140) / 2 - 12);
+  return {
+    table: { x: right, y: 86, w, h: half },
+    desc: { x: right, y: 86 + half + 16, w, h: Math.min(320, half) },
+    tree: { x: Math.max(16, right - w - 20), y: 140, w: Math.min(460, w), h: half + 60 },
+  };
+}
+
+interface WindowState {
+  open: Record<WindowId, boolean>;
+  pos: Record<WindowId, WindowPos>;
+  order: WindowId[];
+}
+
+function initialWindows(): WindowState {
+  const fallback: WindowState = {
+    open: { table: true, desc: false, tree: false },
+    pos: defaultPositions(),
+    order: ["tree", "desc", "table"],
+  };
+  const stored = readStored(WINDOW_KEY);
+  if (!stored) return fallback;
+  try {
+    const parsed = JSON.parse(stored) as Partial<WindowState>;
+    return {
+      open: { ...fallback.open, ...parsed.open },
+      pos: { ...fallback.pos, ...parsed.pos },
+      order: parsed.order?.length ? parsed.order : fallback.order,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+/* -------------------------------------------------------------------- about */
 
 function About({ g, lang }: { g: Indexed; lang: Lang }) {
   const c = g.raw.meta.coverage;
@@ -97,19 +152,27 @@ function About({ g, lang }: { g: Indexed; lang: Lang }) {
   );
 }
 
+/* ---------------------------------------------------------------------- app */
+
 export default function App() {
   const [graph, setGraph] = useState<Indexed | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useStoredLang();
   const [selected, setSelected] = useState<string | null>(null);
+  // What the diagram is drawn around. Kept apart from the selection so that
+  // picking a parameter lights it up in the current picture instead of
+  // replacing the picture with one centred somewhere else.
+  const [root, setRoot] = useState<string | null>(null);
   const [trail, setTrail] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [openCategory, setOpenCategory] = useState<number | null>(null);
   const [direction, setDirection] = useState<Direction>("downstream");
-  const [view, setView] = useState<"diagram" | "tree">("diagram");
+  const [treeTab, setTreeTab] = useState<"param" | BlockTreeKind>("param");
+  const [dataTab, setDataTab] = useState<"table" | "chart">("table");
   const [depth, setDepth] = useState(3);
   const [showAbout, setShowAbout] = useState(false);
   const [showDense, setShowDense] = useState(false);
+  const [windows, setWindows] = useState<WindowState>(initialWindows);
   const [origins, setOrigins] = useState<Set<EdgeOrigin>>(() => {
     const stored = readStored(ORIGIN_KEY);
     if (stored) {
@@ -125,6 +188,10 @@ export default function App() {
   useEffect(() => {
     writeStored(ORIGIN_KEY, JSON.stringify([...origins]));
   }, [origins]);
+
+  useEffect(() => {
+    writeStored(WINDOW_KEY, JSON.stringify(windows));
+  }, [windows]);
 
   useEffect(() => {
     // The single-file build embeds the graph in a <script type="application/json">
@@ -158,14 +225,26 @@ export default function App() {
 
   const tree = useMemo(() => {
     if (!graph || !selected) return null;
-    return expand(graph, selected, {
+    if (treeTab === "param") {
+      return expand(graph, selected, {
+        direction,
+        origins,
+        maxDepth: depth,
+        maxChildren: 40,
+        includeDensePages: showDense,
+      });
+    }
+    // The block trees are rooted at a block: a parameter is a leaf of the data
+    // flow, not a step in it, so it stands in for the block that reads it.
+    const owner = node ? owningBlock(graph, node) : null;
+    if (!owner) return null;
+    return expandBlocks(graph, owner.id, {
+      kind: treeTab,
       direction,
-      origins,
       maxDepth: depth,
-      maxChildren: 40,
-      includeDensePages: showDense,
+      maxChildren: 24,
     });
-  }, [graph, selected, direction, origins, depth, showDense]);
+  }, [graph, selected, node, treeTab, direction, origins, depth, showDense]);
 
   if (error) return <div className="fatal">{error}</div>;
   if (!graph) return <div className="loading">…</div>;
@@ -189,6 +268,10 @@ export default function App() {
     });
     setSelected(id);
     setShowAbout(false);
+    const picked = graph.byId.get(id);
+    // Only a block moves the picture. A parameter is found inside it.
+    if (picked?.t === "func") setRoot(id);
+    else if (!root) setRoot(owningBlock(graph, picked!)?.id ?? null);
   };
 
   const goBack = (id: string) => {
@@ -196,13 +279,56 @@ export default function App() {
     if (seen >= 0) setTrail(trail.slice(0, seen + 1));
     setSelected(id);
     setShowAbout(false);
+    const picked = graph.byId.get(id);
+    if (picked?.t === "func") setRoot(id);
   };
+
+  const toggleWindow = (id: WindowId) =>
+    setWindows((w) => ({
+      ...w,
+      open: { ...w.open, [id]: !w.open[id] },
+      order: [...w.order.filter((k) => k !== id), id],
+    }));
+
+  const raise = (id: WindowId) =>
+    setWindows((w) =>
+      w.order[w.order.length - 1] === id
+        ? w
+        : { ...w, order: [...w.order.filter((k) => k !== id), id] },
+    );
+
+  const movePos = (id: WindowId, pos: WindowPos) =>
+    setWindows((w) => ({ ...w, pos: { ...w.pos, [id]: pos } }));
+
+  const windowTitle = (label: string) =>
+    node ? (
+      <>
+        {label} — <strong>{displayNodeName(node)}</strong>
+      </>
+    ) : (
+      label
+    );
+
+  const hasValues = Boolean(node && (node.axes || node.value !== undefined));
 
   return (
     <div className="app">
       <header>
         <h1>{t(lang, "appTitle")}</h1>
         <div className="header-actions">
+          <fieldset className="window-toggles">
+            <legend>{t(lang, "windows")}</legend>
+            {(["table", "desc", "tree"] as WindowId[]).map((id) => (
+              <label key={id}>
+                <input
+                  type="checkbox"
+                  checked={windows.open[id]}
+                  onChange={() => toggleWindow(id)}
+                />
+                {t(lang, id === "table" ? "wTable" : id === "desc" ? "wDesc" : "wTree")}
+              </label>
+            ))}
+          </fieldset>
           <button
             className={showAbout ? "active" : ""}
             onClick={() => setShowAbout((v) => !v)}
@@ -297,75 +423,146 @@ export default function App() {
           {showAbout ? (
             <About g={graph} lang={lang} />
           ) : node ? (
+            <section className="diagram-panel">
+              <Diagram
+                g={graph}
+                rootId={root ?? node.id}
+                selectedId={node.id}
+                lang={lang}
+                trail={trail}
+                onSelect={select}
+                onBack={goBack}
+              />
+              <details className="legend">
+                <summary>{t(lang, "legend")}</summary>
+                <p className="note">{t(lang, "legendNotation")}</p>
+                <p className="note">{t(lang, "legendCase")}</p>
+                <p className="note">{t(lang, "legendAlt")}</p>
+                <p className="note">{t(lang, "legendInferred")}</p>
+                <p className="note">{t(lang, "legendFormula")}</p>
+              </details>
+            </section>
+          ) : (
+            <p className="empty-note">{t(lang, "selectPrompt")}</p>
+          )}
+        </main>
+      </div>
+
+      {/* The windows float over the diagram rather than pushing it down: they
+          are things you consult while looking at it. */}
+      {windows.open.table && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wTable"))}
+          pos={windows.pos.table}
+          onChange={(p) => movePos("table", p)}
+          onClose={() => toggleWindow("table")}
+          onFocus={() => raise("table")}
+          z={10 + windows.order.indexOf("table")}
+        >
+          {node && hasValues ? (
             <>
-              {/* The diagram is the thing being read, so it gets the top of the
-                  page and the full width; the facts about the parameter are a
-                  reference to drop to afterwards, not the first thing to wade
-                  through. */}
-              <section className="tree-panel diagram-panel">
-                <div className="view-tabs">
-                  <div className="seg">
-                    <button
-                      className={view === "diagram" ? "active" : ""}
-                      onClick={() => setView("diagram")}
-                    >
-                      {t(lang, "diagramTab")}
-                    </button>
-                    <button
-                      className={view === "tree" ? "active" : ""}
-                      onClick={() => setView("tree")}
-                    >
-                      {t(lang, "treeTab")}
-                    </button>
-                  </div>
+              <div className="seg tabs">
+                <button
+                  className={dataTab === "table" ? "active" : ""}
+                  onClick={() => setDataTab("table")}
+                >
+                  {t(lang, "tabTable")}
+                </button>
+                <button
+                  className={dataTab === "chart" ? "active" : ""}
+                  onClick={() => setDataTab("chart")}
+                >
+                  {t(lang, "tabChart")}
+                </button>
+              </div>
+              <MetaLine node={node} lang={lang} />
+              {dataTab === "table" ? (
+                <ValueTable node={node} lang={lang} />
+              ) : (
+                <ValueChart node={node} lang={lang} width={windows.pos.table.w - 40} />
+              )}
+            </>
+          ) : (
+            <p className="empty-note">{t(lang, "selectForWindows")}</p>
+          )}
+        </FloatingWindow>
+      )}
+
+      {windows.open.desc && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wDesc"))}
+          pos={windows.pos.desc}
+          onChange={(p) => movePos("desc", p)}
+          onClose={() => toggleWindow("desc")}
+          onFocus={() => raise("desc")}
+          z={10 + windows.order.indexOf("desc")}
+        >
+          {node ? (
+            <Description node={node} g={graph} lang={lang} onSelect={select} />
+          ) : (
+            <p className="empty-note">{t(lang, "selectForWindows")}</p>
+          )}
+        </FloatingWindow>
+      )}
+
+      {windows.open.tree && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wTree"))}
+          pos={windows.pos.tree}
+          onChange={(p) => movePos("tree", p)}
+          onClose={() => toggleWindow("tree")}
+          onFocus={() => raise("tree")}
+          z={10 + windows.order.indexOf("tree")}
+        >
+          {node ? (
+            <>
+              <div className="seg tabs">
+                <button
+                  className={treeTab === "param" ? "active" : ""}
+                  onClick={() => setTreeTab("param")}
+                >
+                  {t(lang, "tabParamTree")}
+                </button>
+                <button
+                  className={treeTab === "signal" ? "active" : ""}
+                  onClick={() => setTreeTab("signal")}
+                >
+                  {t(lang, "tabSignalTree")}
+                </button>
+                <button
+                  className={treeTab === "call" ? "active" : ""}
+                  onClick={() => setTreeTab("call")}
+                >
+                  {t(lang, "tabCallTree")}
+                </button>
+              </div>
+              <div className="controls">
+                <div className="seg">
+                  <button
+                    className={direction === "downstream" ? "active" : ""}
+                    onClick={() => setDirection("downstream")}
+                  >
+                    {t(lang, "downstream")}
+                  </button>
+                  <button
+                    className={direction === "upstream" ? "active" : ""}
+                    onClick={() => setDirection("upstream")}
+                  >
+                    {t(lang, "upstream")}
+                  </button>
                 </div>
-                {view === "diagram" ? (
-                  <>
-                    <Diagram
-                      g={graph}
-                      focusId={node.id}
-                      lang={lang}
-                      trail={trail}
-                      onSelect={select}
-                      onBack={goBack}
-                    />
-                    <details className="legend">
-                      <summary>{t(lang, "legend")}</summary>
-                      <p className="note">{t(lang, "legendNotation")}</p>
-                      <p className="note">{t(lang, "legendCase")}</p>
-                      <p className="note">{t(lang, "legendAlt")}</p>
-                      <p className="note">{t(lang, "legendInferred")}</p>
-                      <p className="note">{t(lang, "legendFormula")}</p>
-                    </details>
-                  </>
-                ) : (
-                <>
-                <div className="controls">
-                  <div className="seg">
-                    <button
-                      className={direction === "downstream" ? "active" : ""}
-                      onClick={() => setDirection("downstream")}
-                    >
-                      {t(lang, "downstream")}
-                    </button>
-                    <button
-                      className={direction === "upstream" ? "active" : ""}
-                      onClick={() => setDirection("upstream")}
-                    >
-                      {t(lang, "upstream")}
-                    </button>
-                  </div>
-                  <label>
-                    {t(lang, "depth")}
-                    <input
-                      type="range"
-                      min={1}
-                      max={5}
-                      value={depth}
-                      onChange={(e) => setDepth(Number(e.target.value))}
-                    />
-                    <span className="depth-value">{depth}</span>
-                  </label>
+                <label>
+                  {t(lang, "depth")}
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    value={depth}
+                    onChange={(e) => setDepth(Number(e.target.value))}
+                  />
+                  <span className="depth-value">{depth}</span>
+                </label>
+                {treeTab === "param" && (
                   <fieldset className="origins">
                     <legend>{t(lang, "sources")}</legend>
                     {(["xref", "scan", "fr"] as EdgeOrigin[]).map((o) => (
@@ -394,27 +591,26 @@ export default function App() {
                       {t(lang, "showDense")}
                     </label>
                   </fieldset>
-                </div>
-                {tree && (
-                  <TreeView
-                    tree={tree}
-                    g={graph}
-                    lang={lang}
-                    rootAgreement={rootAgreement}
-                    onSelect={select}
-                    direction={direction}
-                  />
                 )}
-                </>
-                )}
-              </section>
-              <Detail node={node} g={graph} lang={lang} onSelect={select} />
+              </div>
+              {tree ? (
+                <TreeView
+                  tree={tree}
+                  g={graph}
+                  lang={lang}
+                  rootAgreement={rootAgreement}
+                  onSelect={select}
+                  direction={direction}
+                />
+              ) : (
+                <p className="empty-note">{t(lang, "noRelations")}</p>
+              )}
             </>
           ) : (
-            <p className="empty-note">{t(lang, "selectPrompt")}</p>
+            <p className="empty-note">{t(lang, "selectForWindows")}</p>
           )}
-        </main>
-      </div>
+        </FloatingWindow>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { EdgeOrigin, GraphNode } from "./types";
 import type { Indexed, TreeNode } from "./graph";
 import { agreement } from "./graph";
-import { displayNodeName, originalName } from "./names";
+import { displayName, displayNodeName, originalName } from "./names";
 import { isToolMetadata } from "./logic-format";
 import { type Lang, pickLocalised, t } from "./i18n";
 
@@ -217,6 +217,11 @@ function TreeRow({ tree, g, lang, rootAgreement, onSelect }: TreeViewProps) {
             <span className="edge-kind">{t(lang, EDGE_LABEL[tree.edge.k])}</span>
           </>
         )}
+        {tree.via && (
+          <span className="edge-kind via">
+            {t(lang, "viaSignal")} {displayName(tree.via)}
+          </span>
+        )}
         <button className="node-name" onClick={() => onSelect(n.id)}>
           {displayNodeName(n)}
         </button>
@@ -256,6 +261,7 @@ export function TreeView(props: TreeViewProps) {
       props.direction === "upstream" && props.tree.node.t === "param"
         ? "noUpstreamForParam"
         : "noRelations";
+
     return <p className="empty-note">{t(props.lang, key)}</p>;
   }
   return (
@@ -327,7 +333,47 @@ function DecompiledCode({ node, lang }: { node: GraphNode; lang: Lang }) {
 
 /* ----------------------------------------------------------------- detail */
 
-export function Detail({
+/**
+ * Address, processor, width, units and scaling on one line.
+ *
+ * These were a six-row definition list that pushed the actual content below
+ * the fold. They are reference details you glance at, not read.
+ */
+export function MetaLine({ node, lang }: { node: GraphNode; lang: Lang }) {
+  const parts = [
+    node.addr !== undefined
+      ? `0x${node.addr.toString(16).toUpperCase().padStart(4, "0")}`
+      : null,
+    node.bank ? t(lang, node.bank === "master" ? "master" : "slave") : null,
+    node.bits ? `${node.bits} bit ${t(lang, node.signed ? "signed" : "unsigned")}` : null,
+    node.units && node.units !== "-" ? node.units : null,
+    node.math ?? null,
+  ].filter(Boolean);
+  if (!parts.length && !originalName(node)) return null;
+  return (
+    <p className="meta-line">
+      {parts.map((part, i) => (
+        <span key={i} className="meta-part">
+          {part}
+        </span>
+      ))}
+      {originalName(node) && (
+        <span className="meta-part meta-original">
+          {t(lang, "originalSpelling")}: <code>{originalName(node)}</code>
+        </span>
+      )}
+    </p>
+  );
+}
+
+/**
+ * Everything about a node except its numbers.
+ *
+ * The values moved out to their own window: a map's grid and a map's
+ * description are consulted at different moments, and stacking them meant
+ * scrolling past 18 columns of numbers to reach a sentence.
+ */
+export function Description({
   node,
   g,
   lang,
@@ -359,41 +405,7 @@ export function Detail({
 
   return (
     <div className="detail">
-      <h2>
-        {displayNodeName(node)}
-        <span className="node-kind">{nodeKindLabel(lang, node)}</span>
-        {node.conf && (
-          <span className={`conf conf-${node.conf}`}>
-            {t(lang, node.conf === "documented" ? "confDocumented" : "confDerived")}
-          </span>
-        )}
-      </h2>
-
-      {/* Address, processor, units, scaling and width were a six-row
-          definition list that pushed everything else below the fold. They are
-          reference details, so they get one line and stay legible. */}
-      <p className="meta-line">
-        {[
-          node.addr !== undefined
-            ? `0x${node.addr.toString(16).toUpperCase().padStart(4, "0")}`
-            : null,
-          node.bank ? t(lang, node.bank === "master" ? "master" : "slave") : null,
-          node.bits ? `${node.bits} bit ${t(lang, node.signed ? "signed" : "unsigned")}` : null,
-          node.units && node.units !== "-" ? node.units : null,
-          node.math ?? null,
-        ]
-          .filter(Boolean)
-          .map((part, i) => (
-            <span key={i} className="meta-part">
-              {part}
-            </span>
-          ))}
-        {originalName(node) && (
-          <span className="meta-part meta-original">
-            {t(lang, "originalSpelling")}: <code>{originalName(node)}</code>
-          </span>
-        )}
-      </p>
+      <MetaLine node={node} lang={lang} />
 
       {cats.length > 0 && (
         <p className="chips">
@@ -429,13 +441,6 @@ export function Detail({
               )}
             </>
           )}
-        </section>
-      )}
-
-      {(node.axes || node.value !== undefined) && (
-        <section>
-          <h3>{t(lang, "table")}</h3>
-          <ValueTable node={node} lang={lang} />
         </section>
       )}
 
