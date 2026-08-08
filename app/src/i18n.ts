@@ -101,6 +101,38 @@ const STRINGS = {
     en: "Pick a parameter or a block to fill this.",
   },
   viaSignal: { ja: "経由", en: "via" },
+  noValuesForBlock: {
+    ja: "ブロックには数表がありません。マップ・カーブ・定数を選ぶと出ます。",
+    en: "A block has no table of its own. Pick a map, curve or constant.",
+  },
+
+  // comments
+  commentModeOn: { ja: "コメントを付ける", en: "Comment on screen" },
+  commentModeOff: { ja: "コメントを終える", en: "Stop commenting" },
+  commentHint: {
+    ja: "気になる所をクリックしてください。ブロック・式・入出力・ウィンドウのどれでも指せます。",
+    en: "Click whatever looks wrong — a block, a formula, a port or a window.",
+  },
+  commentPlaceholder: {
+    ja: "ここが読みにくい／この値がおかしい など（⌘/Ctrl+Enter で保存）",
+    en: "What is wrong with it? (⌘/Ctrl+Enter to save)",
+  },
+  commentSave: { ja: "保存", en: "Save" },
+  commentCancel: { ja: "やめる", en: "Cancel" },
+  commentList: { ja: "コメント一覧", en: "Comments" },
+  commentDelete: { ja: "削除", en: "Delete" },
+  commentGoto: { ja: "この箇所へ移動", en: "Scroll to this" },
+  commentClear: { ja: "全部消す", en: "Clear all" },
+  commentClearConfirm: {
+    ja: "コメントを全部消します。よろしいですか？",
+    en: "Delete every comment. Are you sure?",
+  },
+  commentCopy: { ja: "コピーして貼り付け用に", en: "Copy for pasting back" },
+  commentCopied: { ja: "コピーしました", en: "Copied" },
+  commentExportHint: {
+    ja: "これをコピーして会話に貼ってください。番号で返信します。コメントはこのブラウザにだけ保存され、どこにも送信されません。",
+    en: "Copy this into the conversation; replies come back by number. Comments stay in this browser and are sent nowhere.",
+  },
   showAllLines: { ja: "残りの式も表示", en: "Show the remaining lines" },
   showFewerLines: { ja: "主要な式だけ表示", en: "Show only the key lines" },
   portsHidden: { ja: "表示しきれない入出力", en: "inputs/outputs not shown" },

@@ -5,6 +5,7 @@ import { Description, MetaLine, TreeView, ValueTable, useAgreement, nodeKindLabe
 import { Diagram } from "./Diagram";
 import { ValueChart } from "./ValueChart";
 import { FloatingWindow, type WindowPos } from "./FloatingWindow";
+import { Annotations } from "./Annotations";
 import { type BlockTreeKind, expandBlocks, owningBlock } from "./block-tree";
 import { displayNodeName } from "./names";
 import { type Lang, pickLocalised, t } from "./i18n";
@@ -172,6 +173,7 @@ export default function App() {
   const [depth, setDepth] = useState(3);
   const [showAbout, setShowAbout] = useState(false);
   const [showDense, setShowDense] = useState(false);
+  const [commenting, setCommenting] = useState(false);
   const [windows, setWindows] = useState<WindowState>(initialWindows);
   const [origins, setOrigins] = useState<Set<EdgeOrigin>>(() => {
     const stored = readStored(ORIGIN_KEY);
@@ -483,7 +485,11 @@ export default function App() {
               )}
             </>
           ) : (
-            <p className="empty-note">{t(lang, "selectForWindows")}</p>
+            <p className="empty-note">
+              {/* A function is a legitimate selection that simply has no
+                  numbers; saying "pick something" implies nothing is. */}
+              {t(lang, node ? "noValuesForBlock" : "selectForWindows")}
+            </p>
           )}
         </FloatingWindow>
       )}
@@ -504,6 +510,18 @@ export default function App() {
           )}
         </FloatingWindow>
       )}
+
+      {/* The comment layer sits above everything, including the windows. */}
+      <Annotations
+        lang={lang}
+        context={
+          node
+            ? `${displayNodeName(node)}${root && root !== node.id ? ` / ${displayNodeName(graph.byId.get(root)!)}` : ""}`
+            : "-"
+        }
+        active={commenting}
+        onToggle={setCommenting}
+      />
 
       {windows.open.tree && (
         <FloatingWindow
