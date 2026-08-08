@@ -102,6 +102,55 @@ def test_bitwise_and_survives_cleaning(tz):
     assert "ZUSTAND_MOTOR VL" not in guards
 
 
+# The bare form has no parentheses around the right operand, so a lookbehind
+# that inspects one character sees a space and eats the operator.  In TZ_CALC
+# every such guard sits on an assignment to a temporary, which is folded away
+# before it becomes a Statement - which is why this needs its own fixture.
+BARE_AND = """
+void ll_flags(void)
+
+{
+  if ((ZUSTAND_MOTOR & LL) == 0) {
+    B_LL = 0;
+  }
+  else {
+    B_LL = 1;
+  }
+  return;
+}
+"""
+
+
+@pytest.mark.parametrize("operand", ["LL", "VL", "Nachlauf", "Start"])
+def test_unparenthesised_bitwise_and_keeps_its_operator(operand):
+    statements = parse_logic.extract(BARE_AND.replace("LL)", f"{operand})"))
+    guards = " ".join(g for s in statements for g in s.guards)
+    assert f"ZUSTAND_MOTOR & {operand}" in guards
+    assert f"ZUSTAND_MOTOR {operand}" not in guards
+
+
+def test_address_of_is_still_stripped():
+    assert parse_logic._clean("kls_wint(&KL_X.sizeX,N)") == "kls_wint(KL_X,N)"
+    assert parse_logic._clean("table = &KF_TZ_VL") == "table = KF_TZ_VL"
+
+
+def test_logical_and_is_not_mistaken_for_address_of():
+    assert parse_logic._clean("(a != 0) && (b != 0)") == "(a != 0) && (b != 0)"
+
+
+def test_shifts_are_not_read_as_comparisons():
+    assert parse_logic._invert("x << 8 < 100") == "x << 8 >= 100"
+
+
+def test_else_arm_carries_the_negated_condition():
+    """"otherwise" keeps the fact and drops the meaning; invert instead."""
+    statements = parse_logic.extract(BARE_AND)
+    by_guard = {tuple(s.guards): s for s in statements}
+    assert ("(ZUSTAND_MOTOR & LL) == 0",) in by_guard
+    assert ("(ZUSTAND_MOTOR & LL) != 0",) in by_guard
+    assert not any("otherwise" in g for s in statements for g in s.guards)
+
+
 def test_guards_do_not_leak_past_their_branch(tz):
     """Statements after the if/else chain are unconditional."""
     by_out, _statements = tz
@@ -113,7 +162,7 @@ def test_guards_do_not_leak_past_their_branch(tz):
 def test_two_curves_in_one_expression(tz):
     _by_out, statements = tz
     start = statements[1]
-    assert start.guards == ["otherwise"]
+    assert start.guards == ["(ZUSTAND_MOTOR & (Nachlauf|KI.15 aus|Start|S)) != 0"]
     shapes = [i["shape"] for i in start.interpolations]
     assert shapes == ["curve", "curve"]
     assert {i["tables"][0] for i in start.interpolations} == {

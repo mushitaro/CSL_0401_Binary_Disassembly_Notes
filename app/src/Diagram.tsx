@@ -1,6 +1,8 @@
-import { type ReactElement, useMemo, useState } from "react";
+import { type ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import type { Indexed } from "./graph";
-import { type DiagramNode, alternatives, buildDiagram } from "./diagram";
+import { type DiagramNode, buildDiagram } from "./diagram";
+import { type FormattedLine, makeContext } from "./logic-format";
+import { displayName } from "./names";
 import { type Lang, t } from "./i18n";
 
 /**
@@ -10,6 +12,10 @@ import { type Lang, t } from "./i18n";
  * box with a grid, a 2-D curve carries its curve, a constant is a small pill,
  * a signal is a plain tag. A tuner scanning the picture needs to see "that
  * input is a map I can edit" without reading the name first.
+ *
+ * Neighbouring blocks open where they stand. Following a chain by replacing
+ * the whole view loses the reader's place, and the thing they clicked is the
+ * one thing that then is not on screen.
  */
 
 const KIND_LABEL = {
@@ -65,34 +71,115 @@ export function Diagram({
   g,
   focusId,
   lang,
+  trail,
   onSelect,
+  onBack,
 }: {
   g: Indexed;
   focusId: string;
   lang: Lang;
+  trail: string[];
   onSelect: (id: string) => void;
+  onBack: (id: string) => void;
 }) {
   const [showAll, setShowAll] = useState(false);
-  const diagram = useMemo(
-    () => buildDiagram(g, focusId, 14, showAll),
-    [g, focusId, showAll],
+  const [showNoise, setShowNoise] = useState(false);
+  const [depth, setDepth] = useState(1);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const scroller = useRef<HTMLDivElement>(null);
+
+  const ctx = useMemo(
+    () => makeContext(g.raw.nodes, g.raw.nameIndex, g.byId, g.raw.glossary, lang),
+    [g, lang],
   );
+  const diagram = useMemo(
+    () =>
+      buildDiagram(g, focusId, {
+        ctx,
+        maxPorts: 14,
+        showAllLines: showAll,
+        showNoise,
+        depth,
+        expanded,
+      }),
+    [g, focusId, ctx, showAll, showNoise, depth, expanded],
+  );
+
+  // With producers on the left the focused block is no longer at x=0, and a
+  // wide chain would otherwise open scrolled to a neighbour rather than to the
+  // block the reader asked for.
+  useEffect(() => {
+    const el = scroller.current;
+    const centre = diagram?.nodes.find((n) => n.depth === 0 || n.highlight);
+    if (!el || !centre) return;
+    el.scrollLeft = Math.max(0, centre.x + centre.w / 2 - el.clientWidth / 2);
+  }, [diagram]);
 
   if (!diagram) {
     return <p className="empty-note">{t(lang, "noDiagram")}</p>;
   }
 
-  const focusNode = g.byId.get(diagram.focus);
+  const toggle = (key: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   return (
     <div className="diagram-wrap">
-      {diagram.via && (
+      {trail.length > 1 && (
+        <nav className="breadcrumb" aria-label={t(lang, "blockDiagram")}>
+          {trail.map((id, i) => {
+            const node = g.byId.get(id);
+            if (!node) return null;
+            const last = i === trail.length - 1;
+            return (
+              <span key={id}>
+                {i > 0 && <span className="crumb-sep">›</span>}
+                {last ? (
+                  <strong>{displayName(node.name, node.t)}</strong>
+                ) : (
+                  <button className="crumb" onClick={() => onBack(id)}>
+                    {displayName(node.name, node.t)}
+                  </button>
+                )}
+              </span>
+            );
+          })}
+        </nav>
+      )}
+
+      {diagram.paramFocus && (
         <p className="note">
-          <strong>{diagram.via}</strong> {t(lang, "diagramVia")}{" "}
-          <strong>{focusNode?.name}</strong>
+          <strong>{diagram.paramFocus}</strong> {t(lang, "diagramParamFocus")}
         </p>
       )}
-      <div className="diagram-scroll">
+
+      <div className="diagram-controls">
+        <label>
+          {t(lang, "diagramDepth")}
+          <input
+            type="range"
+            min={1}
+            max={3}
+            value={depth}
+            onChange={(e) => setDepth(Number(e.target.value))}
+          />
+          <span className="depth-value">{depth}</span>
+        </label>
+        {(showNoise || diagram.hiddenNoise > 0) && (
+          <button onClick={() => setShowNoise((v) => !v)}>
+            {showNoise
+              ? t(lang, "hideNoise")
+              : `${t(lang, "showNoise")} (+${diagram.hiddenNoise})`}
+          </button>
+        )}
+      </div>
+
+      <div className="diagram-scroll" ref={scroller}>
         <svg
           className="diagram"
           width={diagram.width}
@@ -119,21 +206,24 @@ export function Diagram({
             <path
               key={i}
               d={e.d}
-              className={`wire wire-${e.kind}${e.alternative ? " wire-alt" : ""}`}
+              className={`wire wire-${e.kind}${e.alternative ? " wire-alt" : ""}${
+                e.inferred ? " wire-inferred" : ""
+              }`}
               markerEnd="url(#arrow)"
             />
           ))}
 
           {diagram.nodes.map((n) =>
             n.kind === "block" ? (
-              <BlockBox key={n.id} n={n} lang={lang} onSelect={onSelect} />
+              <BlockBox key={n.id} n={n} lang={lang} onSelect={onSelect} onToggle={toggle} />
             ) : (
               <PortBox key={n.id} n={n} lang={lang} onSelect={onSelect} />
             ),
           )}
         </svg>
       </div>
-      {(diagram.hiddenLines > 0 || diagram.hiddenPorts > 0) && (
+
+      {(diagram.hiddenLines > 0 || diagram.hiddenPorts > 0 || diagram.hiddenBlocks > 0) && (
         <p className="note diagram-hidden">
           {diagram.hiddenLines > 0 && (
             <button onClick={() => setShowAll((v) => !v)}>
@@ -145,6 +235,11 @@ export function Diagram({
           {diagram.hiddenPorts > 0 && (
             <span>
               {t(lang, "portsHidden")}: {diagram.hiddenPorts}
+            </span>
+          )}
+          {diagram.hiddenBlocks > 0 && (
+            <span>
+              {t(lang, "blocksHidden")}: {diagram.hiddenBlocks}
             </span>
           )}
         </p>
@@ -194,14 +289,21 @@ function BlockBox({
   n,
   lang,
   onSelect,
+  onToggle,
 }: {
   n: DiagramNode;
   lang: Lang;
   onSelect: (id: string) => void;
+  onToggle: (key: string) => void;
 }) {
+  const visible: FormattedLine[] = n.lines ?? [];
+
   let y = 30;
   return (
-    <g className="block" transform={`translate(${n.x} ${n.y})`}>
+    <g
+      className={`block${n.collapsed ? " block-collapsed" : ""}${n.highlight ? " highlight" : ""}`}
+      transform={`translate(${n.x} ${n.y})`}
+    >
       <rect width={n.w} height={n.h} rx={5} />
       <rect width={n.w} height={24} rx={5} className="block-head" />
       <text
@@ -212,27 +314,65 @@ function BlockBox({
       >
         {n.label}
       </text>
-      {n.detail && (
+      {n.depth !== 0 && (
+        <g
+          className="block-toggle clickable"
+          transform={`translate(${n.w - 46} 5)`}
+          onClick={() => onToggle(n.key)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") onToggle(n.key);
+          }}
+        >
+          <title>{t(lang, n.collapsed ? "expandBlock" : "collapseBlock")}</title>
+          <rect width={16} height={14} rx={3} />
+          <text x={8} y={11} textAnchor="middle">
+            {n.collapsed ? "+" : "−"}
+          </text>
+        </g>
+      )}
+      {n.detail && n.depth === 0 && (
         <text className="block-bank" x={n.w - 10} y={17} textAnchor="end">
           {t(lang, n.detail === "master" ? "master" : "slave")}
         </text>
       )}
-      {(n.lines ?? []).map((line, i) => {
+      {visible.map((line, i) => {
         const rows: ReactElement[] = [];
         if (line.guard) {
           y += 17;
           rows.push(
             <text key={`g${i}`} className="guard" x={10} y={y}>
-              {`when ${line.guard}`}
+              {line.guardGloss ? line.guardGloss : `when ${line.guard}`}
             </text>,
           );
         }
         y += 17;
         rows.push(
-          <Formula key={`f${i}`} x={10} y={y} out={line.out} expr={line.expr} />,
+          <Formula
+            key={`f${i}`}
+            x={10}
+            y={y}
+            out={line.out}
+            expr={line.shown ?? line.expr}
+            title={line.raw}
+          />,
         );
+        if (line.gloss && n.showGloss) {
+          y += 15;
+          rows.push(
+            <text key={`m${i}`} className="gloss" x={22} y={y}>
+              {line.gloss}
+            </text>,
+          );
+        }
         return rows;
       })}
+      {(n.moreLines ?? 0) > 0 && (
+        <text className="block-more" x={10} y={n.h - 8}>
+          {`+${n.moreLines} ${t(lang, "moreLines")}`}
+        </text>
+      )}
     </g>
   );
 }
@@ -243,32 +383,36 @@ function Formula({
   y,
   out,
   expr,
+  title,
 }: {
   x: number;
   y: number;
   out: string;
   expr: string;
+  title?: string;
 }) {
   // Tokenise so operand names can be tinted by what they are; everything else
   // stays as plain maths.
   const parts = expr.split(/(\{[^{}]*\}|[A-Za-z_][A-Za-z0-9_]*)/g).filter(Boolean);
   return (
     <text className="formula" x={x} y={y}>
+      {/* The decompiler's own wording, for checking the rewrite above it. */}
+      {title && <title>{title}</title>}
       <tspan className="op-out">{out}</tspan>
       <tspan className="op-eq"> = </tspan>
       {parts.map((p, i) => {
         if (p.startsWith("{")) {
           return (
             <tspan key={i} className="op-alt">
-              {alternatives(p).join(" | ")}
+              {p}
             </tspan>
           );
         }
-        const cls = /^KF_/.test(p)
+        const cls = /^KF_/i.test(p)
           ? "op-map"
-          : /^KL_/.test(p)
+          : /^KL_/i.test(p)
             ? "op-curve"
-            : /^K_/.test(p)
+            : /^K_/i.test(p)
               ? "op-const"
               : /^(kf|kl)[su]_[wb]int$|Filter|tableLookup/.test(p)
                 ? "op-helper"

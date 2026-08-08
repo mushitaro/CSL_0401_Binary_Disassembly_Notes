@@ -100,9 +100,10 @@ CAST_RE = re.compile(
 )
 # Address-of only: a "&" that follows an identifier or ")" is a bitwise AND and
 # must survive, or "ZUSTAND_MOTOR & VL" silently becomes "ZUSTAND_MOTOR VL".
-STRUCT_ADDR_RE = re.compile(
-    r"(?<![\w)\]])&\s*([A-Za-z_]\w*)\s*(?:\.\w+|->\w+)?"
-)
+ADDR_OF_RE = re.compile(r"&\s*([A-Za-z_]\w*)\s*(?:\.\w+|->\w+)?")
+# What may sit to the left of a "&" that is an operator rather than address-of:
+# the end of an operand, or the first "&" of a "&&".
+_BINARY_AND_LEFT = ")]&"
 STRUCT_CAST_RE = re.compile(r"\(\s*[A-Za-z_]\w*\s*\*\s*\)\s*")
 
 # The MSS54 lookup helpers follow a strict naming scheme:
@@ -160,12 +161,91 @@ class Branch:
     arms: list[tuple[str, list]] = field(default_factory=list)
 
 
+def _strip_address_of(text: str) -> str:
+    """Drop "&" only where it means address-of, never where it is an operator.
+
+    Deciding on the single character before the "&" is not enough, because the
+    decompiler spells a bitwise AND with spaces around it: in
+    "ZUSTAND_MOTOR & Nachlauf" that character is a space, so the "&" and the
+    space get eaten and the guard reads "ZUSTAND_MOTOR Nachlauf" - the engine
+    state a tuner is looking for, silently turned into nonsense.  Look back
+    past the whitespace to the character that actually ends the left operand.
+    """
+    out: list[str] = []
+    pos = 0
+    for m in ADDR_OF_RE.finditer(text):
+        if m.start() < pos:
+            continue
+        left = text[: m.start()].rstrip()
+        if left and (left[-1].isalnum() or left[-1] == "_" or left[-1] in _BINARY_AND_LEFT):
+            continue
+        out.append(text[pos : m.start()])
+        out.append(m.group(1))
+        pos = m.end()
+    out.append(text[pos:])
+    return "".join(out)
+
+
 def _clean(expression: str) -> str:
     text = STRUCT_CAST_RE.sub("", expression)
     text = CAST_RE.sub("", text)
-    text = STRUCT_ADDR_RE.sub(r"\1", text)
+    text = _strip_address_of(text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
+
+
+_INVERSE = {"==": "!=", "!=": "==", "<": ">=", "<=": ">", ">": "<=", ">=": "<"}
+# Longest first, so "<=" is found before "<".
+_COMPARISONS = ("==", "!=", "<=", ">=", "<", ">")
+
+
+def _split_top(text: str, operator: str) -> tuple[str, str] | None:
+    """Split on `operator` at paren depth 0, or None if it is not there."""
+    depth = 0
+    for i, ch in enumerate(text):
+        if ch in "([":
+            depth += 1
+        elif ch in ")]":
+            depth -= 1
+        elif depth == 0 and text.startswith(operator, i):
+            end = i + len(operator)
+            before, after = text[i - 1 : i], text[end : end + 1]
+            if operator in ("<", ">"):
+                # Not the "<" of "<=", and not either half of a "<<" shift.
+                if after in ("=", operator) or before == operator:
+                    continue
+            return text[:i].strip(), text[end:].strip()
+    return None
+
+
+def _invert(condition: str) -> str:
+    """The condition under which `condition` does not hold.
+
+    Inverting a comparison in place keeps the result readable as a condition;
+    wrapping everything in "not (...)" would be correct but reads as a riddle.
+    Anything with a top-level && or || is left to De Morgan-free negation,
+    which is still honest, just wordier.
+    """
+    text = condition.strip()
+    if _split_top(text, "&&") or _split_top(text, "||"):
+        return f"not ({text})"
+    for op in _COMPARISONS:
+        parts = _split_top(text, op)
+        if parts:
+            return f"{parts[0]} {_INVERSE[op]} {parts[1]}"
+    return f"not ({text})"
+
+
+def _else_guard(conditions: list[str]) -> str:
+    """The guard for an else arm: none of the preceding arms fired.
+
+    Recording the else arm as the bare word "otherwise" keeps the fact that it
+    is an else and throws away what it is the else *of*, which is the part that
+    carries the meaning.  The guard then reads "when A == 0 AND otherwise".
+    """
+    if not conditions:
+        return "otherwise"
+    return " and ".join(_invert(c) for c in conditions)
 
 
 def parse_body(lines: list[str], start: int = 0, stop_at_brace: bool = False):
@@ -200,7 +280,8 @@ def parse_body(lines: list[str], start: int = 0, stop_at_brace: bool = False):
                 elif m_else:
                     i += 1
                     body, i = _read_block(lines, i)
-                    branch.arms.append(("otherwise", body))
+                    negated = _else_guard([c for c, _ in branch.arms])
+                    branch.arms.append((negated, body))
                 else:
                     break
             out.append(branch)

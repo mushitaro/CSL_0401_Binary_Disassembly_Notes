@@ -816,3 +816,163 @@ svg.diagram .port.highlight rect:first-of-type {
 svg.diagram .port.highlight text {
   font-weight: 700;
 }
+
+/* ---------------------------------------------------------------- diagram v2
+   Collapsed neighbours, the breadcrumb and the plain-language gloss lines. */
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.breadcrumb .crumb {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.breadcrumb .crumb:hover {
+  background: var(--panel);
+  border-radius: 3px;
+}
+
+.breadcrumb strong {
+  padding: 2px 4px;
+}
+
+.breadcrumb .crumb-sep {
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+.diagram-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.diagram-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A neighbouring block is context, not the subject: it recedes until opened. */
+svg.diagram .block-collapsed > rect:first-of-type {
+  stroke: var(--border);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 3;
+}
+
+svg.diagram .block-collapsed .block-head {
+  fill-opacity: 0.05;
+}
+
+svg.diagram .block-collapsed .block-title {
+  fill: var(--diagram-ink);
+  font-weight: 600;
+}
+
+svg.diagram .block.highlight > rect:first-of-type {
+  stroke-width: 2.2;
+}
+
+svg.diagram .block-toggle rect {
+  fill: var(--panel);
+  stroke: var(--border);
+}
+
+svg.diagram .block-toggle text {
+  font-size: 11px;
+  fill: var(--diagram-ink);
+  font-weight: 700;
+}
+
+svg.diagram .block-toggle:hover rect {
+  stroke: var(--accent);
+}
+
+svg.diagram .block-more {
+  font-size: 10px;
+  fill: var(--muted);
+}
+
+/* The reading of the formula, in the reader's own language. */
+svg.diagram .gloss {
+  font-size: 10.5px;
+  fill: var(--muted);
+}
+
+/* Wiring recovered from cross-references rather than from a formula: the
+   weaker evidence is drawn as the weaker line. */
+svg.diagram .wire-inferred {
+  stroke-dasharray: 2 3;
+  opacity: 0.5;
+}
+
+/* The facts line that replaced the six-row definition list. */
+.meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  margin: 2px 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.meta-part + .meta-part::before {
+  content: "·";
+  margin-right: 10px;
+  color: var(--border);
+}
+
+.meta-original {
+  font-family: inherit;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+
+.legend,
+.original-toggle {
+  margin: 8px 0;
+  font-size: 12px;
+}
+
+.legend > summary,
+.original-toggle > summary {
+  cursor: pointer;
+  color: var(--muted);
+  user-select: none;
+}
+
+.legend > summary:hover,
+.original-toggle > summary:hover {
+  color: var(--accent);
+}
+
+.legend .note {
+  margin: 6px 0 0;
+}
+
+/* The diagram is the subject of the page: give it the width it can use. */
+.diagram-panel {
+  margin-bottom: 18px;
+}

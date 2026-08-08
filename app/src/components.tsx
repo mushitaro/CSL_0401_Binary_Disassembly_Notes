@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { EdgeOrigin, GraphNode } from "./types";
 import type { Indexed, TreeNode } from "./graph";
 import { agreement } from "./graph";
+import { displayNodeName, originalName } from "./names";
+import { isToolMetadata } from "./logic-format";
 import { type Lang, pickLocalised, t } from "./i18n";
 
 /** The 47 MB of PDFs stay in the repository; link there rather than ship them. */
@@ -216,7 +218,7 @@ function TreeRow({ tree, g, lang, rootAgreement, onSelect }: TreeViewProps) {
           </>
         )}
         <button className="node-name" onClick={() => onSelect(n.id)}>
-          {n.name}
+          {displayNodeName(n)}
         </button>
         <span className="node-kind">{nodeKindLabel(lang, n)}</span>
         {both && <span className="agree agree-both">{t(lang, "agreementBoth")}</span>}
@@ -358,7 +360,7 @@ export function Detail({
   return (
     <div className="detail">
       <h2>
-        {node.name}
+        {displayNodeName(node)}
         <span className="node-kind">{nodeKindLabel(lang, node)}</span>
         {node.conf && (
           <span className={`conf conf-${node.conf}`}>
@@ -367,67 +369,57 @@ export function Detail({
         )}
       </h2>
 
-      <dl className="facts">
-        {node.addr !== undefined && (
-          <>
-            <dt>{t(lang, "address")}</dt>
-            <dd>
-              <code>0x{node.addr.toString(16).toUpperCase().padStart(4, "0")}</code>
-            </dd>
-          </>
+      {/* Address, processor, units, scaling and width were a six-row
+          definition list that pushed everything else below the fold. They are
+          reference details, so they get one line and stay legible. */}
+      <p className="meta-line">
+        {[
+          node.addr !== undefined
+            ? `0x${node.addr.toString(16).toUpperCase().padStart(4, "0")}`
+            : null,
+          node.bank ? t(lang, node.bank === "master" ? "master" : "slave") : null,
+          node.bits ? `${node.bits} bit ${t(lang, node.signed ? "signed" : "unsigned")}` : null,
+          node.units && node.units !== "-" ? node.units : null,
+          node.math ?? null,
+        ]
+          .filter(Boolean)
+          .map((part, i) => (
+            <span key={i} className="meta-part">
+              {part}
+            </span>
+          ))}
+        {originalName(node) && (
+          <span className="meta-part meta-original">
+            {t(lang, "originalSpelling")}: <code>{originalName(node)}</code>
+          </span>
         )}
-        {node.bank && (
-          <>
-            <dt>{t(lang, "bank")}</dt>
-            <dd>{t(lang, node.bank === "master" ? "master" : "slave")}</dd>
-          </>
-        )}
-        {node.units && node.units !== "-" && (
-          <>
-            <dt>{t(lang, "units")}</dt>
-            <dd>{node.units}</dd>
-          </>
-        )}
-        {node.math && (
-          <>
-            <dt>{t(lang, "scaling")}</dt>
-            <dd>
-              <code>{node.math}</code>
-            </dd>
-          </>
-        )}
-        {node.bits && (
-          <>
-            <dt>{t(lang, "width")}</dt>
-            <dd>
-              {node.bits} bit · {t(lang, node.signed ? "signed" : "unsigned")}
-            </dd>
-          </>
-        )}
-        {cats.length > 0 && (
-          <>
-            <dt>{t(lang, "categories")}</dt>
-            <dd>
-              {cats.map((c) => (
-                <span key={c!.id} className="chip">
-                  {pickLocalised(lang, c!)}
-                </span>
-              ))}
-            </dd>
-          </>
-        )}
-      </dl>
+      </p>
+
+      {cats.length > 0 && (
+        <p className="chips">
+          {cats.map((c) => (
+            <span key={c!.id} className="chip">
+              {pickLocalised(lang, c!)}
+            </span>
+          ))}
+        </p>
+      )}
 
       {node.error && <p className="warn">⚠ {node.error}</p>}
       {node.plate && <pre className="plate">{node.plate}</pre>}
 
-      {node.desc?.en && (
+      {node.desc?.en && !isToolMetadata(node.desc.en) && (
         <section>
           <h3>{t(lang, "description")}</h3>
           {lang === "ja" && node.desc.ja ? (
             <>
               <p>{node.desc.ja}</p>
-              <p className="original">{node.desc.en}</p>
+              {/* The English original is kept for checking a translation, but
+                  it is a duplicate of the paragraph above it for most readers. */}
+              <details className="original-toggle">
+                <summary>English</summary>
+                <p className="original">{node.desc.en}</p>
+              </details>
             </>
           ) : (
             <>
@@ -447,11 +439,11 @@ export function Detail({
         </section>
       )}
 
-      <section>
-        <h3>{t(lang, "documents")}</h3>
-        {docs.length === 0 ? (
-          <p className="note">{t(lang, "noDocs")}</p>
-        ) : (
+      {/* A section whose only content is "there is nothing here" costs a
+          heading, a paragraph and the space between them to say so. */}
+      {docs.length > 0 && (
+        <section>
+          <h3>{t(lang, "documents")}</h3>
           <ul className="doclist">
             {docs.map((d) => {
               const meta = docBySection.get(d.section);
@@ -475,8 +467,8 @@ export function Detail({
               );
             })}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
 
       {node.t === "func" && node.hasCode && node.addr !== undefined && (
         <DecompiledCode node={node} lang={lang} />

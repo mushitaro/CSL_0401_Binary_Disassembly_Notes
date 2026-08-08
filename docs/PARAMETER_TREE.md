@@ -10,19 +10,22 @@
 
 MSS54HP（E46 M3 CSL、プログラム `0401`）の DME の**ロジック図**をブラウザで辿れるビューアです。
 
-**メインはブロック図です。** ブロックの中には実バイナリから復元した計算式が入り、左に入力（3Dマップ・2Dカーブ・定数・信号）、右に出力が並びます。どの値がどのテーブルから来ているのかが一目で分かります。
+**メインはブロック図です。** ブロックの中には実バイナリから復元した計算式が入り、左に入力（3Dマップ・2Dカーブ・定数・信号）、右に出力が並びます。さらにその外側に、**入力信号を書いているブロック**と**出力信号を読んでいるブロック**が並ぶので、値の出どころを1画面で遡れます。
 
 ```
-KF_TZ_GRUND ┐(3Dマップ)          ┌─────────────────────────────────────────┐
-KF_TZ_LL    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌→ │ tz_calc                                 │ → TZ_GRUND
-KF_TZ_VL    ┘  破線=状態で切替     │ when 始動でない:                          │ → TZ_ETA_BASIS
-KL_TZ_START_N   (2Dカーブ) ────→  │  TZ_GRUND = kfs_wint({3つのマップ},N,RF) │ → TZ_MIN
-KL_TZ_START_TMOT ─────────────→  │ when それ以外:                           │ → TZ_SA_OFFSET
-N, RF, TMOT      (信号) ───────→  │  TZ_GRUND = kls_wint(KL_TZ_START_TMOT…) │
-                                 └─────────────────────────────────────────┘
+ 産出ブロック          入力                                                    出力      消費ブロック
+┌─────────┐   KF_TZ_GRUND ┐(3Dマップ)  ┌──────────────────────────────────┐            ┌────────────┐
+│ rf_calc  │→ RF  KF_TZ_LL ├╌╌╌╌╌╌╌╌╌→ │ tz_calc                          │ → TZ_GRUND │tz_related_2│
+│ tmot_calc│→TMOT KF_TZ_VL ┘ 破線=状態で │ 停止後の後処理・始動中… でないとき   │ → TZ_MIN  →│ …          │
+└─────────┘   KL_TZ_START_N ────────→  │  TZ_GRUND = {3つのマップ}[N, RF]  │ → TZ_ETA…  └────────────┘
+    ＋ボタンで  N, RF, TMOT (信号) ───→  │   ↳ 基本点火時期 ← 回転数×充填量  │
+    その場で展開                        └──────────────────────────────────┘
 ```
 
-上の `{KF_TZ_GRUND | KF_TZ_LL | KF_TZ_VL}` は「運転状態（アイドル/部分負荷/全負荷）によって3つのうちどれかが使われる」という意味で、破線で描かれます。
+- `{KF_TZ_GRUND | KF_TZ_LL | KF_TZ_VL}` は「運転状態（アイドル/部分負荷/全負荷）によって3つのうちどれかが使われる」という意味で、破線で描かれます。
+- `KF_X[A, B]` は2軸マップの補間、`KL_X(A)` はカーブの補間です（元の逆コンパイル結果では `kfs_wint(KF_X,A,B)`）。式にマウスを載せると元の C 表記が出ます。
+- 式の下の細い行は、XDF と純正資料に**実際に説明がある場合だけ**出る和文の意味行です。説明が無い項目には出しません（推測で埋めると、式が読めない人ほど信じてしまうため）。
+- ブロックをクリックしても画面は切り替わりません。`＋` でその場に式が開き、上のパンくずで元に戻れます。
 
 答えの材料はこのリポジトリに元から3つ揃っていましたが、互いに分断されていました。
 
@@ -181,6 +184,33 @@ functional blocks), and the Ghidra project (functions, references and RAM symbol
 from the actual binary). This tool joins them on addresses and mnemonics.
 
 ![English UI](screenshot-en.png)
+
+### Reading the diagram
+
+The block diagram is the main view. A block holds the formulas recovered from
+the binary, with its inputs on the left and its outputs on the right — and
+beyond those, the blocks that *write* those inputs and the blocks that *read*
+those outputs, so a value can be traced back without leaving the page.
+
+```
+ producers        inputs                                         outputs    consumers
+┌──────────┐  KF_TZ_GRUND ┐        ┌───────────────────────────┐           ┌────────────┐
+│ rf_calc   │→RF KF_TZ_LL ├╌╌╌╌╌╌→ │ tz_calc                   │→ TZ_GRUND │tz_related_2│
+│ tmot_calc │→TMOT KF_TZ_VL┘dashed │ while not after-run …     │→ TZ_MIN  →│ …          │
+└──────────┘  KL_TZ_START_N ────→  │  TZ_GRUND = {3 maps}[N,RF]│→ TZ_ETA…  └────────────┘
+   "+" opens  N, RF, TMOT ─────→   └───────────────────────────┘
+   one in place
+```
+
+- `KF_X[A, B]` interpolates a two-axis map and `KL_X(A)` a curve; the decompiler
+  wrote those as `kfs_wint(KF_X,A,B)` and `kls_wint(KL_X,A)`. Hovering a formula
+  shows the original C.
+- A dashed input is one of several selected by engine state.
+- Guards such as `(ZUSTAND_MOTOR & LL) == 0` are read back as "while not idle
+  (Leerlauf)" — but only when every bit in the mask has a settled meaning.
+  Anything else keeps its mask form rather than being half-guessed.
+- Clicking a neighbour does not replace the view: `+` opens it where it stands,
+  and the breadcrumb goes back.
 
 ### Running it
 

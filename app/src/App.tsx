@@ -3,6 +3,7 @@ import type { EdgeOrigin, Graph, GraphNode } from "./types";
 import { type Direction, type Indexed, expand, index, searchNodes } from "./graph";
 import { Detail, TreeView, useAgreement, nodeKindLabel } from "./components";
 import { Diagram } from "./Diagram";
+import { displayNodeName } from "./names";
 import { type Lang, pickLocalised, t } from "./i18n";
 
 const LANG_KEY = "mss54.lang";
@@ -101,6 +102,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useStoredLang();
   const [selected, setSelected] = useState<string | null>(null);
+  const [trail, setTrail] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [openCategory, setOpenCategory] = useState<number | null>(null);
   const [direction, setDirection] = useState<Direction>("downstream");
@@ -177,7 +179,21 @@ export default function App() {
     });
   };
 
+  // The trail is what makes following a chain reversible. Clicking through a
+  // diagram used to replace the whole view with no way back, so a reader who
+  // followed RF upstream lost the block they started from.
   const select = (id: string) => {
+    setTrail((prev) => {
+      const seen = prev.indexOf(id);
+      return seen >= 0 ? prev.slice(0, seen + 1) : [...prev, id];
+    });
+    setSelected(id);
+    setShowAbout(false);
+  };
+
+  const goBack = (id: string) => {
+    const seen = trail.indexOf(id);
+    if (seen >= 0) setTrail(trail.slice(0, seen + 1));
     setSelected(id);
     setShowAbout(false);
   };
@@ -230,7 +246,7 @@ export default function App() {
                       className={`node-name${r.id === selected ? " sel" : ""}`}
                       onClick={() => select(r.id)}
                     >
-                      {r.name}
+                      {displayNodeName(r)}
                     </button>
                     <span className="node-kind">{nodeKindLabel(lang, r)}</span>
                   </li>
@@ -263,7 +279,7 @@ export default function App() {
                                 className={`node-name${m.id === selected ? " sel" : ""}`}
                                 onClick={() => select(m.id)}
                               >
-                                {m.name}
+                                {displayNodeName(m)}
                               </button>
                             </li>
                           ))}
@@ -282,8 +298,11 @@ export default function App() {
             <About g={graph} lang={lang} />
           ) : node ? (
             <>
-              <Detail node={node} g={graph} lang={lang} onSelect={select} />
-              <section className="tree-panel">
+              {/* The diagram is the thing being read, so it gets the top of the
+                  page and the full width; the facts about the parameter are a
+                  reference to drop to afterwards, not the first thing to wade
+                  through. */}
+              <section className="tree-panel diagram-panel">
                 <div className="view-tabs">
                   <div className="seg">
                     <button
@@ -302,9 +321,22 @@ export default function App() {
                 </div>
                 {view === "diagram" ? (
                   <>
-                    <Diagram g={graph} focusId={node.id} lang={lang} onSelect={select} />
-                    <p className="note">{t(lang, "legendAlt")}</p>
-                    <p className="note">{t(lang, "legendFormula")}</p>
+                    <Diagram
+                      g={graph}
+                      focusId={node.id}
+                      lang={lang}
+                      trail={trail}
+                      onSelect={select}
+                      onBack={goBack}
+                    />
+                    <details className="legend">
+                      <summary>{t(lang, "legend")}</summary>
+                      <p className="note">{t(lang, "legendNotation")}</p>
+                      <p className="note">{t(lang, "legendCase")}</p>
+                      <p className="note">{t(lang, "legendAlt")}</p>
+                      <p className="note">{t(lang, "legendInferred")}</p>
+                      <p className="note">{t(lang, "legendFormula")}</p>
+                    </details>
                   </>
                 ) : (
                 <>
@@ -376,6 +408,7 @@ export default function App() {
                 </>
                 )}
               </section>
+              <Detail node={node} g={graph} lang={lang} onSelect={select} />
             </>
           ) : (
             <p className="empty-note">{t(lang, "selectPrompt")}</p>
