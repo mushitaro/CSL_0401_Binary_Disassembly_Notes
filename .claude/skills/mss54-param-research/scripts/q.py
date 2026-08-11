@@ -376,7 +376,10 @@ def cmd_dead(rx=None):
             continue
         k = p.get("kind")
         if k == "constant":
-            if re.search(r"_(ENABLE|CFG|CONTROL|AKTIV|ON)$", p["name"], re.I) and p.get("value") == 0:
+            # Naming is not consistent across modules: CONTROL, CTRL, CFG,
+            # ENABLE, AKTIV, STEUER and MODE all appear as the same idea.
+            if re.search(r"_(ENABLE|EN|CFG|CONFIG|CONTROL|CTRL|STEUER|AKTIV|ACTIVE|MODE|ON)$",
+                         p["name"], re.I) and p.get("value") == 0:
                 zero_enable.append(p)
         else:
             ax = (p.get("axes") or {}).get("z") or (p.get("axes") or {}).get("y")
