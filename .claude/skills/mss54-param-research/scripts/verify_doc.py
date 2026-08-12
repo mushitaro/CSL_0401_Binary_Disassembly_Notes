@@ -49,7 +49,10 @@ for n in D["nodes"]:
         PARAMS.setdefault(n["name"], []).append(n)
 
 ROW = re.compile(
-    r"^\|\s*`?([A-Za-z_][A-Za-z0-9_]*(?:\[[^\]|]*\])?)`?\s*\|"   # 1 name
+    # XDF titles are not identifiers: several carry a parenthetical or an index,
+    # e.g. "kf_rf_soll (CSL Alpha-N)" and "K_LL_TI_FAC[1of8]". Match the whole
+    # cell and strip it, rather than silently skipping those rows.
+    r"^\|\s*`?([A-Za-z_][A-Za-z0-9_]*(?:\s*\([^)|]*\)|\[[^\]|]*\])?)`?\s*\|"   # 1 name
     r"\s*([^|]*?)\s*\|"                                           # 2 kind
     r"\s*`?0x([0-9A-Fa-f]{2,5})`?\s*\|"                          # 3 XDF addr
     r"\s*`?0x([0-9A-Fa-f]{4,6})`?\s*\|"                          # 4 file offset
