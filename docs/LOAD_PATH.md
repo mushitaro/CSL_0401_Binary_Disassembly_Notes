@@ -115,7 +115,11 @@ XDF でも `KF_RF_N_AQ_REL`（X: n, Y: aq_rel [%], Function: DKBA）として 04
 
 ### 6. CSL '0401' との対比（実機バイナリで確認）
 
-`Full 211323000401PD31_TERRA.bin`（XDF のアドレスはこのファイル先頭からのオフセットで一致）から読み出した値です。
+`Full 211323000401PD31_TERRA.bin` から読み出した値です。
+
+> **アドレス規則**：XDF の 64KB 空間は `0x0000–0x7FFF` がスレーブ、`0x8000–0xFFFF` がマスター（[PARAMETER_TREE.md](PARAMETER_TREE.md) の「分かったこと」1 を参照）。**1MB イメージ上のファイルオフセットは、マスター側は XDF アドレスそのまま、スレーブ側は `アドレス + 0x88000`** です。本稿が引用するアドレスはすべてマスター側（≥ 0x8000）なので生アドレスで読めます。
+>
+> スレーブ側に同じ規則を当てると消去領域を読むことになるので注意してください。実測での確認：`K_RF_HUBVOLUMEN`（マスター）は @0xD21C = 3201、@0x8D21C = 0xFFFF。逆に `K_LA_T_RF`（スレーブ）は @0x4804 = 0xFFFF、@0x8C804 = 有効値。なお `0x88000 + (アドレス mod 0x8000)` という統一形は **Ghidra の注釈空間に対する規則**であって、マスター側のファイルオフセットには使えません。
 
 | 定数 | アドレス | 実値 | 意味 |
 |---|---|---|---|
@@ -385,7 +389,11 @@ So the standard M3 does carry a "throttle × rpm → filling" table — but **no
 
 ### 6. Comparison with CSL '0401' (verified against the binary)
 
-Read from `Full 211323000401PD31_TERRA.bin` (the XDF addresses line up with offsets from the start of this file):
+Read from `Full 211323000401PD31_TERRA.bin`:
+
+> **Address rule**: in the XDF's 64 KB space, `0x0000–0x7FFF` is the Slave and `0x8000–0xFFFF` the Master (see finding 1 in [PARAMETER_TREE.md](PARAMETER_TREE.md)). **File offsets into the 1 MB image are the raw XDF address for Master-side data, and `address + 0x88000` for Slave-side data.** Every address quoted in this document is Master-side (≥ 0x8000), so it reads at its raw offset.
+>
+> Applying the raw rule to a Slave-side address lands in erased flash. Verified both ways: `K_RF_HUBVOLUMEN` (Master) reads 3201 at 0xD21C and 0xFFFF at 0x8D21C; `K_LA_T_RF` (Slave) reads 0xFFFF at 0x4804 and valid data at 0x8C804. Note that the unified form `0x88000 + (address mod 0x8000)` is a rule for **Ghidra's annotation space**, not for Master-side file offsets.
 
 | Constant | Address | Value | Meaning |
 |---|---|---|---|
