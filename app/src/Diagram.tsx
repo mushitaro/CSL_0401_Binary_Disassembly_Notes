@@ -1,6 +1,6 @@
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import type { Indexed } from "./graph";
-import { type DiagramNode, buildDiagram } from "./diagram";
+import { type DiagramNode, buildDiagram } from "./diagram-model";
 import { owningBlock } from "./block-tree";
 import { type FormattedLine, makeContext } from "./logic-format";
 import { displayName } from "./names";

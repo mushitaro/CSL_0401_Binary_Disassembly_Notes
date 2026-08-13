@@ -1,6 +1,6 @@
 import type { GraphNode } from "./types";
 import type { Indexed, TreeNode } from "./graph";
-import { blockChain } from "./diagram";
+import { blockChain } from "./diagram-model";
 
 /**
  * The blocks as a tree, alongside the parameter tree.

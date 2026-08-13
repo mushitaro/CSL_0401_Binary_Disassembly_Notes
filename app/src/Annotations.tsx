@@ -6,7 +6,7 @@ import {
   loadPins,
   locate,
   savePins,
-} from "./annotations";
+} from "./annotation-store";
 import { type Lang, t } from "./i18n";
 
 /**
