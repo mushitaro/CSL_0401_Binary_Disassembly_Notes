@@ -149,12 +149,22 @@ TZ_GRUND = (short)uVar1;
 
 1. **XDF は両プロセッサを含む。** 64KB 空間の `0x0000–0x7FFF` がスレーブ、`0x8000–0xFFFF` がマスター。
    `cfg_m.baureihe` が `0x8006`、`cfg_s.baureihe` が `0x0006` で差はちょうど `0x8000`。
-   スレーブ側のデータは 1MB イメージ上では **`アドレス + 0x88000`** にある（スレーブ像が `0x80000` 始まり、その中のパラメータ空間が `0x8000`）。
+   **1MB イメージ上のファイルオフセットはバンクごとに違います**（`tools/pipeline/parse_xdf.py:file_offset` の実装）:
+
+   ```
+   master（XDF 0x8000–0xFFFF）   ファイルオフセット = アドレス
+   slave （XDF 0x0000–0x7FFF）   ファイルオフセット = 0x88000 + アドレス
+   ```
+
+   マスター像はアドレスがそのまま位置になり、スレーブ像は `0x80000` 始まりでその中のパラメータ空間が `0x8000` なので `0x88000` が加算されます。
    スレーブ側 x軸 219本すべてがこのオフセットで単調な階段になり、生アドレスでは 3/219 しか成立しません。
+   `Full 211323000401PD31_TERRA.bin` に対する直接バイト読み出しでも、マスター定数 922/922 が `アドレス` で、スレーブ定数 859/859 が `0x88000 + アドレス` で一致します。
 
 2. **Ghidra 側のキャリブレーションは `Mapped Parameter Space` (`0x88000–0x8FFFF`) に注釈されている。**
    生イメージの `Parameter Space` (`0x8000–0xFFFF`) ではありません（そちらは定義データ18件のみ）。
-   統一形は **`0x88000 + (XDFアドレス mod 0x8000)`**。これを間違えると被覆率が 86.5% から **0.6%** に落ちます。
+   **Ghidra のシンボルと突き合わせるとき**は両バンクに同じ統一形 **`0x88000 + (XDFアドレス mod 0x8000)`** が使えます。これを間違えると被覆率が 86.5% から **0.6%** に落ちます。
+
+   **この統一形はファイルオフセットではありません。** これは実行時のマッピング窓のアドレスであって、BIN からバイトを読む用途に使うと **マスターのパラメータが 0x80000 だけ高い位置＝無関係なスレーブデータの上に落ちます**。ファイル上の位置は必ず上の 1 のバンク別規則を使ってください。二つを混同しないよう、シンボル照合には *Ghidra アドレス*、バイト読み出しには *ファイルオフセット* と呼び分けます。
 
 3. **マップ／カーブのブロックは2バイトのヘッダで始まる。** 逆コンパイル結果の `kfs_wint(&KF_RG_M.sizeX, N, RF)` がこれを裏付けています。
 
@@ -296,12 +306,28 @@ shown verbatim in the app's About panel; nothing is rounded up to look complete.
 ### Findings established while building it
 
 - **The XDF covers both CPUs**: `0x0000–0x7FFF` is the Slave, `0x8000–0xFFFF`
-  the Master. Slave data lives at file offset `address + 0x88000`; 219 of 219
+  the Master. **File offsets differ by bank** (`tools/pipeline/parse_xdf.py:file_offset`):
+
+  ```
+  master (XDF 0x8000–0xFFFF)   file offset = address
+  slave  (XDF 0x0000–0x7FFF)   file offset = 0x88000 + address
+  ```
+
+  The master image sits where its address says; the slave image starts at
+  `0x80000` with its parameter space `0x8000` in, hence `0x88000`. 219 of 219
   slave x axes decode to monotonic ladders there versus 3 of 219 at the raw
-  address.
+  address, and reading `Full 211323000401PD31_TERRA.bin` directly confirms it:
+  922 of 922 master constants at `address`, 859 of 859 slave at `0x88000 + address`.
 - **Ghidra annotates calibration in the mapped window** `0x88000–0x8FFFF`, not
-  in the raw `Parameter Space` image. Getting this wrong drops reference
-  coverage from 86.5% to 0.6%.
+  in the raw `Parameter Space` image. **For matching Ghidra symbols** one
+  expression covers both banks — `0x88000 + (address mod 0x8000)`. Getting this
+  wrong drops reference coverage from 86.5% to 0.6%.
+
+  **That unified form is not a file offset.** It is the run-time mapping window;
+  used to read bytes it puts every master parameter 0x80000 too high, on
+  unrelated slave data. Read the file with the bank-aware rule above. The two are
+  kept distinct by name throughout: *Ghidra address* for symbol matching, *file
+  offset* for byte reads.
 - **Map and curve blocks start with a two-byte header** — confirmed by the
   decompiler emitting `kfs_wint(&KF_RG_M.sizeX, N, RF)`.
 - **Diagram labels extract with no separators** (`KL_TZ_START_TMOTKF_TZ_LL…`),
