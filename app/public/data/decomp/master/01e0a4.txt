@@ -1,0 +1,38 @@
+
+void noise_st_calc(void)
+
+{
+  if ((((V < K_NOISE_V_MAX3) && (K_NOISE_V_MIN3 < V)) && (GANG == K_NOISE_GANG)) &&
+     (((ZUSTAND_MOTOR & LL) != 0 || ((ZUSTAND_MOTOR & TL) != 0)))) {
+    NOISE_T3 = (SYS_SEC_COUNTER._2_2_ - NOISE_T2) + NOISE_T3;
+  }
+  else if (((K_NOISE_V_MAX1 < V) || ((V < K_NOISE_V_MIN1 || (GANG != K_NOISE_GANG)))) &&
+          ((NOISE_ST & 0x80) == 0)) {
+    NOISE_T3 = 0;
+  }
+  if (((((ushort)((ushort)K_NOISE_PWG_SOLL * 10) <= PWG_SOLL) && (K_NOISE_V_MIN1 < V)) &&
+      (V < K_NOISE_V_MAX1)) && ((GANG == K_NOISE_GANG && (K_NOISE_T3 < NOISE_T3)))) {
+    NOISE_ST = NOISE_ST | 0x80;
+  }
+  if (((NOISE_ST & 0x80) != 0) &&
+     (((PWG_SOLL < (ushort)((ushort)K_NOISE_PWG_SOLL * 10) || (GANG != K_NOISE_GANG)) ||
+      ((K_NOISE_V_MAX2 < V || (V < K_NOISE_V_MIN2)))))) {
+    NOISE_ST = NOISE_ST & 0x7f;
+    NOISE_T3 = 0;
+  }
+  NOISE_T2 = SYS_SEC_COUNTER._2_2_;
+  if (((NOISE_ST & 0x80) == 0) || (K_NOISE_CFG == 0)) {
+    NOISE_ST = NOISE_ST & 0xfc;
+  }
+  else {
+    if ((K_NOISE_CFG & 1) != 0) {
+      NOISE_ST = NOISE_ST | 1;
+    }
+    if ((K_NOISE_CFG & 2) != 0) {
+      NOISE_ST = NOISE_ST | 2;
+      return;
+    }
+  }
+  return;
+}
+

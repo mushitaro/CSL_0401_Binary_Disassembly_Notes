@@ -1,0 +1,41 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void fgr_tel_mfl_read(void)
+
+{
+  short sVar1;
+  word wVar2;
+  
+  wVar2 = TPU_CISR;
+  TPU_CISR = wVar2 & 0xfffe;
+  fgr_tel_mfl = DAT_00ffff08;
+  sVar1 = DAT_00ffff00;
+  if (sVar1 == 0xb) {
+    _DAT_00ffeb3c = DAT_00ffff02;
+  }
+  else {
+    _DAT_00ffeb3c = DAT_00ffff00;
+    if (((0x1fa < _DAT_00ffeb3c) && (_DAT_00ffeb3c < 0x230)) && (UB < K_MFL_UB)) {
+      sVar1 = (_DAT_00ffeb3c + (short)((K_MFL_T_OFFSET * 500) / 396)) - DAT_00ffeb76;
+      if (sVar1 < 0) {
+        DAT_00ffeb76 = DAT_00ffeb76 + -1;
+      }
+      if (0 < sVar1) {
+        DAT_00ffeb76 = DAT_00ffeb76 + 1;
+      }
+      DAT_00ffff02 = DAT_00ffeb76;
+    }
+    wVar2 = TPU_HSRR[1];
+    TPU_HSRR[1] = wVar2 | 3;
+  }
+  if ((_DAT_00ffeb3c < 0x1fa) || (0x230 < _DAT_00ffeb3c)) {
+    DAT_00ffeb79 = DAT_00ffeb79 + '\x01';
+  }
+  else {
+    DAT_00ffeb78 = DAT_00ffeb78 + '\x01';
+  }
+  fgr_timeout_mfl = (ushort)K_FGR_TIMEOUT_MFL;
+  return;
+}
+

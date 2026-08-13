@@ -1,0 +1,65 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void tog_corrections_update(void)
+
+{
+  short sVar1;
+  uint uVar1a;
+  uint uVar1b;
+  KL_6_2byte_2byte *curve;
+  
+  tog_rp_sperr_counter = tog_rp_sperr_counter + -1;
+  TOG_P_COUNT = TOG_P_COUNT - 1;
+  if (TOG_P_COUNT == 0) {
+    _TOG_P_DIFF = TOG_P_ANF - P_UMG_HOEHE;
+    sVar1 = kls_wint(&KL_TOG_P_DIFF.sizeX,_TOG_P_DIFF + 500);
+    TOG_P_ANF = P_UMG_HOEHE;
+    TOG_P_COUNT = (ushort)K_TOG_P_COUNT;
+                    /* Does 0401 have two versions of TOG_ASCAX_DIFF depending on whether V is zero
+                       or not? */
+    if (V == 0) {
+      curve = &kl_tog_ascax_diff_vnull;
+    }
+    else {
+      curve = &KL_TOG_ASCAX_DIFF;
+    }
+    TOG_KORR_P = (char)sVar1;
+    uVar1a._2_2_ = kls_wint(&curve->sizeX,TOG_ASCAX_SUM + 0x8000);
+    TOG_KORR_AX = (undefined1)uVar1a._2_2_;
+    TOG_ASCAX_SUM = 0;
+    uVar1b._2_2_ = kls_wint(&KL_TOG_ASCAY_DIFF.sizeX,TOG_ASCAY_SUM + 0x8000);
+    uVar1b._3_1_ = (undefined1)uVar1b._2_2_;
+    TOG_ASCAY_SUM = 0;
+    TOG_KORR_AY = (undefined1)uVar1b;
+    if (TOG_ST == '\x06') {
+      if (TOG_TEMP_NIVEAU < TOG_NIVEAU) {
+        TOG_TEMP_NIVEAU = TOG_TEMP_NIVEAU + 1;
+      }
+      else if (TOG_NIVEAU < TOG_TEMP_NIVEAU) {
+        TOG_TEMP_NIVEAU = TOG_TEMP_NIVEAU - 1;
+      }
+    }
+  }
+  else {
+    TOG_ASCAY_SUM = ASC_AY + TOG_ASCAY_SUM;
+    sVar1 = smg_ax_berg_dpr;
+    if (V != 0) {
+      sVar1 = (short)ASC_AX;
+    }
+    TOG_ASCAX_SUM = sVar1 + TOG_ASCAX_SUM;
+  }
+  if (((uint)N40 <= (uint)k_tog_n40_stable_delta_max + (uint)tog_n40_previous) &&
+     ((int)((uint)tog_n40_previous - (uint)k_tog_n40_stable_delta_max) <= (int)(uint)N40)) {
+    tog_n40_stable_counter = tog_n40_stable_counter + 1;
+    if (k_tog_n40_stable_period < tog_n40_stable_counter) {
+      tog_n40_stable_counter = 0;
+      tog_ed_threshold_counter = 0;
+    }
+    return;
+  }
+  tog_n40_previous = N40;
+  tog_n40_stable_counter = 0;
+  return;
+}
+

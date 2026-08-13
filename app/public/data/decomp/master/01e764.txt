@@ -1,0 +1,71 @@
+
+uint slp_diag(void)
+
+{
+  undefined3 uVar1;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  uint in_D0;
+  byte bVar4;
+  undefined4 uVar2;
+  uint uVar3;
+  bool bVar5;
+  
+  if (((ZUSTAND_MOTOR & S) == 0) &&
+     (in_D0 = CONCAT31((int3)(in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c,
+     (ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) goto LAB_0001e89c;
+  uVar1 = (undefined3)(in_D0 >> 8);
+  in_D0 = CONCAT31(uVar1,UB);
+  if (((UB <= K_ED_UBMIN_M) ||
+      ((((UB_HR_ST & 2) == 0 || ((UB_ED & 0x20) != 0)) || ((SLP_ST & 0x10) == 0)))) ||
+     ((SLP_ST & 0x80) != 0)) goto LAB_0001e89c;
+  in_D0 = CONCAT31(uVar1,SLP_ST) & 0xffffff0f;
+  if ((SLP_ST & 0xf) == 0) {
+    in_D0 = CONCAT31(uVar1,SLP_ED) & 0xffffffe0;
+    if ((SLP_ED & 0xe0) == 0) goto LAB_0001e89c;
+    in_D0 = CONCAT31(uVar1,SLP_ED) & 0xffffff60;
+    if ((SLP_ED & 0x60) == 0) {
+      bVar5 = (SLP_ST & 0x40) == 0;
+LAB_0001e88e:
+      if (bVar5) goto LAB_0001e89c;
+    }
+    else {
+      uVar3 = ed_report(DTC_13_SAP_RELAY,0x80);
+      in_D0 = uVar3 & 0xffffff0f;
+      if ((SLP_ST & 0x40) == 0) {
+        bVar5 = (uVar3 & 2) == 0;
+        goto LAB_0001e88e;
+      }
+      if ((uVar3 & 1) == 0) {
+        bVar5 = (uVar3 & 4) == 0;
+        goto LAB_0001e88e;
+      }
+    }
+    bVar4 = 0;
+  }
+  else {
+    if ((SLP_ST & 2) != 0) {
+      in_D0 = ed_report(DTC_13_SAP_RELAY,2);
+      SLP_ED = (byte)in_D0;
+    }
+    if ((SLP_ST & 1) != 0) {
+      bVar4 = set_status_register(0x2700);
+      can_0xd_masked_update('\0',2,2);
+      uVar2 = ed_report(DTC_13_SAP_RELAY,1);
+      SLP_ED = (byte)uVar2;
+      if ((SLP_ST & 0x40) != 0) {
+        can_0xd_masked_update('\0',0,2);
+      }
+      bVar4 = set_status_register((ushort)CONCAT31(extraout_var,bVar4));
+      in_D0 = CONCAT31(extraout_var_00,bVar4);
+    }
+    if (((SLP_ST & 4) == 0) || ((SLP_ED & 2) != 0)) goto LAB_0001e89c;
+    bVar4 = 4;
+  }
+  in_D0 = ed_report(DTC_13_SAP_RELAY,bVar4);
+  SLP_ED = (byte)in_D0;
+LAB_0001e89c:
+  SLP_ST = SLP_ST & 0xe0;
+  return in_D0;
+}
+

@@ -1,0 +1,45 @@
+
+void starter_request_controller(void)
+
+{
+  byte bVar1;
+  undefined3 extraout_var;
+  uint uVar2;
+  byte bVar3;
+  
+  if ((START_STATUS & 0x80) == 0) {
+    uVar2 = klu_wint(&KL_START_ENDE.sizeX,(ushort)TMOT);
+    if (((((((UB_HR_ST & 2) == 0) || ((UB_ED & 0x20) != 0)) || ((cfg_m_motortyp & 0xef) != 0x20)) ||
+         ((((ZUSTAND_MOTOR & KI.15 aus) != 0 || ((S_KL50_ED & 0x40) != 0)) ||
+          ((SCHALT_M_ST & 8) == 0)))) ||
+        ((((TMOT_ED & 0x20) == 0 && ((TMOT_ST1 & 0x10) == 0)) && ((ushort)uVar2 <= N)))) ||
+       ((((S_GANG_ED & 0x20) == 0 && ((SCHALT_S_ST & 8) == 0)) && (K_START_SGANG._0_1_ != '\0')))) {
+      if ((START_STATUS & 0x40) == 0) {
+        START_STATUS = START_STATUS & 0xdf;
+      }
+      else {
+        START_STATUS = START_STATUS | 0x20;
+      }
+      START_STATUS = START_STATUS & 0xbf;
+      bVar1 = SIM_PORTC;
+      SIM_PORTC = bVar1 | 0x40;
+      return;
+    }
+    if ((N <= K_START_BEGINN) || ((START_STATUS & 0x40) != 0)) {
+      if ((START_STATUS & 0x40) == 0) {
+        START_STATUS = START_STATUS | 0x60;
+      }
+      else {
+        START_STATUS = START_STATUS & 0xdf;
+      }
+      bVar3 = set_status_register(0x2700);
+      bVar1 = SIM_PORTC;
+      SIM_PORTC = bVar1 | 0x40;
+      bVar1 = SIM_PORTC;
+      SIM_PORTC = bVar1 & 0xbf;
+      set_status_register((ushort)CONCAT31(extraout_var,bVar3));
+    }
+  }
+  return;
+}
+

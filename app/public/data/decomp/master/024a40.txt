@@ -1,0 +1,8 @@
+
+void sk_tr_run_computer_core_test(int param_1)
+
+{
+  sk_tr_run_test_task(*(undefined1 *)(param_1 + 0x8),param_1 + 0x9);
+  return;
+}
+

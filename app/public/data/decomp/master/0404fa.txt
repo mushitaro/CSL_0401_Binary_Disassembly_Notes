@@ -1,0 +1,27 @@
+
+void qsm_cancel_transfer(int *qsm_transfer_descriptor)
+
+{
+  undefined1 extraout_var;
+  byte bVar1;
+  int iVar2;
+  struct_qsm_transfer_queue_item *psVar3;
+  
+  bVar1 = set_status_register(0x2700);
+  if (((qsm_transfer_busy & 0x80) != 0) && (qsm_transfer_descriptor == qsm_active_transfer)) {
+    qsm_transfer_flags = qsm_transfer_flags | 0x80;
+  }
+  psVar3 = &qsm_transfer_queue;
+  iVar2 = 4;
+  do {
+    if (qsm_transfer_descriptor == psVar3->descriptor) {
+      psVar3->priority = 0;
+      psVar3->descriptor = (int *)0x0;
+    }
+    psVar3 = psVar3 + 1;
+    iVar2 = iVar2 + -1;
+  } while (0 < iVar2);
+  set_status_register(CONCAT11(extraout_var,bVar1));
+  return;
+}
+

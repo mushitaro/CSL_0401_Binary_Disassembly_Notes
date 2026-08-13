@@ -1,0 +1,33 @@
+
+void sys_process_scheduled_tasks(void)
+
+{
+  byte bVar1;
+  short sVar2;
+  uint unaff_D2;
+  char cVar3;
+  byte *pbVar4;
+  
+  pbVar4 = &sys_task_schedule_table;
+  cVar3 = '\b';
+  do {
+    if ((*(short *)(pbVar4 + 2) != 0) &&
+       (sVar2 = *(short *)(pbVar4 + 2) + -1, *(short *)(pbVar4 + 2) = sVar2, sVar2 == 0)) {
+      bVar1 = *pbVar4;
+      unaff_D2 = CONCAT31((int3)(unaff_D2 >> 8),bVar1);
+      sys_mark_task_pending(unaff_D2);
+      if (((&sys_task_pointer_table)[bVar1][5] & 2) == 0) {
+        *pbVar4 = 0;
+        (&sys_task_control_bytes)[(uint)bVar1 * 2] =
+             (&sys_task_control_bytes)[(uint)bVar1 * 2] & 0xfe;
+      }
+      else {
+        *(undefined2 *)(pbVar4 + 2) = *(undefined2 *)((&sys_task_pointer_table)[bVar1] + 6);
+      }
+    }
+    pbVar4 = pbVar4 + 4;
+    cVar3 = cVar3 + -1;
+  } while (cVar3 != '\0');
+  return;
+}
+

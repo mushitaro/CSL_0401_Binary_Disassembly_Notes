@@ -1,0 +1,24 @@
+
+void obd_reset_monitor_activity_flags(void)
+
+{
+  byte bVar1;
+  byte *pbVar2;
+  
+  bVar1 = DAT_0003a28f;
+  if (CPU_Identifier == 'M') {
+    bVar1 = DAT_0003a28e;
+  }
+  FF_RDY = (ushort)bVar1;
+  bVar1 = 1;
+  pbVar2 = &ed_fil_base[1].ED_FIL_OBD;
+  do {
+    *pbVar2 = *pbVar2 & 0x9f;
+    pbVar2 = pbVar2 + 6;
+    bVar1 = bVar1 + 1;
+  } while (bVar1 < 0x80);
+  OBD_ACT_MASK = 0;
+  DAT_00ffd861 = DAT_00ffd861 & 0xfe;
+  return;
+}
+

@@ -1,0 +1,20 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void obd_init(void)
+
+{
+  if ((OBD_STATE & 1) == 0) {
+    OBD_STATE = 0;
+    OBD_STEUER = 0;
+    TSTART = 0xff;
+    T_START = 0xffffffff;
+    _OBD_RDY_MASK = 0;
+    OBD_ACT_MASK = 0;
+    obd_monitor_filters_init();
+  }
+  obd_clear_cycle_counters();
+  obd_monitor_phase0();
+  return;
+}
+

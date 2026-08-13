@@ -1,0 +1,22 @@
+
+void md_reib_offset_calc(void)
+
+{
+  uint uVar1;
+  
+  if (((ZUSTAND_MOTOR & S) != 0) || ((ZUSTAND_MOTOR & Start) != 0)) {
+    uVar1 = klu_wint(&KL_MD_MIN_REIB_OFFSET.sizeX,(ushort)TMOT);
+    MD_REIB_OFFSET = (ushort)uVar1;
+  }
+  if ((MD_REIB_OFFSET != 0) && ((MD_ST & 1) == 0)) {
+    uVar1 = klu_wint(&KL_MD_MIN_REIB_ABREG.sizeX,(ushort)TMOT);
+    MD_REIB_ABREG = (ushort)uVar1;
+    if (MD_REIB_ABREG < MD_REIB_OFFSET) {
+      MD_REIB_OFFSET = MD_REIB_OFFSET - MD_REIB_ABREG;
+      return;
+    }
+    MD_REIB_OFFSET = 0;
+  }
+  return;
+}
+

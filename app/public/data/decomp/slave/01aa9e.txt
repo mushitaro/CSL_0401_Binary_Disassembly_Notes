@@ -1,0 +1,107 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+byte ti_start_sequence_controller(void)
+
+{
+  uint uVar1;
+  uint unaff_D2;
+  byte bVar3;
+  uint uVar2;
+  
+  if (((((((TPU_ST_S & 0x20) == 0) || ((ZUSTAND_MOTOR & Start) != 0)) &&
+        ((uint)K_T_EKP_ON < (uint)(SYS_TIMERTICS_COUNTER - EKP_T_ON))) &&
+       (((TI_ST_START & 0x40) == 0 && ((TI_ST_START & 4) == 0)))) &&
+      ((ZUSTAND_MOTOR & KI.15 aus) == 0)) && (TI_EV_DS2 == '\0')) {
+    TI_ST_START = TI_ST_START & 0xf7;
+    for (unaff_D2 = unaff_D2 & 0xffffff00; bVar3 = (byte)unaff_D2, bVar3 < zyl_count;
+        unaff_D2 = CONCAT31((int3)(unaff_D2 >> 8),bVar3 + 1)) {
+      ti_write_undo(bVar3);
+    }
+    ti_set_startbereich();
+    ti_start_vsp_factors_update();
+    TI_ST_START = TI_ST_START | 4;
+  }
+  if (((ZUSTAND_MOTOR & KI.15 aus) != 0) ||
+     ((((cfg_s_baureihe & 0xf8) == 0x40 && ((ZUSTAND_MOTOR & S) != 0)) &&
+      (SCHALT_START_BEGIN == '\x01')))) {
+    SCHALT_START_BEGIN = '\0';
+    bVar3 = TI_ST_START & 0xbf;
+    TI_ST_HELP = TI_ST_HELP & 0xfe;
+    if ((((cfg_s_motortyp & 0xf7) == 4) && (5 < TI_AUSBLEND_IST)) && ((DAT_00fffe0a & 0xfc) != 0)) {
+      bVar3 = TI_ST_START & 0xb7;
+    }
+    TI_ST_START = bVar3;
+    if ((((cfg_s_motortyp & 0xef) == 0x20) && (7 < TI_AUSBLEND_IST)) &&
+       ((DAT_00fffe0a & 0x3fc) != 0)) {
+      TI_ST_START = TI_ST_START & 0xf7;
+    }
+  }
+  if ((((TI_ST_START & 0x40) != 0) && ((TPU_ST_S & 0x80) == 0)) &&
+     (((TI_ST_START & 8) == 0 && (TI_EV_DS2 == '\0')))) {
+    TI_ST_START = TI_ST_START & 0xfb | 8;
+    TI_AUSBLEND_IST = 0;
+    for (uVar2 = unaff_D2 & 0xffffff00; (byte)uVar2 < zyl_count;
+        uVar2 = CONCAT31((int3)(uVar2 >> 8),(byte)uVar2 + 1)) {
+      FUN_0001d278(uVar2);
+    }
+    ti_engine_running();
+    _PSP1_END_ANGLE = DAT_00ffe788;
+    _PSP2_END_ANGLE = DAT_00ffe78a;
+    _PSP3_END_ANGLE = DAT_00ffe78c;
+    _PSP4_END_ANGLE = DAT_00ffe78e;
+    if (((cfg_s_motortyp & 0xf7) == 4) || ((cfg_s_motortyp & 0xef) == 0x20)) {
+      _PSP5_END_ANGLE = DAT_00ffe790;
+      _PSP6_END_ANGLE = DAT_00ffe792;
+    }
+    if ((cfg_s_motortyp & 0xef) == 0x20) {
+      _PSP7_END_ANGLE = DAT_00ffe794;
+      PSP8_END_ANGLE = DAT_00ffe796;
+    }
+  }
+  if ((((TI_ST_START & 8) != 0) && ((TPU_ST_S & 0x80) == 0)) && (TI_EV_DS2 == '\0')) {
+    if ((cfg_s_motortyp & 0xf7) == 4) {
+      DAT_00fffe0a = DAT_00fffe0a | 0xfc;
+    }
+    if ((cfg_s_motortyp & 0xef) == 0x20) {
+      DAT_00fffe0a = DAT_00fffe0a | 0x3fc;
+    }
+  }
+  uVar2 = T_ML >> 10;
+  if (0xffff < uVar2) {
+    uVar2 = 0xffff;
+  }
+  if ((ZUSTAND_MOTOR & KI.15 aus) == 0) goto LAB_0001ad54;
+  if ((TI_ST_START & 2) == 0) {
+    if (uVar2 != 0) {
+      uVar1 = klu_wint(&KL_TI_WKS_ML_TMOT.sizeX,(ushort)TMOT_START);
+      if (uVar2 < (uVar1 & 0xffff)) goto LAB_0001ad28;
+    }
+    START_ST = START_ST & ~B_FLAG_WKS;
+  }
+  else {
+LAB_0001ad28:
+    START_ST = START_ST | B_FLAG_WKS;
+  }
+  if ((K_TI_TMIN_WNAS < uVar2) && (uVar2 < K_TI_TMAX_WNAS)) {
+    START_ST = START_ST | B_FLAG_WNS;
+  }
+  else {
+    START_ST = START_ST & ~B_FLAG_WNS;
+  }
+LAB_0001ad54:
+  if ((ZUSTAND_MOTOR & Start) != 0) {
+    uVar2 = klu_bint(&KL_TI_TMOT_B2.sizeX,TMOT);
+    if (((byte)uVar2 < N40) || (K_TI_NO < NO_ZAEHLER_S)) {
+      TI_ST_START = TI_ST_START & 0xfe | 2;
+    }
+    else {
+      TI_ST_START = TI_ST_START & 0xfd | 1;
+    }
+  }
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+    TI_ST_START = TI_ST_START & 0xfc;
+  }
+  return ZUSTAND_MOTOR & (VL|TL|LL);
+}
+

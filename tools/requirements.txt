@@ -1,0 +1,4 @@
+# Pipeline dependencies.  PyGhidra is installed from the Ghidra distribution
+# by tools/setup_ghidra.sh, not from PyPI, so it is not pinned here.
+pdfminer.six>=20250506
+pytest>=8.0

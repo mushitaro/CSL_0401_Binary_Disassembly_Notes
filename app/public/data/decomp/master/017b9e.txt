@@ -1,0 +1,87 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void md_res_calc(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  if ((KATH_ST & 0x10) == 0) {
+    if (MD_RES_KATH_FAKTOR != 0) {
+      if (((SA_WE_ST & 8) == 0) && (K_MD_RES_KATH_T_ABREG < MD_RES_KATH_FAKTOR)) {
+        MD_RES_KATH_FAKTOR = MD_RES_KATH_FAKTOR - K_MD_RES_KATH_T_ABREG;
+      }
+      else {
+        MD_RES_KATH_FAKTOR = 0;
+      }
+    }
+  }
+  else if ((KATH_ZUSTAND & 2) == 0) {
+    if ((MD_RES_KATH_FAKTOR != 0x8000) && (MD_RES_KATH_FAKTOR < 0x8000)) {
+      uVar1 = (uint)K_MD_RES_KATH_T_AUFREG + (uint)MD_RES_KATH_FAKTOR;
+      if (uVar1 < 0x8000) {
+        MD_RES_KATH_FAKTOR = (ushort)uVar1;
+      }
+      else {
+        MD_RES_KATH_FAKTOR = 0x8000;
+      }
+    }
+  }
+  else {
+    MD_RES_KATH_FAKTOR = K_MD_RES_KATH_START;
+  }
+  if ((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || ((K_MD_RES_CONTROL & 1) == 0)) ||
+     (MD_RES_KATH_FAKTOR == 0)) {
+    MD_RES_KATH = 0;
+  }
+  else {
+    MD_RES_KATH = (ushort)((int)((uint)MD_RES_KATH_ROH * (uint)MD_RES_KATH_FAKTOR) >> 0xf);
+  }
+  if (((V < K_MD_RES_LRW_V) && ((V_ST & 0x40) == 0)) && ((MD_RES_LRW_ST & 1) == 0)) {
+    MD_RES_LRW_ST = MD_RES_LRW_ST | 1;
+  }
+  if (((MD_RES_LRW_ST & 1) != 0) &&
+     (((uint)K_MD_RES_LRW_VHYS + (uint)K_MD_RES_LRW_V < (uint)V || ((V_ST & 0x40) != 0)))) {
+    MD_RES_LRW_ST = MD_RES_LRW_ST & 0xfe;
+  }
+  if ((MD_RES_LRW_ST & 1) == 0) {
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = LWS_LRW;
+    if ((short)LWS_LRW < 0) {
+      uVar2 = -LWS_LRW;
+    }
+    uVar1 = klu_wint(&KL_MD_RES_LRW.sizeX,uVar2);
+    uVar2 = (ushort)uVar1;
+  }
+  if ((uint)K_MD_RES_LRW_DELTA + (uint)MD_RES_LRW_ROH < (uint)uVar2) {
+    uVar2 = K_MD_RES_LRW_DELTA + MD_RES_LRW_ROH;
+  }
+  else if ((int)(uint)uVar2 < (int)((uint)MD_RES_LRW_ROH - (uint)K_MD_RES_LRW_DELTA)) {
+    uVar2 = MD_RES_LRW_ROH - K_MD_RES_LRW_DELTA;
+  }
+  MD_RES_LRW_ROH = uVar2;
+  if (MD_RES_LRW_ROH == 0) {
+    MD_RES_LRW = 0;
+    MD_RES_LRW_ST = MD_RES_LRW_ST & 0xfd;
+  }
+  else {
+    MD_RES_LRW = MD_RES_LRW_ROH -
+                 (short)((uint)MD_IND_WUNSCH_BEGR * (uint)TZ_KATH_ETA_OFFSET >> 0x10);
+    if ((short)MD_RES_LRW < 0) {
+      MD_RES_LRW = 0;
+    }
+    MD_RES_LRW_ST = MD_RES_LRW_ST | 2;
+  }
+  if (MD_RES_LRW < MD_RES_KATH) {
+    MD_RES = MD_RES_KATH;
+  }
+  else {
+    MD_RES = MD_RES_LRW;
+  }
+  _md_res_dpr = MD_RES;
+  return;
+}
+

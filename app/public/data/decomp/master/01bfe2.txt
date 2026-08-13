@@ -1,0 +1,22 @@
+
+void tabg_calc(void)
+
+{
+  ushort xValue;
+  short sVar1;
+  
+  xValue = tabg_ad;
+  TABG_ROH = kls_wint(&KL_TABG_PT200.sizeX,xValue);
+  sVar1 = tabg_filter_calc(TABG_ROH);
+  if ((K_TABG_CFG == '\0') && ((TABG_ED & 0x40) == 0)) {
+    tabg_filter = PT1_Filter_SS(sVar1 << 4,tabg_filter,K_TABG_TAU);
+    TABG = (short)(tabg_filter + 8 >> 4);
+  }
+  else {
+    tabg_filter = sVar1 << 4;
+    TABG = sVar1;
+  }
+  trg_calc();
+  return;
+}
+

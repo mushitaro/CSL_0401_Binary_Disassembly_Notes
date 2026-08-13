@@ -1,0 +1,9 @@
+
+/* EGAS Safety Concept Computer Core Test Task 14 - unused */
+
+undefined4 SK_TR_Test_14(void)
+
+{
+  return 6;
+}
+

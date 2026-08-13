@@ -1,0 +1,18 @@
+
+void md_bgnd_calc(void)
+
+{
+  uint uVar1;
+  
+  MD_Minimum_Moment_FUN_00017542();
+  MD_Maximum_Moment_FUN_00017a76();
+  md_res_kath_roh_calc();
+  md_norm_init();
+  md_sk_wdk_calc();
+  uVar1 = klu_wint(&KL_MD_DETA_KR_UP.sizeX,N);
+  md_deta_kr_up = (undefined2)uVar1;
+  uVar1 = klu_wint(&KL_MD_DETA_KR_DOWN.sizeX,N);
+  md_deta_kr_down = (short)uVar1;
+  return;
+}
+

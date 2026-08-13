@@ -1,0 +1,56 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void SIM_Init(void)
+
+{
+  _DAT_00fffa22 = 0x411;
+  if ((CFG_RAM_SG_TYP & 2) == 0) {
+    _DAT_00fffa48 = 7;
+    DAT_00fffa4a = 0x6830;
+    _DAT_00fffa4c = 7;
+    DAT_00fffa52 = 0;
+    _DAT_00fffa54 = 0xffc0;
+    DAT_00fffa56 = 0;
+    _DAT_00fffa5a = 0;
+    _DAT_00fffa5c = 0xffc0;
+    _DAT_00fffa5e = 0;
+    _DAT_00fffa76 = 0;
+  }
+  else {
+    _DAT_00fffa48 = 6;
+    DAT_00fffa4a = 0x7830;
+    _DAT_00fffa4c = 6;
+    DAT_00fffa52 = 0x3830;
+    _DAT_00fffa54 = 0x13f8;
+    DAT_00fffa56 = 0x5830;
+    _DAT_00fffa5a = 0x2870;
+    _DAT_00fffa5c = 0x804;
+    _DAT_00fffa5e = 0x4870;
+    _DAT_00fffa76 = 0x78b0;
+  }
+  _DAT_00fffa74 = 0xff10;
+  _DAT_00fffa72 = 0;
+  _DAT_00fffa70 = 0;
+  _DAT_00fffa6e = 0x7801;
+  _DAT_00fffa6c = 0xfff8;
+  _DAT_00fffa6a = 0x7830;
+  _DAT_00fffa68 = 0xff20;
+  _DAT_00fffa66 = 0x78b0;
+  _DAT_00fffa64 = 0xff00;
+  _DAT_00fffa62 = 0x7870;
+  _DAT_00fffa60 = 0xff80;
+  _DAT_00fffa58 = 0x804;
+  _DAT_00fffa50 = 0x13f8;
+  DAT_00fffa4e = 0;
+  _DAT_00fffa46 = 0x20a;
+  _DAT_00fffa44 = 0x2fff;
+  DAT_00fffa11 = 0xc4;
+  DAT_00fffa15 = 0xc4;
+  DAT_00fffa17 = 0;
+  DAT_00fffa19 = 0x19;
+  DAT_00fffa1d = 0x11;
+  DAT_00fffa1f = 0;
+  return;
+}
+

@@ -1,0 +1,71 @@
+
+void starter_diag(void)
+
+{
+  undefined3 extraout_var;
+  byte bVar3;
+  undefined4 uVar1;
+  uint uVar2;
+  bool bVar4;
+  byte bVar5;
+  
+  if ((SCHALT_S_ST & 0x20) == 0) {
+    START_GND_ED = 0;
+    goto LAB_0001e546;
+  }
+  if ((((((cfg_m_motortyp & 0xef) != 0x20) || (UB <= K_ED_UBMIN_M)) || ((UB_HR_ST & 2) == 0)) ||
+      (((UB_ED & 0x20) != 0 || ((START_STATUS & 0x10) == 0)))) || ((START_STATUS & 0x80) != 0))
+  goto LAB_0001e546;
+  if ((START_STATUS & 0xf) == 0) {
+    START_GND_ED = 0;
+    if ((START_ED & 0xe0) == 0) goto LAB_0001e546;
+    if ((START_ED & 0x60) == 0) {
+      bVar4 = (START_STATUS & 0x40) == 0;
+LAB_0001e532:
+      if (bVar4) goto LAB_0001e546;
+    }
+    else {
+      uVar2 = ed_report(DTC_14_STARTER_RELAY,0x80);
+      if ((START_STATUS & 0x40) == 0) {
+        bVar4 = (uVar2 & 2) == 0;
+        goto LAB_0001e532;
+      }
+      if ((uVar2 & 1) == 0) {
+        bVar4 = (uVar2 & 4) == 0;
+        goto LAB_0001e532;
+      }
+    }
+    bVar5 = 0;
+  }
+  else {
+    if ((START_STATUS & 2) != 0) {
+      if (START_GND_ED < 3) {
+        START_GND_ED = START_GND_ED + 1;
+      }
+      else {
+        uVar1 = ed_report(DTC_14_STARTER_RELAY,2);
+        START_ED = (byte)uVar1;
+      }
+    }
+    if ((START_STATUS & 1) != 0) {
+      bVar3 = set_status_register(0x2700);
+      bVar5 = SIM_PORTC;
+      SIM_PORTC = bVar5 | 0x40;
+      uVar1 = ed_report(DTC_14_STARTER_RELAY,1);
+      if ((START_STATUS & 0x40) != 0) {
+        bVar5 = SIM_PORTC;
+        SIM_PORTC = bVar5 & 0xbf;
+      }
+      START_ED = (byte)uVar1;
+      set_status_register((ushort)CONCAT31(extraout_var,bVar3));
+    }
+    if (((START_STATUS & 4) == 0) || (START_GND_ED != 0)) goto LAB_0001e546;
+    bVar5 = 4;
+  }
+  uVar1 = ed_report(DTC_14_STARTER_RELAY,bVar5);
+  START_ED = (byte)uVar1;
+LAB_0001e546:
+  START_STATUS = START_STATUS & 0xe0;
+  return;
+}
+

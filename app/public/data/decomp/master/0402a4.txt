@@ -1,0 +1,42 @@
+
+void sys_process_scheduled_tasks(void)
+
+{
+  uint task_id_wrapped;
+  char remaining_entries;
+  struct_task_schedule_table_entry *task_entry;
+  short countdown_remaining;
+  byte task_id;
+  
+                    /* Start at the beginning of the task schedule table (8 entries max) */
+  task_entry = sys_task_schedule_table;
+  remaining_entries = 8;
+  do {
+                    /* Check if this task entry is active (non-zero countdown) */
+    if ((task_entry->countdown_timer_tics != 0) &&
+       (countdown_remaining = task_entry->countdown_timer_tics + -1,
+       task_entry->countdown_timer_tics = countdown_remaining, countdown_remaining == 0)) {
+                    /* Countdown expired – schedule the task */
+      task_id = task_entry->task_id;
+      task_id_wrapped = CONCAT31((int3)(task_id_wrapped >> 8),task_id);
+                    /* Mark the task as pending for execution */
+      sys_mark_task_pending(task_id_wrapped);
+                    /* Check if the task is periodic (bit 1 of byte 5 in task pointer entry) */
+      if (((&sys_task_pointer_table)[task_id][5] & 2) == 0) {
+        task_entry->task_id = 0;
+                    /* Clear the "scheduled" bit (bit 0) in task control byte */
+        *(byte *)(sys_task_control_bytes + task_id) =
+             *(byte *)(sys_task_control_bytes + task_id) & 0xfe;
+      }
+      else {
+                    /* Periodic: reload countdown from task pointer table offset +6 */
+        task_entry->countdown_timer_tics = *(short *)((&sys_task_pointer_table)[task_id] + 6);
+      }
+    }
+                    /* Move to the next task entry */
+    task_entry = task_entry + 1;
+    remaining_entries = remaining_entries + -1;
+  } while (remaining_entries != 0);
+  return;
+}
+

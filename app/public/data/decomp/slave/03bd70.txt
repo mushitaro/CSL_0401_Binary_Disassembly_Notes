@@ -1,0 +1,33 @@
+
+void smg_can_reinforcement_and_clutch_capacity_update(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  if (smg_can_istgang == Neutral) {
+    CAN_drivetrain_reinforcement = 0;
+  }
+  else {
+    if (((int)DAT_00ffdb18 < (int)(uint)DAT_00ffdb26) && (DAT_00ffdb26 != 0)) {
+      uVar1 = (DAT_00ffdb18 * 10000) / (int)(uint)DAT_00ffdb26 & 0xffff;
+    }
+    else {
+      uVar1 = 10000;
+    }
+    CAN_drivetrain_reinforcement =
+         (undefined2)
+         ((int)((uint)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] * K_SMG_I_HA * uVar1) /
+         (int)((uint)K_SMG_R_RAD_DYN * 0x24));
+  }
+  uVar2 = (ushort)DAT_00ffdb1a__SMGCAN_M_KUPPL_max_transmittable_torque_;
+  if (DAT_00ffdb1a__SMGCAN_M_KUPPL_max_transmittable_torque_ == 0) {
+    uVar2 = 1;
+  }
+  DAT_00ffdb9a = uVar2 * 0x28;
+  DAT_00ffdb9c = DAT_00ffdb9a >> 1;
+  FUN_0003c176();
+  smg_rev_target_offset_limits_update();
+  return;
+}
+

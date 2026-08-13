@@ -1,0 +1,20 @@
+
+ushort fst_init(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = ed_report(DTC_8D_FUEL_IMPLAUS,0x80);
+  FST_ED = (char)uVar1;
+  if ((uVar1 & 0x60) != 0) {
+    FST_ST = FST_ST | 8;
+  }
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    FST_VERBR = 0;
+    FST_MAX = 0xff;
+    FST_MIN = 0xff;
+    FST_ST = FST_ST & 0xf7;
+  }
+  return EE_ERROR_MASK & 0x1101;
+}
+

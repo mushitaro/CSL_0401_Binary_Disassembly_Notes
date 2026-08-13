@@ -1,0 +1,24 @@
+
+void can_error_monitor(void)
+
+{
+  uint extraout_D0;
+  uint extraout_D0_00;
+  
+  can_a_tx_get_status();
+  if ((extraout_D0 & 0x80) != 0) {
+    can_a_message_table_init('\0');
+    can_a_tx_ed(false);
+    can_a_tx_status = can_a_tx_status | 0x30;
+  }
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    can_b_tx_get_status();
+    if ((extraout_D0_00 & 0x80) != 0) {
+      can_b_message_table_init('\0');
+      can_b_reinit('\0');
+      can_b_tx_status = can_b_tx_status | 0x30;
+    }
+  }
+  return;
+}
+

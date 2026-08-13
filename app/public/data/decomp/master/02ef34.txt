@@ -1,0 +1,26 @@
+
+/* This function "freezes" and stores the last valid rest-check oil level, associated odometer, and
+   CAN status, and controls the update logic to avoid rapid changes. */
+
+void tog_ff_write(undefined1 param_1)
+
+{
+  if (TOG_FF_FREEZE_FLAG == '\0') {
+    TOG_FF_FREEZE_FLAG = '\x01';
+    TOG_FF_TOG_CAN_ST = param_1;
+  }
+  else {
+    if (TOG_FF_FREEZE_FLAG == -1) {
+      return;
+    }
+    TOG_FF_FREEZE_FLAG = TOG_FF_FREEZE_FLAG + '\x01';
+    if (TOG_FF_TOG_NIVEAU <= TOG_NIVEAU) {
+      TOG_FF_TOG_FF_KM = CAN_KM_STAND;
+      return;
+    }
+  }
+  TOG_FF_TOG_FF_KM = CAN_KM_STAND;
+  TOG_FF_TOG_NIVEAU = TOG_NIVEAU;
+  return;
+}
+

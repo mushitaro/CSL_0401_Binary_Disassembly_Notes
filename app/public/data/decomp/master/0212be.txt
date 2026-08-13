@@ -1,0 +1,113 @@
+
+/* this function runs in the 100ms task
+   
+    */
+
+uint tan_m_adj_calc(void)
+
+{
+  uint uVar1;
+  short temp;
+  int iVar2;
+  int tan_m_adj_temp_result;
+  short temp1;
+  short tan_local;
+  short tmot_m_diff;
+  
+                    /* Convert TAN (IAT) to raw scale: 10x degrees C + offset (−48°C = 0) */
+  tan_local = (ushort)TAN * 10 + -480;
+                    /* One-time initialization phase — used during engine start or after reset */
+  if (tan_m_adj_state == 0) {
+    if (tan_m_init_timer < 0) {
+      tan_m_adj_delta = (int)tan_m_adj_initial;
+      tan_m_adj_state = 2;
+      return (int)tan_m_adj_initial;
+    }
+    uVar1 = (uint)tmot_m;
+    tan_m_adj_correction_sum = uVar1 + tan_m_adj_correction_sum;
+    if (tan_m_init_timer == 0) {
+                    /* in 0401 this doesn't really do anything as KL at a980 is 10000 across the
+                       board regardless of T_MOTOR_STEHT */
+      uVar1 = klu_wint(&KL_TANM_PT1_INIT.sizeX,T_MOTOR_STEHT);
+      tmot_m__n_1_ = tmot_m * 100;
+      uVar1 = ((int)(short)uVar1 * ((int)tan_m_adj__t_1_ - (int)tmot_m)) / 10000;
+      tan_m_adj_initial = (short)uVar1;
+    }
+    tan_m_init_timer = tan_m_init_timer + -1;
+    return uVar1;
+  }
+                    /* Filter TMOT to prevent sudden changes by limiting delta to
+                       +/-k_tmot_m_diff_max */
+  tmot_m_diff = (short)(tmot_m * 100) - (short)tmot_m__n_1_;
+  if ((int)(uint)k_tmotm_diff_max < (int)tmot_m_diff) {
+    iVar2 = tmot_m__n_1_ + (uint)k_tmotm_diff_max;
+  }
+  else {
+    iVar2 = tmot_m * 100;
+    if ((int)tmot_m_diff < (int)-(uint)k_tmotm_diff_max) {
+      iVar2 = tmot_m__n_1_ - (uint)k_tmotm_diff_max;
+    }
+  }
+  tmot_m__n_1_ = iVar2;
+                    /* Filtered TMOT */
+  temp = (short)(tmot_m__n_1_ / 100);
+                    /* If engine is off (no idle, tip-in, overrun, or crank), just use TAN as-is */
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    tan_m_adj = tan_local;
+    tan_m_adj_state = 1;
+    return CONCAT31((int3)((uint)(tmot_m__n_1_ / 100) >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+  }
+  tan_m_adj_state = 2;
+                    /* Correction logic: based on idle/overrun state and TMOT-TAN difference */
+  if (((ZUSTAND_MOTOR & LL) == 0) || ((SA_WE_ST & 8) != 0)) {
+                    /* if motor isn't idling or overrun is active */
+    if ((SA_WE_ST & 8) == 0) {
+                    /* if overrun is not active */
+      iVar2 = (int)temp - (int)tan_local;
+      temp1 = k_tanm_load_gain;
+    }
+    else {
+                    /* if overrun is active */
+      iVar2 = (int)temp - (int)tan_local;
+      temp1 = k_tanm_load_gain_sa;
+    }
+    iVar2 = (uint)ML * temp1 * iVar2;
+    tan_m_weight = k_tanm_delta_weight;
+  }
+  else {
+    tan_m_weight = k_tanm_delta_weight_ll;
+    iVar2 = (uint)ML * (int)k_tanm_load_gain_ll * ((int)temp - (int)tan_local);
+                    /* Load term */
+  }
+  tan_m_adj_load_term = iVar2 / 400;
+                    /* Main term: previous delta * weight */
+  tan_m_adj_main_term = tan_m_adj_delta * (int)tan_m_weight;
+                    /* adjust for exhaust heat influence (TABG), this factor is disabled by default
+                       as k_tan_m_rg_factor is 0 in the standard 0401 partial */
+  tan_m_adj_rg_term =
+       ((int)rg_m_avan1 * (int)k_tanm_rg_gain * ((int)(short)(TABG * 10) - (int)temp)) / 100;
+                    /* Full correction sum */
+  tan_m_adj_correction_sum =
+       tan_m_adj_delta * (int)tan_m_weight + tan_m_adj_rg_term + tan_m_adj_load_term;
+  DAT_00ffeba0 = tan_m_weight + 100;
+  tan_m_adj_temp_result = tan_m_adj_correction_sum / (int)(short)(tan_m_weight + 100);
+                    /* Clamp to prevent undershoot when TMOT < TAN and result dips below TAN */
+  if ((tan_local < temp) && (tan_m_adj_temp_result < 1)) {
+    iVar2 = (int)tan_local - (int)temp;
+    tan_m_adj_delta = tan_m_adj_temp_result;
+    if (tan_m_adj_temp_result < (int)tan_local - (int)temp) {
+      tan_m_adj_delta = (int)tan_local - (int)temp;
+      iVar2 = tan_m_adj_delta;
+    }
+  }
+  else {
+    tan_m_adj_delta = 0;
+    iVar2 = tan_m_adj_temp_result;
+  }
+                    /* Final modeled intake temp = filtered TMOT + delta */
+  tan_m_adj = tan_m_adj_delta._2_2_ + temp;
+                    /* Store for next iteration */
+  tan_m_adj__t_1_ = tan_m_adj;
+  return CONCAT22((short)((uint)iVar2 >> 0x10),tan_m_adj);
+}
+

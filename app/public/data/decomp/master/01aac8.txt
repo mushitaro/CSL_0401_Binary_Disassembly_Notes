@@ -1,0 +1,11 @@
+
+undefined4 hfm_ml_u_calc(short param_1)
+
+{
+  undefined4 uVar1;
+  
+                    /* Specific to 0401 */
+  uVar1 = tableLookup((uint)(ushort)(param_1 << 3),KL_HFM_ML_U.y[0]);
+  return uVar1;
+}
+

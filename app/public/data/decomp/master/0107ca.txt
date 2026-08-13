@@ -1,0 +1,12 @@
+
+void tpu_init(void)
+
+{
+  TPU_TPUMCR = 0x3a4a;
+  TPU_TICR = 0x530;
+  TPU_CIER = 0;
+  TPU_CPR[0] = 0;
+  TPU_CPR[1] = 0;
+  return;
+}
+

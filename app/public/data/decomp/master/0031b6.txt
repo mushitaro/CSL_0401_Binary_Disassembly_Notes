@@ -1,0 +1,97 @@
+
+/* WARNING: Restarted to delay deadcode elimination for space: stack */
+
+uint32_t flash_command_dispatch(flash_cmd_t cmd,uint8_t *a5,uint8_t *a4,uint32_t d7)
+
+{
+  byte bVar1;
+  word wVar2;
+  word wVar3;
+  word wVar4;
+  word wVar5;
+  word wVar6;
+  int iVar7;
+  short extraout_D1w;
+  short extraout_D1w_00;
+  short extraout_D1w_01;
+  uint extraout_A0;
+  uint8_t *unaff_A4;
+  word local_2e;
+  
+  sys_active_interrupts = sys_active_interrupts + 1;
+  local_2e = SIM_PFPAR;
+  wVar2 = SIM_CSORBT;
+  wVar4 = SIM_CSOR0;
+  wVar5 = SIM_CSOR1;
+  wVar6 = SIM_CSOR2;
+  SIM_CSORBT = 0x68f0;
+  SIM_CSOR0 = 0x70f0;
+  wVar3 = SIM_CSOR1;
+  SIM_CSOR1 = wVar3 | 0x1000;
+  wVar3 = SIM_CSOR2;
+  SIM_CSOR2 = wVar3 | 0x1000;
+  bVar1 = SIM_PFPAR._0_1_;
+  SIM_PFPAR._0_1_ = bVar1 & 0x7f;
+  if (cmd == FLASH_CMD_MEMCPY) {
+    memcpy_bytewise(a4,a5,d7);
+    goto LAB_0000334e;
+  }
+  if (cmd == FLASH_CMD_PROG_BYTES_VFY_BT) {
+    wVar3 = SIM_CSORBT;
+    SIM_CSORBT = wVar3 | 0x1000;
+    flash_program_bytes_verify_ramstub(a5,a4,d7);
+    goto LAB_0000334e;
+  }
+  if (cmd == FLASH_CMD_PROG_BYTES_VFY_CHK) {
+    if (((int)(a5 + -0x6000) < 0) || (0x7fff < (int)a5)) goto LAB_0000334e;
+LAB_000032a6:
+    no_action_1();
+    flash_write_byte_word_vfy_ramstub
+              (*(uint8_t **)((int)&local_2e + (int)extraout_D1w),
+               *(uint8_t **)(&stack0xffffffd6 + extraout_D1w),
+               *(uint32_t *)(&stack0xffffffda + extraout_D1w));
+  }
+  else {
+    if (cmd == FLASH_CMD_ERASE_SECTOR_CHK) {
+      if (((int)(a5 + -0x6000) < 0) || (0x7fff < (int)a5)) goto LAB_0000334e;
+    }
+    else {
+      if (cmd == FLASH_CMD_PROG_BYTES_VFY) goto LAB_000032a6;
+      if (cmd != FLASH_CMD_ERASE_SECTOR) {
+        if (cmd == FLASH_CMD_MEMCMP) {
+          flash_memcmp(a5,a4,d7);
+        }
+        else if (cmd == FLASH_CMD_FILL_ZERO_VFY) {
+          no_action_1();
+          flash_program_zero_block_and_verify
+                    (*(uint8_t **)((int)&local_2e + (int)extraout_D1w_01),unaff_A4,
+                     *(uint32_t *)(&stack0xffffffda + extraout_D1w_01));
+        }
+        else if (cmd == FLASH_CMD_VERIFY_ERASED) {
+          mem_block_is_erased(a5,d7);
+        }
+        else {
+          if (cmd == FLASH_CMD_NOOP_6) {
+            return 0;
+          }
+          if (cmd == FLASH_CMD_NOOP_5) {
+            return 0;
+          }
+        }
+        goto LAB_0000334e;
+      }
+    }
+    no_action_1();
+    flash_erase_sector_ramstub(*(uint16_t **)((int)&local_2e + (int)extraout_D1w_00));
+  }
+LAB_0000334e:
+  iVar7 = no_action_2();
+  SIM_CSOR2 = wVar6;
+  SIM_CSOR1 = wVar5;
+  SIM_CSOR0 = wVar4;
+  SIM_CSORBT = wVar2;
+  SIM_PFPAR = local_2e;
+  sys_active_interrupts = sys_active_interrupts - 1;
+  return extraout_A0 & 0xffffff | iVar7 << 0x18;
+}
+

@@ -1,0 +1,61 @@
+
+void a_quer_calc(void)
+
+{
+  short sVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  ushort uVar5;
+  word wVar6;
+  
+  if (2 < LWS_STAT) {
+    A_QUER_BER = 0;
+    return;
+  }
+  sVar1 = LWS_LRW;
+  if (LWS_LRW < 0) {
+    sVar1 = -LWS_LRW;
+  }
+  if ((int)(uint)K_A_QUER_LRW_OFFSET < (int)sVar1) {
+    uVar5 = sVar1 - K_A_QUER_LRW_OFFSET;
+  }
+  else {
+    uVar5 = 0;
+  }
+  DAT_00ffdabe = PT1_Filter_US(uVar5,DAT_00ffdabe,0x20);
+  uVar2 = klu_wint(&KL_FZ_RADIUS_LRW.sizeX,DAT_00ffdabe);
+  wVar6 = V;
+  if (0xff < (short)V) {
+    wVar6 = 0xff;
+  }
+  uVar3 = klu_bint(&KL_A_QUER_V_KORR.sizeX,(byte)wVar6);
+  uVar2 = (uVar2 & 0xffff) * (uVar3 & 0xff) >> 6;
+  if (0xffff < uVar2) {
+    uVar2 = 0xffff;
+  }
+  FZG_R = (ushort)uVar2;
+  if (FZG_R == 0) {
+    FZG_R = 1;
+  }
+  iVar4 = (int)((uint)V_ASC * (uint)V_ASC) / (int)(uint)FZG_R;
+  if (iVar4 < 0) {
+    iVar4 = iVar4 + 0x1f;
+  }
+  iVar4 = iVar4 >> 5;
+  if (0 < LWS_LRW) {
+    if (0x7f < iVar4) {
+      A_QUER_BER = 0x7f;
+      return;
+    }
+    A_QUER_BER = (char)iVar4;
+    return;
+  }
+  if (0x7f < iVar4) {
+    A_QUER_BER = 0x81;
+    return;
+  }
+  A_QUER_BER = -(char)iVar4;
+  return;
+}
+

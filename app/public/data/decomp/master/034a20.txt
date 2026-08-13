@@ -1,0 +1,9 @@
+
+void obd_monitor_phase0(void)
+
+{
+  obd_reset_phase_slot(0);
+  DAT_00ffd85a = DAT_00ffd85a & 0xf1ff;
+  return;
+}
+

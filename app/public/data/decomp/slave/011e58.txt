@@ -1,0 +1,13 @@
+
+void tpu_settle_delay(void)
+
+{
+  short sVar1;
+  
+  sVar1 = 0x1e;
+  do {
+    sVar1 = sVar1 + -1;
+  } while (sVar1 != -1);
+  return;
+}
+

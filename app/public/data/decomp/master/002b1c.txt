@@ -1,0 +1,42 @@
+
+/* Computes 1-byte code from metadata & program version in RAM */
+
+uint8_t progver_key_calc(void)
+
+{
+  undefined *puVar1;
+  undefined4 uVar2;
+  uint8_t extraout_D0b_00;
+  uint8_t extraout_D0b_01;
+  uint8_t extraout_D0b;
+  
+  puVar1 = PTR_DAT_00010200;
+  uVar2 = FUN_00002a2c(PTR_DAT_00010200,0xc);
+  extraout_D0b = (uint8_t)uVar2;
+  uVar2 = FUN_00002a2c(puVar1 + 0x24,7);
+  extraout_D0b_00 = (uint8_t)uVar2;
+  uVar2 = FUN_00002a2c(puVar1 + 0x39,7);
+  extraout_D0b_01 = (uint8_t)uVar2;
+  if (((extraout_D0b != '\0') && (extraout_D0b_00 != '\0')) && (extraout_D0b_01 != '\0')) {
+    if (((extraout_D0b == extraout_D0b_00) && (extraout_D0b == extraout_D0b_01)) &&
+       (extraout_D0b_00 == extraout_D0b_01)) {
+      return extraout_D0b;
+    }
+    if ((((extraout_D0b != extraout_D0b_00) || (extraout_D0b != extraout_D0b_01)) ||
+        (extraout_D0b_00 == extraout_D0b_01)) &&
+       (((extraout_D0b != extraout_D0b_00 || (extraout_D0b == extraout_D0b_01)) ||
+        (extraout_D0b_00 != extraout_D0b_01)))) {
+      if (extraout_D0b == extraout_D0b_00) {
+        return extraout_D0b_01;
+      }
+      if (extraout_D0b != extraout_D0b_01) {
+        return extraout_D0b_01;
+      }
+      if (extraout_D0b_00 != extraout_D0b_01) {
+        return extraout_D0b_01;
+      }
+    }
+  }
+  return '\0';
+}
+

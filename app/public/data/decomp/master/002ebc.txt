@@ -1,0 +1,11 @@
+
+void aif_erase_tail_guard_sector(void)
+
+{
+  if (aif_tail_guard_key != -0x39) {
+    flash_command_dispatch(FLASH_CMD_ERASE_SECTOR,(uint8_t *)&DAT_00006000,(uint8_t *)0x0,0x2000);
+  }
+  aif_log_status = 1;
+  return;
+}
+

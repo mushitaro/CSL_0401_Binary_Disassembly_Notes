@@ -1,0 +1,15 @@
+
+uint tpu_try_initialize_channel(uint tpu_channel,byte priority_level)
+
+{
+  char cVar1;
+  
+  cVar1 = tpu_get_channel_function((byte)tpu_channel);
+  if (cVar1 == 13) {
+    tpu_host_service_request(tpu_channel,3);
+    tpu_set_channel_priority((byte)tpu_channel,priority_level);
+    return 0;
+  }
+  return 1;
+}
+

@@ -1,0 +1,27 @@
+
+void boot_handoff_dispatch(void)
+
+{
+  int in_VBR;
+  
+  if (in_VBR == 0) {
+    return;
+  }
+  boot_handoff_prepare();
+  if (aif_tail_guard_key == 0x66) {
+    DAT_00ff8022 = 60;
+    DAT_00ff8023 = 195;
+    reset();
+                    /* WARNING: Could not recover jumptable at 0x00003102. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (*DAT_00004884)();
+    return;
+  }
+  DAT_00ff8022 = 126;
+  DAT_00ff8023 = 129;
+  reset();
+  SIM_DREG = 0xff;
+  bootloader_entry();
+  return;
+}
+

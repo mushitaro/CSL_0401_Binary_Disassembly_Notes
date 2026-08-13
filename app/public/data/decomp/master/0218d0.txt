@@ -1,0 +1,108 @@
+
+/* rf_calc runs in the segment task */
+
+void rf_calc(void)
+
+{
+  uint32_t rf_soll_korr;
+  int32_t rf_p_saug_i_temp;
+  uint32_t rf_diag_soll_korr;
+  uint16_t ml_720_min;
+  int16_t d_ml_720;
+  
+                    /* Calculate rf_p_saug (relative fill derived from MAP sensor reading)
+                       m_norm_fakt (units 1/grams) is the factor of mass of air in the engine at
+                       reference temp and pressure.
+                       m (units grams) is the mass of air in the engine as calculated from the MAP
+                       sensor with adjustments for residual gas and TETV. */
+  rf_p_saug = (ushort)(((uint)m_norm_fakt * (int)m) / 65535);
+                    /* If the motor is not in the start condition */
+  if ((ZUSTAND_MOTOR & Start) == 0) {
+                    /* rf_diag_ed_st is 0 in normal condition and non-zero depending on the sort of
+                       rf_diag error */
+    RF = rf_p_saug;
+    if (rf_diag_ed_st == 0) {
+                    /* k_rf_cfg is a parameter that configures the behaviour of the RF calculation.
+                       In the standard 0401 partial this value is = 0x12 */
+      if ((k_rf_cfg & 1) == 0) {
+        if ((k_rf_cfg & 4) == 0) {
+                    /* Multiply rf_soll_korr (our RF from the AlphaN table) by rf_korr which is an
+                       adjustment factor to rf based on current TABG */
+          rf_soll_korr = (uint)rf_soll * (uint)rf_korr;
+          if ((int)rf_soll_korr < 0) {
+            rf_soll_korr = rf_soll_korr + 0x3ff;
+          }
+                    /* Set RF to equal our TABG adjusted rf from AlphaN */
+          RF = (ushort)((int)rf_soll_korr >> 10);
+                    /* If k_rf_cfg bit 4 is set then it means we need to adjust RF by rf_p_saug_i
+                       which is the MAP-based integral controller  */
+          if ((k_rf_cfg & 0x10) != 0) {
+            rf_p_saug_i_temp = (int32_t)rf_p_saug_i;
+            if (rf_p_saug_i_temp < 0) {
+              rf_p_saug_i_temp = rf_p_saug_i_temp + 0x3f;
+            }
+                    /* Take our RF value (which is from AlphaN and adjusted for TABG) and add
+                       rf_p_saug_i to it. After this RF is now adjusted for manifold pressure */
+            RF = (short)(rf_p_saug_i_temp >> 6) + RF;
+                    /* Sanity check - we can't have a negative RF. */
+            if ((short)RF < 0) {
+              RF = 0;
+            }
+          }
+        }
+        else {
+                    /* This is an option for using an HFM sensor connected to HFM1 (in place of the
+                       CSL flap) to calculate RF. Using this configuration requires hardware changes
+                       and program changes - it should not be used. */
+          RF = rf_hfm1;
+        }
+      }
+    }
+    else {
+                    /* If there is a rf_diag error state that impacts RF calculation then fall back
+                       to using our rf_soll_korr value, this is essentially just AlphaN with a TABG
+                       adjustment - it's a safe approach. */
+      if (rf_diag_ed_st == 1) {
+        rf_diag_soll_korr = (uint)rf_soll * (uint)rf_korr;
+        if ((int)rf_diag_soll_korr < 0) {
+          rf_diag_soll_korr = rf_diag_soll_korr + 0x3ff;
+        }
+        RF = (ushort)((int)rf_diag_soll_korr >> 10);
+      }
+    }
+                    /* Calculate ML based on N, m_norm and the RF value we just calculated */
+    ML = (word)(((uint)N * ((int)((uint)RF * (uint)m_norm) / 1000)) / 25000);
+  }
+  else {
+                    /* If the engine is currently starting, use the parameter values for RF and ML
+                       for the starting state. */
+    RF = k_rf_start;
+    ML = k_ml_start;
+  }
+  if (RF < 0x4fb) {
+                    /* Calculate RF5 which is used elsewhere. */
+    RF5 = (undefined1)(RF / 5);
+  }
+  else {
+    RF5 = 0xff;
+  }
+                    /* Calculate TL (Load Signal) */
+  TL = (undefined2)((int)((uint)RF_TI_CONST * (uint)RF) / 2000);
+                    /* Loop through for all 6 cylinders comparing the current ML to the ML from last
+                       time to get the delta. */
+  ml_720_akt_zyl = ml_720_akt_zyl + 1;
+  if (ml_720_akt_zyl == zyl_count) {
+    ml_720_akt_zyl = 0;
+  }
+  d_ml_720 = ML - ml_720[ml_720_akt_zyl];
+  ml_720[ml_720_akt_zyl] = ML;
+  ml_720_min = K_HFM_ML_SEG_MIN;
+  if (K_HFM_ML_SEG_MIN < ML) {
+    ml_720_min = ML;
+  }
+                    /* DAM (Delta Air Mass) is the change in air mass flow relative to one cylinder
+                        */
+  DAM = (word)((int)((uint)N * (int)d_ml_720) / (int)(uint)ml_720_min);
+  return;
+}
+

@@ -1,0 +1,35 @@
+
+byte sys_cancel_task(byte task_id)
+
+{
+  undefined3 extraout_var;
+  byte bVar1;
+  char cVar2;
+  byte bVar3;
+  byte *pbVar4;
+  undefined3 in_stack_00000004;
+  
+  bVar3 = 0;
+  if (((&sys_task_control_bytes)[(uint)task_id * 2] & 1) == 1) {
+    bVar1 = set_status_register(0x2700);
+    cVar2 = '\a';
+    for (pbVar4 = &sys_task_schedule_table; (-1 < cVar2 && (task_id != *pbVar4));
+        pbVar4 = pbVar4 + 4) {
+      cVar2 = cVar2 + -1;
+    }
+    if (-1 < (char)(cVar2 + -1)) {
+      pbVar4[2] = 0;
+      pbVar4[3] = 0;
+      *pbVar4 = 0;
+      (&sys_task_control_bytes)[(uint)task_id * 2] =
+           (&sys_task_control_bytes)[(uint)task_id * 2] & 0xfe;
+    }
+    set_status_register((short)CONCAT31(extraout_var,bVar1));
+  }
+  else {
+    bVar3 = 0x22;
+    syserror(_in_stack_00000004,0x200);
+  }
+  return bVar3;
+}
+

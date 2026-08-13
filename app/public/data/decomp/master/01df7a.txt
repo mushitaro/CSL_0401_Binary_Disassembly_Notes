@@ -1,0 +1,12 @@
+
+void gang_init(void)
+
+{
+  GANG = 0;
+  GANG_NV = 0xffffffff;
+  NOISE_ST = 0;
+  NOISE_T2 = 0;
+  NOISE_T3 = 0;
+  return;
+}
+

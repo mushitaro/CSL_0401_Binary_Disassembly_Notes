@@ -1,0 +1,87 @@
+
+void qsm_transmit_fsm(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined2 uVar3;
+  
+  if (CPU_Identifier != 'S') {
+    uVar2 = DAT_00ffe988;
+    if ((DAT_00ffe98e & 1) == 0) {
+      uVar2 = QSM_SCSR;
+    }
+    if ((char)bootloader_diag_state == '\x05') {
+      if ((DAT_00ffd13e < DAT_00ffd0bb) && (DAT_00ffd13e < 0x84)) {
+        if ((uVar2 & 0x100) != 0) {
+          QSM_SCDR = (ushort)(byte)(&DAT_00ffd0ba)[DAT_00ffd13e];
+          DAT_00ffd13e = DAT_00ffd13e + 1;
+        }
+      }
+      else {
+        uVar1 = QSM_SCCR1;
+        QSM_SCCR1 = uVar1 & 0xff7f;
+        if ((uVar2 & 0x80) == 0) {
+          uVar1 = QSM_SCCR1;
+          QSM_SCCR1 = uVar1 | 0x40;
+        }
+        else {
+          bootloader_diag_state._3_1_ = '\x06';
+          uVar1 = QSM_SCCR1;
+          QSM_SCCR1 = uVar1 & 0xffbf;
+          uVar1 = QSM_SCCR1;
+          QSM_SCCR1 = uVar1 & 0xfff7;
+          FUN_00000764();
+          FUN_000007b0();
+          FUN_00000978();
+        }
+      }
+    }
+    if ((uVar2 & 0x40) != 0) {
+      uVar3 = DAT_00ffe98a;
+      if ((DAT_00ffe98e & 1) == 0) {
+        uVar3 = QSM_SCDR;
+      }
+      if ((((char)bootloader_diag_state == '\0') || ((char)bootloader_diag_state == '\x06')) ||
+         ((char)bootloader_diag_state == '\x01')) {
+        bootloader_diag_state._3_1_ = '\x01';
+        if (DAT_00ffe98d == 0xff) {
+          DAT_00ffe98d = 0;
+          DAT_00ffe98c = 0;
+        }
+        else {
+          DAT_00ffe98d = DAT_00ffe98d + 1;
+        }
+        DAT_00ffd0b4 = SYS_TIMERTICS_COUNTER;
+        (&DAT_00ffd02e)[DAT_00ffd0b2] = (char)uVar3;
+        DAT_00ffd0b2 = DAT_00ffd0b2 + 1;
+        DAT_00ffd0b8 = uVar2 & 0xf | DAT_00ffd0b8;
+        if ((uVar2 & 0xf) == 0) {
+          if ((((DAT_00ffe98e & 2) == 0) && (DAT_00ffe98c = DAT_00ffe98c + 1, 9 < DAT_00ffe98c)) &&
+             ((int)((uint)DAT_00ffe98d - (uint)DAT_00ffe98c) < 3)) {
+            DAT_00ffe98d = 0;
+            DAT_00ffe98c = 0;
+            DAT_00ffe98e = 2;
+            FUN_00036030();
+          }
+        }
+        else if ((((DAT_00ffd0b2 == 6) && (DAT_00ffd02e == -0x3f)) &&
+                 ((DAT_00ffd02f == 0x33 && ((DAT_00ffd030 == -0xf && (DAT_00ffd031 == -0x7f)))))) &&
+                (DAT_00ffd032 == 'f')) {
+          FUN_00000c54();
+          DAT_00ffe98e = 4;
+          return;
+        }
+        if ((DAT_00ffd0b2 == DAT_00ffd02f) || (0x83 < DAT_00ffd0b2)) {
+          bootloader_diag_state._3_1_ = '\x02';
+          DAT_00ffe98e = 2;
+          uVar2 = QSM_SCCR1;
+          QSM_SCCR1 = uVar2 & 0xffdb;
+        }
+        FUN_00000c5e('\x01');
+      }
+    }
+  }
+  return;
+}
+

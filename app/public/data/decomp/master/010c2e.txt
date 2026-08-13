@@ -1,0 +1,14 @@
+
+void CTM4_Init(void)
+
+{
+  Ram00fff400 = 0xb00;
+  Ram00fff408 = 0xe;
+  Ram00fff414 = 0xf97d;
+  Ram00fff410 = 0x203;
+  Ram00fff45c = 0xf97d;
+  Ram00fff458 = 0xa03;
+  CTM4_FCSM12SIC = 0x105;
+  return;
+}
+

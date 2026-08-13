@@ -1,0 +1,36 @@
+
+void tpu_host_service_request(uint tpu_channel,uint hsr_code)
+
+{
+  word awVar1 [2];
+  undefined3 extraout_var;
+  byte bVar2;
+  uint uVar3;
+  uint uVar4;
+  ushort uVar5;
+  
+  bVar2 = set_status_register(0x2700);
+  awVar1 = TPU_HSRR;
+  awVar1 = TPU_HSRR;
+  if (awVar1 != (word  [2])0x0) {
+    uVar4 = 0;
+    uVar3 = 3;
+    for (uVar5 = 0; uVar5 < 0x10; uVar5 = uVar5 + 1) {
+      awVar1 = TPU_CPR;
+      if ((uVar3 & (uint)awVar1) != 0) {
+        uVar4 = uVar3 + uVar4;
+      }
+      uVar3 = uVar3 << 2;
+    }
+    do {
+      awVar1 = TPU_HSRR;
+    } while ((uVar4 & (uint)awVar1) != 0);
+  }
+  uVar4 = (tpu_channel & 0xff) * 2;
+  awVar1 = TPU_HSRR;
+  TPU_HSRR = (word  [2])
+             ((hsr_code & 0xff) << (uVar4 & 0x3f) | (uint)awVar1 & ~(3 << (uVar4 & 0x3f)));
+  set_status_register((ushort)CONCAT31(extraout_var,bVar2));
+  return;
+}
+

@@ -1,0 +1,26 @@
+
+int * qsm_get_highest_priority_queued_transfer(void)
+
+{
+  byte bVar1;
+  char cVar2;
+  struct_qsm_transfer_queue_item *psVar3;
+  struct_qsm_transfer_queue_item *psVar4;
+  
+  psVar3 = (struct_qsm_transfer_queue_item *)0x0;
+  if (qsm_queue_count != '\0') {
+    psVar4 = &qsm_transfer_queue;
+    bVar1 = 0;
+    cVar2 = 4;
+    do {
+      if ((psVar4->descriptor != (int *)0x0) && (bVar1 < psVar4->priority)) {
+        bVar1 = psVar4->priority;
+        psVar3 = psVar4;
+      }
+      psVar4 = psVar4 + 1;
+      cVar2 = cVar2 + -1;
+    } while (0 < cVar2);
+  }
+  return (int *)psVar3;
+}
+

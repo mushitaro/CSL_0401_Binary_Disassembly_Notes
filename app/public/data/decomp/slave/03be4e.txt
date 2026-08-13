@@ -1,0 +1,58 @@
+
+void smg_adaptation_gate_and_breakaway_threshold_update(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  byte xValue;
+  
+  if ((((((rf_diag_ed_st == '\0') && ((VAN_ED_ST & 0xf0) == 0)) &&
+        (((AUSS_ABG_ED_MULT |
+          AUSS_KS_ED_MULT |
+          AUSS_ABG_ED_ZYL_8OF8_ |
+          AUSS_KS_ED_ZYL_8OF8_ |
+          AUSS_ABG_ED_ZYL_7OF8_ |
+          AUSS_KS_ED_ZYL_7OF8_ |
+          AUSS_ABG_ED_ZYL_6OF8_ |
+          AUSS_KS_ED_ZYL_6OF8_ |
+          AUSS_ABG_ED_ZYL_5OF8_ |
+          AUSS_KS_ED_ZYL_5OF8_ |
+          AUSS_ABG_ED_ZYL_4OF8_ |
+          AUSS_KS_ED_ZYL_4OF8_ |
+          AUSS_ABG_ED_ZYL_3OF8_ |
+          AUSS_KS_ED_ZYL_3OF8_ |
+          AUSS_ABG_ED_ZYL_2OF8_ |
+          AUSS_KS_ED_ZYL_2OF8_ | AUSS_ABG_ED_ZYL_1OF8_ | AUSS_KS_ED_ZYL_1OF8_) & 0x60) == 0)) &&
+       ((sk_mode_state_latched == '\0' && ((KSD1_ED & 0x40) == 0)))) &&
+      ((((KSD2_ED & 0x40) == 0 && (((LASV1_ED & 0x40) == 0 && ((LASV2_ED & 0x40) == 0)))) &&
+       ((LASN1_ED & 0x40) == 0)))) &&
+     (((((LASN2_ED & 0x40) == 0 && ((LA1_ED & 0x40) == 0)) && ((LA1_ED & 0x40) == 0)) &&
+      (((K_SMG_ADAPT_SP_TOEL <= TOEL && (DAT_00ffdbb0 == '\0')) && (DAT_00ffdb8c == 0)))))) {
+    iVar1 = abs((uint)MD_IND_NE - (uint)DAT_00ffdbba);
+    if ((iVar1 <= (int)(uint)K_SMG_ADAPT_SP_DM_MAX) || (DAT_00ffdbb2 != '\x10')) {
+      if (DAT_00ffdb3a == '\x02') {
+        DAT_00ffdb83 = DAT_00ffdb83 & 0xfd;
+      }
+      if (((ASC_ST & 1) == 0) && ((ASC_ST & 2) == 0)) {
+        iVar1 = abs((int)DAT_00ffdb60);
+        if (iVar1 <= (int)(uint)K_SMG_ADAPT_SP_DMD_FW) goto LAB_0003bfd0;
+      }
+    }
+  }
+  DAT_00ffdb83 = DAT_00ffdb83 | 2;
+LAB_0003bfd0:
+  iVar1 = (int)DAT_00ffdb62;
+  if (iVar1 < 0) {
+    iVar1 = iVar1 + 0x7f;
+  }
+  xValue = (byte)(iVar1 >> 7);
+  if ((short)(iVar1 >> 7) < 0) {
+    xValue = 0;
+  }
+  uVar2 = klu_bint(&KL_SMG_N_ABRISS_SCHW.sizeX,xValue);
+  DAT_00ffdc78 = (short)(((uint)(byte)(&K_SMG_I_HA)[(short)(ushort)smg_can_istgang] *
+                          (uVar2 & 0xffff) + 0x1e) / 0x3c) * 0x28;
+  smg_reset_adaptations(0);
+  return;
+}
+

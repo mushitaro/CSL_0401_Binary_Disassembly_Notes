@@ -1,0 +1,19 @@
+
+uint kd_cfg_calc(void)
+
+{
+  if ((K_KD_QUELLE == HIP) && ((KM_CFG & 5) != 0)) {
+    return 1;
+  }
+  if ((K_KD_QUELLE == HIP_Komp) && ((KM_CFG & 5) != 0)) {
+    return 2;
+  }
+  if ((K_KD_QUELLE == DSP_Eges) && ((KM_CFG & 0x18) != 0)) {
+    return 3;
+  }
+  if ((K_KD_QUELLE == DSP_Eres) && ((KM_CFG & 0x18) != 0)) {
+    return 4;
+  }
+  return 0;
+}
+

@@ -1,0 +1,43 @@
+
+/* Writes one 0x1A-byte program-info record (incl. 7-char version) to next free slot at 0x7E00
+    */
+
+void flash_progver_record_write(void)
+
+{
+  undefined1 uVar1;
+  uint32_t uVar2;
+  ushort uVar3;
+  char cVar4;
+  uint8_t *a5;
+  
+  uVar1 = aif_log_status;
+  a5 = &DAT_00007e00;
+  uVar3 = 0;
+  do {
+    cVar4 = '\0';
+    if (*a5 == 0xff) break;
+    a5 = a5 + 0x1a;
+    cVar4 = -1;
+    uVar3 = uVar3 + 1;
+  } while (uVar3 < 8);
+  if (cVar4 == -1) {
+    return;
+  }
+  aif_log_status = -1;
+  uVar2 = flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,a5,PTR_DAT_00010200,0xc);
+  if (((uVar2 == 0) &&
+      (uVar2 = flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,a5 + 0xc,PTR_DAT_00010200 + 0x24,7),
+      uVar2 == 0)) &&
+     (uVar2 = flash_command_dispatch(FLASH_CMD_PROG_BYTES_VFY,a5 + 0x13,PTR_DAT_00010200 + 0x39,7),
+     uVar2 == 0)) {
+    if (aif_log_status != -1) {
+      return;
+    }
+    aif_log_status = uVar1;
+    return;
+  }
+  aif_log_status = 5;
+  return;
+}
+

@@ -1,0 +1,16 @@
+
+int vers_st_m_calc(void)
+
+{
+  if (K_VERS_UP_M == prg_vers_up_m) {
+    if (K_VERS_PROGR_M == prg_vers_progr_m) {
+      return 0;
+    }
+    VERS_ST_M = VERS_ST_M | 0x20;
+  }
+  else {
+    VERS_ST_M = VERS_ST_M | 0x10;
+  }
+  return -1;
+}
+

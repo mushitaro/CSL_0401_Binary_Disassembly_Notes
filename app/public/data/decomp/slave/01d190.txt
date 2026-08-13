@@ -1,0 +1,23 @@
+
+void ti_moment_factor(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (uint)TI_F_KATS2 + (uint)TI_F_KATS1;
+  if (SCARRY4((uint)TI_F_KATS2,(uint)TI_F_KATS1)) {
+    iVar2 = iVar2 + 1;
+  }
+  iVar1 = (uint)TI_F_WL * (uint)TI_F_NAS;
+  if (iVar1 < 0) {
+    iVar1 = iVar1 + 0x3ff;
+  }
+  iVar2 = (iVar1 >> 10) * (iVar2 >> 1);
+  if (iVar2 < 0) {
+    iVar2 = iVar2 + 0x3ff;
+  }
+  TI_F_MD = (short)(iVar2 >> 10);
+  return;
+}
+

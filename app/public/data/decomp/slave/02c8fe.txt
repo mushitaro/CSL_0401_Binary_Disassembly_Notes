@@ -1,0 +1,14 @@
+
+void avan1_hall_diag_segment_check(void)
+
+{
+  if (TPU_ZOT_ZYL_S == '\x04') {
+    if (AVAN1_IMP_COUNTER == '\0') {
+      AVAN1_ED_HALL = AVAN1_ED_HALL | 1;
+    }
+    AVAN1_IMP_COUNTER = '\0';
+    AVAN1_ED_HALL = AVAN1_ED_HALL | 0x10;
+  }
+  return;
+}
+

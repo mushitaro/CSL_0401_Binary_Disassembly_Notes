@@ -1,0 +1,17 @@
+
+void nw_sync_pulse_if_peer_requested(void)
+
+{
+  byte bVar1;
+  
+  if ((NW_SYNCREQUEST_M == 0) && (NW_SYNCREQUEST_S == 1)) {
+    bVar1 = SIM_PORTF0;
+    SIM_PORTF0 = bVar1 & 0xdf;
+    bVar1 = SIM_DDRF;
+    SIM_DDRF = bVar1 | 0x20;
+    bVar1 = SIM_DDRF;
+    SIM_DDRF = bVar1 & 0xdf;
+  }
+  return;
+}
+

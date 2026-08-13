@@ -1,0 +1,81 @@
+
+/* WARNING: Removing unreachable block (ram,0x000233f2) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void md_pwg(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  short sVar4;
+  ushort uVar5;
+  KL_10_2byte_2byte *curve;
+  
+  if ((SCHALT_M_ST & 1) == 0) {
+    curve = &KL_PWG_SOLL_KOMFORT;
+  }
+  else {
+    curve = &KL_PWG_SOLL_SPORT;
+  }
+  uVar2 = klu_wint(&curve->sizeX,PWG);
+  uVar5 = (ushort)uVar2;
+  if (cfg_m_getriebetyp == 0x40) {
+    if ((((DAT_00ffd955 == '\x01') && ((DAT_00ffd953 & 0xe) == 4)) && (uVar5 < K_PWG_SOLL_ANF_2_MAX)
+        ) && (V < K_PWG_SOLL_ANF_2_V)) {
+      PWG_SOLL_ANF_2 = '\x01';
+    }
+    else if ((uVar5 == 0) || (DAT_00ffd956 == '\x02')) {
+      PWG_SOLL_ANF_2 = '\0';
+      PWG_SOLL_ANF_2_FAK = 0x80;
+    }
+    if (PWG_SOLL_ANF_2 != '\0') {
+      uVar5 = (ushort)K_PWG_SOLL_ANF_2_AUF + (ushort)PWG_SOLL_ANF_2_FAK;
+      if (K_PWG_SOLL_ANF_2_FAK < uVar5) {
+        uVar5 = (ushort)K_PWG_SOLL_ANF_2_FAK;
+      }
+      PWG_SOLL_ANF_2_FAK = (byte)uVar5;
+      uVar5 = (ushort)((int)((uint)PWG_SOLL_ANF_2_FAK * (uVar2 & 0xffff)) >> 7);
+      if (1000 < uVar5) {
+        uVar5 = 1000;
+      }
+    }
+  }
+  if (PWG_MODE < 3) {
+    DAT_00ffe6ca = 60000;
+    PWG_SOLL = uVar5;
+  }
+  else {
+    uVar2 = klu_wint(&KL_PWG_SOLL_NOTLAUF.sizeX,PWG);
+    if ((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || ((V == 0 && ((V_ST & 0x40) == 0)))) ||
+       (DAT_00ffe6ca <= K_PWG_AB_RAMPE)) {
+      DAT_00ffe6ca = 0;
+    }
+    else {
+      DAT_00ffe6ca = DAT_00ffe6ca - K_PWG_AB_RAMPE;
+    }
+    sVar4 = (short)((uint)DAT_00ffe6ca * (int)(short)(uVar5 - (short)uVar2) + 0x8000 >> 0x10);
+    iVar1 = (int)sVar4 + (uVar2 & 0xffff);
+    if (iVar1 == 0 || SCARRY4((int)sVar4,uVar2 & 0xffff) != iVar1 < 0) {
+      PWG_SOLL = 0;
+    }
+    else {
+      PWG_SOLL = sVar4 + (short)uVar2;
+    }
+  }
+  _PWG_SOLL_DPR = PWG_SOLL;
+  uVar3 = kfu_wint(&KF_MD_FAHRER.sizeX,N,PWG_SOLL);
+  MD_FW_REL = (short)uVar3;
+  if (6 < PWG_MODE) {
+    pwg_soll_can = 0xff;
+    return;
+  }
+  uVar2 = ((uint)PWG_SOLL * 0x100 + 500) / 1000;
+  if (0xfd < (ushort)uVar2) {
+    pwg_soll_can = 0xfe;
+    return;
+  }
+  pwg_soll_can = (char)uVar2;
+  return;
+}
+

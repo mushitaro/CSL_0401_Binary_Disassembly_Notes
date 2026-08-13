@@ -1,0 +1,32 @@
+
+/* WARNING: Removing unreachable block (ram,0x000409a2) */
+
+uint klu_bint(byte *curve,byte xValue)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  byte *pbVar3;
+  byte *pbVar4;
+  
+  uVar2 = (ushort)*curve;
+  if (curve[2] < xValue) {
+    pbVar3 = curve + (short)uVar2 + 2;
+    if (xValue < curve[(short)uVar2 + 1]) {
+      do {
+        pbVar4 = pbVar3;
+        pbVar3 = pbVar4 + -1;
+      } while (xValue < *pbVar3);
+      uVar1 = tableLookup(((uint)(byte)(xValue - *pbVar3) << 8) / (uint)(byte)(*pbVar4 - *pbVar3),
+                          pbVar3[(short)uVar2]);
+    }
+    else {
+      uVar1 = (uint)curve[(short)uVar2 * 2 + 1];
+    }
+  }
+  else {
+    uVar1 = (uint)curve[(short)uVar2 + 2];
+  }
+  return uVar1;
+}
+

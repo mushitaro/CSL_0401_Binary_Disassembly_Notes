@@ -1,0 +1,33 @@
+
+void sk_pcntrl_partner_timer_watchdog(void)
+
+{
+  short sVar1;
+  
+  sVar1 = PCNTRL_TIMER_S;
+  if ((ZUSTAND_MOTOR & Nachlauf) == 0) {
+    if (PCNTRL_TIMER_S == pcntrl_timer_s_previous) {
+      if (pcntrl_heartbeat_counter < K_PCNTRL_TIMEOUT_S) {
+        pcntrl_heartbeat_counter = pcntrl_heartbeat_counter + 1;
+      }
+      else {
+        pcntrl_heartbeat_counter = 0;
+        sk_pcntrl_dpr_reset();
+      }
+    }
+    else {
+      pcntrl_heartbeat_counter = 0;
+    }
+    pcntrl_timer_s_previous = sVar1;
+    if (K_SK_TR_MAX <= sk_tr_counter) {
+      PCNTRL_ZUSTAND = PCNTRL_ZUSTAND | 2;
+      ed_report(DTC_7A_DME_INTERNAL_CHECK,2);
+    }
+    if (K_SKS_IPK_TIMEOUT <= sks_ipk_counter) {
+      PCNTRL_ZUSTAND = PCNTRL_ZUSTAND | 8;
+      ed_report(DTC_7A_DME_INTERNAL_CHECK,4);
+    }
+  }
+  return;
+}
+

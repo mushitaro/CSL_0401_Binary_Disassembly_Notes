@@ -1,0 +1,14 @@
+
+void md_can_ed_smg_max_calc(void)
+
+{
+  uint md_can_ed_smg_max_temp;
+  
+  if ((ZUSTAND_MOTOR & KI.15 aus) != 0) {
+    DAT_00ffd964 = 0;
+  }
+  md_can_ed_smg_max_temp = klu_wint(&kl_md_can_ed_smg_max.sizeX,V);
+  md_can_ed_smg_max = MD_IND_SCHLEPP + MD_IND_VERBRAUCHER + (short)md_can_ed_smg_max_temp;
+  return;
+}
+

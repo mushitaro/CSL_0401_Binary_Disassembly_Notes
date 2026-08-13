@@ -1,0 +1,26 @@
+
+void asc_torque_intervention_cancellation(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  ushort uVar3;
+  
+  if ((ASC_ABBRUCH != '\0') && (((ASC_ED & 0x40) != 0 || ((CAN_ED_ASC & 0x40) != 0)))) {
+    MD_IND_ASC_LM = 0;
+    bVar1 = ASC_ST & 0xfd;
+    bVar2 = ASC_ST & 1;
+    ASC_ST = bVar1;
+    if (bVar2 != 0) {
+      uVar3 = (ushort)K_ASC_MD_ABBRUCH + (ushort)MD_IND_ASC;
+      if ((0xff < uVar3) || (MD_IND_IST < uVar3)) {
+        uVar3 = 0xff;
+        ASC_ST = 0;
+      }
+      MD_IND_ASC = (byte)uVar3;
+      MD_IND_ASC_LM = MD_IND_ASC;
+    }
+  }
+  return;
+}
+

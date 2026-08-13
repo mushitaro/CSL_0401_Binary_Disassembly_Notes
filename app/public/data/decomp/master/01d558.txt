@@ -1,0 +1,43 @@
+
+void s_kraftschluss_calc(void)
+
+{
+  if ((cfg_m_getriebetyp == 0x40) || (cfg_m_getriebetyp == 0x70)) {
+    if ((cfg_m_getriebetyp != 0x40) || ((CAN_ED_SMG & 0x40) == 0)) {
+      if (cfg_m_getriebetyp != 0x70) {
+        return;
+      }
+      if ((CAN_TEL_EMPF & 0x10) != 0) {
+        return;
+      }
+    }
+    if ((V <= K_LLR_V_MAX) && ((V_ST & 0x40) == 0)) {
+      S_KRAFTSCHLUSS = 0;
+      return;
+    }
+    S_KRAFTSCHLUSS = 1;
+    return;
+  }
+  if (((S_GANG_ED & 0x40) == 0) && (K_SKRAFTS_CONTROL != '\0')) {
+    if (K_SKRAFTS_CONTROL == '\x02') {
+      if ((SCHALT_S_ST & 8) == 0) {
+        if ((N != 0) && (V == 0)) goto LAB_0001d5ea;
+        goto LAB_0001d634;
+      }
+    }
+    else if ((SCHALT_S_ST & 8) == 0) goto LAB_0001d634;
+LAB_0001d600:
+    S_KRAFTSCHLUSS = 0;
+  }
+  else {
+    if (V <= K_LLR_V_MAX) {
+LAB_0001d5ea:
+      if (((V_ST & 0x40) == 0) || ((cfg_m_betriebsmode == '\x02' || (CFG_ROLLENBETRIEB != '\0'))))
+      goto LAB_0001d600;
+    }
+LAB_0001d634:
+    S_KRAFTSCHLUSS = 1;
+  }
+  return;
+}
+

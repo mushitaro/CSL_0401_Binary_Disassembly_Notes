@@ -1,0 +1,37 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void sk_init(void)
+
+{
+  ushort uVar1;
+  
+  SK_RAM_ST = 0xf00f;
+  SK_ROM_ST = 0xf00f;
+  SK_ADC_ST = 0xf00f;
+  SK_SIM_ST = 0xf00f;
+  _SK_ROX_ST = 0xf00f;
+  if (CPU_Identifier == 'M') {
+    DAT_00ff80ea = 0xf00f;
+    _DAT_00ff80ec = 0xf00f;
+    _DAT_00ff80ee = 0xf00f;
+    _DAT_00ff80f0 = 0xf00f;
+    DAT_00ff813c = 0;
+    DAT_00ff8140 = 0;
+    DAT_00ff8144 = 0;
+  }
+  else {
+    DAT_00ff80f2 = 0xf00f;
+    _DAT_00ff80f4 = 0xf00f;
+    _DAT_00ff80f6 = 0xf00f;
+    _DAT_00ff80f8 = 0xf00f;
+    DAT_00ff813e = 0;
+    DAT_00ff8142 = 0;
+    DAT_00ff8145 = 0;
+  }
+  for (uVar1 = 0; uVar1 < 0x40; uVar1 = uVar1 + 1) {
+    *(undefined1 *)((int)&DAT_00ffd1a0 + (int)(short)uVar1) = 0;
+  }
+  return;
+}
+

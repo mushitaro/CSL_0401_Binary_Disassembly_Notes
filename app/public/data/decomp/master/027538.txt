@@ -1,0 +1,13 @@
+
+void km_tel_st_calc(byte zyl)
+
+{
+  ushort *puVar1;
+  
+  puVar1 = (ushort *)((int)KM_TEL_ST + (int)(short)((ushort)zyl * 2));
+  if ((*puVar1 & 0x1d) == (ushort)KM_CFG) {
+    *puVar1 = *puVar1 | 0x100;
+  }
+  return;
+}
+

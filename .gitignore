@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Pipeline intermediates - regenerate with tools/run_pipeline.sh
+build/
+
+# Node
+node_modules/
+app/dist/
+app/tsconfig.tsbuildinfo
+app/dist-single/

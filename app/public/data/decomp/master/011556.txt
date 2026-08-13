@@ -1,0 +1,122 @@
+
+void init_cpu(void)
+
+{
+  byte bVar1;
+  
+  SIM_SWSR = 0x55;
+  SIM_SWSR = 0xaa;
+  sk_init();
+  FUN_000343ec();
+  load_zyl_consts_to_ram();
+  sys_task_scheduler_variables_init();
+  sys_task_scheduler_init();
+  qsm_init_transfer_state();
+  FUN_00035c72();
+  FUN_00000bfe();
+  FUN_00000f70();
+  FUN_00032bfc();
+  FUN_0003511e();
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    FUN_0003d1e4();
+  }
+  pit_clear_interrupt_flag();
+  sys_active_interrupts = sys_active_interrupts + 1;
+  set_status_register(0x2000);
+  FUN_00010c68();
+  FUN_000118f8();
+  pcntrl_init();
+  dpr_sync();
+  n_init();
+  FUN_0002aa0a();
+  nw_sync_init();
+  nw_sync_clear_requests();
+  FUN_0002c84e();
+  tog_capture_arm();
+  FUN_00032822();
+  FUN_00030b40();
+  mil_reset();
+  bls_init();
+  FUN_0001d1b6();
+  FUN_00013426();
+  tdme_init();
+  tan_init();
+  tmot_init();
+  tan_m_adj_init();
+  tabg_init();
+  tkatm_init();
+  p_umg_init();
+  s_kraftschluss_calc();
+  tog_init();
+  rf_consts_calc();
+  aq_rel_init();
+  p_saug_init();
+  n_segment_calc();
+  n_calc();
+  FUN_0002c15a();
+  FUN_0001e8a6();
+  FUN_0003bab6();
+  can_init();
+  FUN_0001e550();
+  FUN_0001f9a2();
+  FUN_00027ce0();
+  kd_init();
+  FUN_000297fe();
+  FUN_00029f94();
+  lls_tv_init();
+  llr_init();
+  lfr_init();
+  FUN_000253c8();
+  fgr_init();
+  fst_init();
+  md_init_FUN_00015f6c();
+  FUN_00026fb2();
+  ub_uext1m_init();
+  ub_uext2m_init();
+  wdk_init();
+  pwg_init();
+  FUN_000239bc();
+  FUN_0002430c();
+  egas_init();
+  FUN_00025052();
+  dwf_st_init();
+  FUN_000272a0();
+  FUN_00020988();
+  dyn_init();
+  gang_init();
+  starter_init();
+  FUN_0001fc52();
+  FUN_0001ff2c();
+  FUN_00020346();
+  FUN_0002c974();
+  FUN_0001f186();
+  FUN_000210b6();
+  FUN_00020b7e();
+  FUN_0002cd0e();
+  FUN_000211da();
+  FUN_0001dedc();
+  FUN_0003a080();
+  FUN_0003d0b4();
+  FUN_0001b09c();
+  hubvolumen_r_verh_calc();
+  rf_init();
+  p_egbp_init();
+  sys_schedule_task_with_delay(0xc);
+  sys_schedule_task_with_delay(5);
+  sys_schedule_task_with_delay(2);
+  sys_schedule_task_with_delay(1);
+  bVar1 = RESET_STATUS;
+  if ((((bVar1 & 0xc0) == 0) && ((WDK_ADAPT & 0x10) == 0)) && ((WDK_ADAPT & 0x20) == 0)) {
+    PDR_STATUS = 0x80;
+  }
+  else {
+    sys_schedule_task_with_delay(0xe);
+  }
+  tpu_segm_channel_init();
+  PSYNC_ST = PSYNC_ST | 0x80;
+  sys_active_interrupts = sys_active_interrupts - 1;
+  SIM_SWSR = 0x55;
+  SIM_SWSR = 0xaa;
+  return;
+}
+

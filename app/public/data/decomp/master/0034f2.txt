@@ -1,0 +1,75 @@
+
+uint32_t flash_program_zero_block_and_verify(uint8_t *dst,uint8_t *expected,uint32_t len)
+
+{
+  uint32_t uVar1;
+  int iVar2;
+  ushort uVar3;
+  code *pcVar4;
+  code **ppcVar5;
+  char in_XF;
+  char in_NF;
+  char in_ZF;
+  char in_VF;
+  byte in_CF;
+  code *apcStack_66 [25];
+  ushort saved_sr;
+  
+  saved_sr = (ushort)(byte)(in_XF << 4 | in_NF << 3 | in_ZF << 2 | in_VF << 1 | in_CF);
+  iVar2 = 100;
+  pcVar4 = flash_program_word_and_verify;
+  ppcVar5 = apcStack_66;
+  do {
+    *(undefined2 *)ppcVar5 = *(undefined2 *)pcVar4;
+    iVar2 = iVar2 + -2;
+    pcVar4 = pcVar4 + 2;
+    ppcVar5 = (code **)((int)ppcVar5 + 2);
+  } while (iVar2 != 0);
+  if (*dst == 0xff) {
+    uVar1 = (*apcStack_66[0])();
+    if ((char)uVar1 == '\0') {
+      uVar3 = *(ushort *)((uint)dst & 0xfffffffe);
+      if (((uint)dst & 1) == 0) {
+        uVar3 = uVar3 >> 8;
+      }
+      if ((uint8_t)uVar3 == *expected) {
+        SIM_SWSR = 0x55;
+        SIM_SWSR = 0xaa;
+        iVar2 = len - 1;
+        if (iVar2 != 0) {
+          while( true ) {
+            dst = dst + 1;
+            if ((*dst != 0xff) && (*expected != *dst)) {
+              return 7;
+            }
+            uVar1 = (*apcStack_66[0])();
+            if ((char)uVar1 != '\0') {
+              return uVar1;
+            }
+            uVar3 = *(ushort *)((uint)dst & 0xfffffffe);
+            if (((uint)dst & 1) == 0) {
+              uVar3 = uVar3 >> 8;
+            }
+            if ((uint8_t)uVar3 != *expected) break;
+            SIM_SWSR = 0x55;
+            SIM_SWSR = 0xaa;
+            expected = expected + 1;
+            iVar2 = iVar2 + -1;
+            if (iVar2 == 0) {
+              return uVar1;
+            }
+          }
+          return 2;
+        }
+      }
+      else {
+        uVar1 = 2;
+      }
+    }
+  }
+  else {
+    uVar1 = 7;
+  }
+  return uVar1;
+}
+

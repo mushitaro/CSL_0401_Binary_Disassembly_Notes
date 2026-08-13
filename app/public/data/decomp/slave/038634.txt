@@ -1,0 +1,93 @@
+
+void smg_eta_from_torque_limits_update(short param_1,short param_2,byte param_3)
+
+{
+  byte bVar1;
+  int iVar2;
+  uint uVar3;
+  char cVar5;
+  ushort uVar4;
+  ushort uVar6;
+  ushort uVar7;
+  
+  bVar1 = DAT_00ffdb3b;
+  uVar7 = DAT_00ffdb58 + param_1;
+  uVar6 = DAT_00ffdb58 + param_2;
+  if (DAT_00ffdbb2 != '\x10') {
+    iVar2 = abs((uint)param_3 - (uint)DAT_00ffdbe0);
+    cVar5 = (char)iVar2;
+    if (2 < (short)iVar2) {
+      cVar5 = '\x02';
+    }
+    if (DAT_00ffdbe0 < param_3) {
+      param_3 = cVar5 + (char)DAT_00ffdbe0;
+    }
+    else {
+      param_3 = (char)DAT_00ffdbe0 - cVar5;
+    }
+  }
+  if ((KATH_ZUSTAND == '\0') && (param_3 < 0x81)) {
+    DAT_00ffdb3b = DAT_00ffdb3b | 4;
+  }
+  else {
+    param_3 = 0x80;
+    DAT_00ffdb3b = DAT_00ffdb3b & 0xfb;
+  }
+  DAT_00ffdbe0 = (ushort)param_3;
+  uVar4 = DAT_00ff8174;
+  if (((((DAT_00ffdb48 & 4) == 0) || (DAT_00ffdb86 < 0x1a)) ||
+      ((DAT_00ffdbb2 != '\x03' && (DAT_00ffdbb2 != '\x10')))) ||
+     (((uVar4 = 0, (SA_WE_ST & 1) == 0 && (K_SA_MD_NE_MIN < MD_IND_NE)) &&
+      ((int)K_SA_TZ_MIN_HYS + (int)TZ_MIN <= (int)TZ_MD_MITTEL)))) {
+    DAT_00ffdb3b = DAT_00ffdb3b | 0x80;
+  }
+  else {
+    DAT_00ffdb3b = DAT_00ffdb3b & 0x7f;
+  }
+  if ((int)(short)uVar6 < (int)(uint)uVar4) {
+    uVar6 = uVar4;
+  }
+  DAT_00ffdbbc = (ushort)(((int)(short)uVar6 << 7) / (int)(uint)param_3);
+  if ((DAT_00ffdbb2 != '\x02') || ((DAT_00ffdbb3 & 1) != 0)) {
+    DAT_00ffdb48 = DAT_00ffdb48 | 1;
+  }
+  if ((((int)(short)uVar7 < (int)(uint)uVar4) && (uVar7 = uVar4, SA_N40_WIEDEREINSETZEN < N40)) &&
+     ((K_SA_TKAT < TKATM &&
+      (((DAT_00ffdbb2 == '\x02' && ((DAT_00ffdbc0 & 1) == 0)) && ((DAT_00ffdb48 & 1) != 0)))))) {
+    uVar7 = 0;
+    DAT_00ffdb3b = DAT_00ffdb3b | 2;
+    DAT_00ffdbb3 = DAT_00ffdbb3 & 0xdf;
+  }
+  else {
+    DAT_00ffdb3b = DAT_00ffdb3b & 0xfd;
+  }
+  if (((DAT_00ffdb3b & 2) == 0) && ((bVar1 & 2) != 0)) {
+    DAT_00ffdbb3 = DAT_00ffdbb3 | 0x20;
+    DAT_00ffdb48 = DAT_00ffdb48 & 0xfe;
+  }
+  uVar6 = MD_ETA_ZW_MIN;
+  if (MD_ETA_ZW_MIN < K_SMG_ETA_RES_MIN) {
+    uVar6 = K_SMG_ETA_RES_MIN;
+  }
+  uVar4 = uVar7;
+  if (uVar7 == 0) {
+    uVar4 = DAT_00ffdb58;
+  }
+  uVar3 = (int)((uint)uVar4 << 0x10) / (int)(uint)uVar6;
+  if ((int)(uVar3 & 0xffff) < (int)(short)DAT_00ffdbbc) {
+    DAT_00ffdbbc = (ushort)uVar3;
+  }
+  if ((short)DAT_00ffdbbc < (short)uVar7) {
+    DAT_00ffdbbc = uVar7;
+  }
+  if ((int)(uint)DAT_00ffdc24 < (int)(short)uVar7) {
+    uVar7 = DAT_00ffdc24;
+  }
+  if ((int)(uint)DAT_00ffdc24 < (int)(short)DAT_00ffdbbc) {
+    DAT_00ffdbbc = DAT_00ffdc24;
+  }
+  DAT_00ffdbba = uVar7;
+  DAT_00ffdb3b = DAT_00ffdb3b | 1;
+  return;
+}
+

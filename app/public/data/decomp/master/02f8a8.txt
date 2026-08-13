@@ -1,0 +1,10 @@
+
+int abs(int __x)
+
+{
+  if (__x < 0) {
+    __x = -__x;
+  }
+  return __x;
+}
+

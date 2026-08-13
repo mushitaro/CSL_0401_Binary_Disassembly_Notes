@@ -1,0 +1,11 @@
+
+void calc_manifold_pressure(void)
+
+{
+                    /* Specific to 0401 */
+  if ((TPU_ST_M & nicht sync) != in Ordnung) {
+    saug_calc();
+  }
+  return;
+}
+

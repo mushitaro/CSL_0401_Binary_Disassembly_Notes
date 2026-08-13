@@ -1,0 +1,87 @@
+
+byte tdme_calc(void)
+
+{
+  byte bVar1;
+  uint uVar2;
+  ushort uVar4;
+  int iVar3;
+  byte eVar4;
+  
+  if (((UEXT2M_ED & 0x20) == 0) && ((UB_UEXT_HR_ST & 0x20) != 0)) {
+    uVar4 = TDME_AD;
+    uVar4 = (ushort)((int)((uint)uVar4 * (uint)UEXT1M_KORREKTUR + 0x200) >> 10);
+    if (K_TDME_RDKS < uVar4) {
+      if (DAT_00ffed7e < K_TDME_RDKS_ZAEHLER) {
+        DAT_00ffed7e = DAT_00ffed7e + 1;
+      }
+      else {
+        TDME_RDKS = 0;
+        uVar2 = klu_wint(&KL_TDME_NTC.sizeX,uVar4);
+        uVar4 = FUN_0001ca90((ushort)uVar2);
+        uVar2 = (uint)uVar4;
+        iVar3 = uVar2 + 0x40;
+        if (SCARRY4(uVar2,0x40)) {
+          iVar3 = uVar2 + 0xbf;
+        }
+        uVar2 = iVar3 >> 7;
+        bVar1 = (byte)uVar2;
+        if (TDME == 0) {
+          TDME = bVar1;
+          if (bVar1 < TDME_MIN) {
+            TDME_MIN = bVar1;
+          }
+        }
+        else if (TDME < uVar2) {
+          TDME_ANSTIEG = TDME_ANSTIEG + 1;
+          if ((K_TDME_ANSTIEG <= TDME_ANSTIEG) && (TDME != 0xff)) {
+            TDME = TDME + 1;
+            TDME_ANSTIEG = 0;
+            if (TDME_MAX < TDME) {
+              TDME_MAX = TDME;
+            }
+          }
+        }
+        else if (uVar2 < TDME) {
+          TDME_ABFALL = TDME_ABFALL + 1;
+          if (K_TDME_ABFALL <= TDME_ABFALL) {
+            TDME = TDME - 1;
+            TDME_ABFALL = 0;
+            if (TDME < TDME_MIN) {
+              TDME_MIN = TDME;
+            }
+          }
+          TDME_ANSTIEG = 0;
+        }
+        else {
+          TDME_ABFALL = 0;
+        }
+      }
+    }
+    else {
+      TDME_RDKS = 1;
+      TDME_ANSTIEG = 0;
+      TDME_ABFALL = 0;
+      DAT_00ffed7e = 0;
+    }
+  }
+  else {
+    TDME_RDKS = 0;
+    DAT_00ffed7e = K_TDME_RDKS_ZAEHLER;
+    TDME_ANSTIEG = 0;
+    TDME_ABFALL = 0;
+    TDME = 0;
+  }
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+    DAT_00ffed7f = '\0';
+  }
+  eVar4 = TDME;
+  if (((K_TDME_SCHWELLE_ZAEHLER <= TDME) &&
+      (TDME_TIME_ZAEHLER = TDME_TIME_ZAEHLER + 1, DAT_00ffed7f == '\0')) &&
+     (eVar4 = ZUSTAND_MOTOR & (VL|TL|LL), eVar4 != 0)) {
+    DAT_00ffed7f = '\x01';
+    TDME_ZYKLEN = TDME_ZYKLEN + 1;
+  }
+  return eVar4;
+}
+

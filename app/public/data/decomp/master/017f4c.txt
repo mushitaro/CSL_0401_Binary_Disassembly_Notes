@@ -1,0 +1,9 @@
+
+void md_norm_init(void)
+
+{
+  MD_NORM_CAN = K_MD_NORM;
+  MD_NORM = (ushort)K_MD_NORM * 0xa0;
+  return;
+}
+

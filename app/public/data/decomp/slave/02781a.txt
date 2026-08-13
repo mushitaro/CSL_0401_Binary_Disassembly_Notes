@@ -1,0 +1,422 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void tefc(void)
+
+{
+  byte bVar1;
+  bool bVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  ushort uVar6;
+  ushort uVar7;
+  
+  if ((TEFC_LL_ST < 0x10) || (0x15 < TEFC_LL_ST)) {
+    bVar2 = false;
+  }
+  else {
+    bVar2 = true;
+  }
+  if ((TEFC_FLAGS & 2) == 0) {
+    TEFC_FLAGS = TEFC_FLAGS | 2;
+    return;
+  }
+  bVar1 = TEFC_FLAGS & 0xfd;
+  uVar6 = N;
+  if (N == 0) {
+    uVar6 = 1;
+  }
+  uVar7 = ML_SOLL_DPR;
+  if (ML_SOLL_DPR == 0) {
+    uVar7 = 1;
+  }
+  if ((TEFC_TEA_ST < 0xb) && (TEFC_TEA_ST != 0)) {
+    if ((SLP_ST & 0x40) == 0) {
+      if ((KATH_ST & 0xf) == 0) {
+        if ((TE_ST & 8) == 0) {
+          TEFC_TEA_ST = 3;
+        }
+        else if ((N40 < K_TEFC_N_MIN) || (K_TEFC_N_MAX < N40)) {
+          TEFC_TEA_ST = 4;
+        }
+        else if ((RF5 < K_TEFC_RF_MIN) || (K_TEFC_RF_MAX < RF5)) {
+          TEFC_TEA_ST = 5;
+        }
+        else if ((N_DYN_ST == '\0') || ((K_TEFC_CFG._0_1_ & 1) == 0)) {
+          if (((RF_DYN_ST & 2) == 0) || ((K_TEFC_CFG._0_1_ & 1) == 0)) {
+            if ((((((TE_ED & 0x40) == 0) && ((LLS_ST & 0x80) == 0)) && (sk_mode_state_latched < 2))
+                && ((rf_diag_ed_st == '\0' && ((VAN_ED_ST & 0xf0) == 0)))) &&
+               (cfg_s_betriebsmode != '\x01')) {
+              if (TEFC_T_TEA_DLY != '\0') {
+                TEFC_TEA_ST = 9;
+              }
+            }
+            else {
+              TEFC_TEA_ST = 8;
+            }
+          }
+          else {
+            TEFC_TEA_ST = 7;
+          }
+        }
+        else {
+          TEFC_TEA_ST = 6;
+        }
+      }
+      else {
+        TEFC_TEA_ST = 2;
+      }
+    }
+    else {
+      TEFC_TEA_ST = 1;
+    }
+  }
+  switch(TEFC_TEA_ST) {
+  case 0:
+    if (((uint)K_TEFC_DELAY << 10 < (uint)(SYS_TIMERTICS_COUNTER - DAT_00ffe8f6)) &&
+       ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+      TEFC_TEA_CNT = 0;
+      TEFC_TEA_OK = 0;
+      TEFC_TEA_ST = 9;
+    }
+    break;
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+  case 8:
+    TEFC_T_TEA_DLY = K_TEFC_TEA_DELAY;
+    break;
+  case 9:
+    if (TEFC_T_TEA_DLY == '\0') {
+      TEFC_TEA_ST = 10;
+      goto switchD_00027992_caseD_a;
+    }
+    TEFC_T_TEA_DLY = TEFC_T_TEA_DLY + -1;
+    break;
+  case 10:
+switchD_00027992_caseD_a:
+    TEFC_TEA_CNT = TEFC_TEA_CNT + 1;
+    if (((K_TEFC_TEA_MAX < TEA1_F) && (K_TEFC_TEA_MAX < TEA2_F)) ||
+       (TEFC_TEA_OK = TEFC_TEA_OK + 1, TEFC_TEA_OK < K_TEFC_TEA_OK)) {
+      if (K_TEFC_TEA_ANZ <= TEFC_TEA_CNT) {
+        if ((TEFC_LL_ST == 0) || (0x15 < TEFC_LL_ST)) {
+          TEFC_LL_OK = 0;
+          TEFC_LL_CNT = 0;
+          TEFC_LL_ST = 0xf;
+          bVar1 = TEFC_FLAGS & 0xbd;
+        }
+        TEFC_FLAGS = bVar1;
+        TEFC_TEA_OK = 0;
+        TEFC_TEA_CNT = 0;
+        bVar1 = TEFC_FLAGS;
+      }
+    }
+    else {
+      TEFC_FLAGS = bVar1;
+      uVar4 = ed_report(DTC_CD_MISFIRE_CYL1|DTC_84_DSC_CAN_TIMEOUT,0);
+      TEFC_ED = (undefined1)uVar4;
+      CRB_TEFC_CID = 1;
+      _CRB_TEFC_MESS = TEA1_F;
+      if (TEA2_F < TEA1_F) {
+        _CRB_TEFC_MESS = TEA2_F;
+      }
+      _CRB_TEFC_GRENZE = K_TEFC_TEA_MAX;
+      if (TEFC_LL_ST != 0) {
+        TEFC_LL_ST = 0x16;
+      }
+      TEFC_TEA_ST = 0xb;
+      bVar1 = TEFC_FLAGS;
+    }
+    break;
+  case 0xb:
+  case 0xc:
+    break;
+  default:
+    TEFC_FLAGS = bVar1;
+    FUN_0002779e('\x01');
+    bVar1 = TEFC_FLAGS;
+  }
+  TEFC_FLAGS = bVar1;
+  if ((TEFC_LL_ST != 0) && (TEFC_LL_ST < 0x16)) {
+    if ((DAT_00ff8292 < 3) &&
+       (uVar3 = abs((int)TEFC_LWS_LRW_START - (int)LWS_LRW), (uint)(int)K_TEFC_LRW_DELTA < uVar3)) {
+      TEFC_LL_ST = 4;
+    }
+    else {
+      uVar3 = abs((uint)TEFC_UB_START - (uint)UB);
+      if (K_TEFC_UB_DELTA < uVar3) {
+        TEFC_LL_ST = 10;
+      }
+      else if (TOEL < K_TEFC_TOEL_MIN) {
+        TEFC_LL_ST = 1;
+      }
+      else if (((MD_ST_TZ == '\0') || (TEFC_LL_ST < 0x10)) || (0x15 < TEFC_LL_ST)) {
+        if (((KATH_ST & 0xf) == 0) && ((SLP_ST & 0x40) == 0)) {
+          if ((TE_ST & 8) == 0) {
+            TEFC_LL_ST = 3;
+          }
+          else if ((S_KRAFTSCHLUSS == '\0') && ((ZUSTAND_MOTOR & LL) != 0)) {
+            if (V == 0) {
+              if ((LFR_ST & 2) == 0) {
+                TEFC_LL_ST = 0xd;
+              }
+              else if (K_TEFC_LL_ML_MAX < ML) {
+                TEFC_LL_ST = 8;
+              }
+              else if (((((cfg_s_baureihe & 0xf8) == 8) &&
+                        ((((KKOS_ST_TREIBER & 0x40) != 0 || ((KKOS_ST & 1) != 0)) &&
+                         (TEFC_LL_KKOS_EIN != 0)))) && ((KKOS_ST & 0x80) == 0)) ||
+                      (((((((KKOS_ST_TREIBER & 0x40) == 0 && ((TEFC_FLAGS & 8) != 0)) ||
+                          (((KKOS_ST_TREIBER & 0x40) != 0 && ((TEFC_FLAGS & 8) == 0)))) ||
+                         (((KKOS_ST & 1) == 0 && ((TEFC_FLAGS & 0x10) != 0)))) ||
+                        (((KKOS_ST & 1) != 0 && ((TEFC_FLAGS & 0x10) == 0)))) &&
+                       ((KKOS_ST & 0x80) == 0)))) {
+                TEFC_LL_ST = 6;
+              }
+              else if (((K_TEFC_CFG._0_1_ & 2) == 0) ||
+                      ((((SCHALT_M_ST & 0x80) != 0 || ((TEFC_FLAGS & 0x20) == 0)) &&
+                       (((SCHALT_M_ST & 0x80) == 0 || ((TEFC_FLAGS & 0x20) != 0)))))) {
+                if ((((((TE_ED & 0x40) == 0) && ((LLS_ST & 0x80) == 0)) &&
+                     (sk_mode_state_latched < 2)) &&
+                    ((rf_diag_ed_st == '\0' && ((VAN_ED_ST & 0xf0) == 0)))) &&
+                   (cfg_s_betriebsmode != '\x01')) {
+                  if (((LFR_ST & 1) == 0) && ((TEFC_LL_ST < 0x10 || (0x15 < TEFC_LL_ST)))) {
+                    TEFC_LL_ST = 0xc;
+                  }
+                  else if (TEFC_T_LL_DLY == '\0') {
+                    TEFC_LL_DELTA =
+                         (short)(((uint)TEFC_LL_ML_ALT << 10) / (uint)uVar7) -
+                         (short)(((uint)TEFC_LL_N_ALT << 10) / (uint)uVar6);
+                  }
+                  else {
+                    TEFC_LL_ST = 0xf;
+                  }
+                }
+                else {
+                  TEFC_LL_ST = 0xb;
+                }
+              }
+              else {
+                TEFC_LL_ST = 7;
+              }
+            }
+            else {
+              TEFC_LL_ST = 5;
+            }
+          }
+          else {
+            TEFC_LL_ST = 9;
+          }
+        }
+        else {
+          TEFC_LL_ST = 2;
+        }
+      }
+      else {
+        TEFC_LL_ST = 0xe;
+      }
+    }
+    if ((KKOS_ST_TREIBER & 0x40) == 0) {
+      TEFC_FLAGS = TEFC_FLAGS & 0xf7;
+    }
+    else {
+      TEFC_FLAGS = TEFC_FLAGS | 8;
+    }
+    if ((KKOS_ST & 1) == 0) {
+      TEFC_FLAGS = TEFC_FLAGS & 0xef;
+    }
+    else {
+      TEFC_FLAGS = TEFC_FLAGS | 0x10;
+    }
+    if ((SCHALT_M_ST & 0x80) == 0) {
+      TEFC_FLAGS = TEFC_FLAGS & 0xdf;
+    }
+    else {
+      TEFC_FLAGS = TEFC_FLAGS | 0x20;
+    }
+  }
+  if ((KKOS_ST & 0x80) == 0) {
+    if (TEFC_LL_KKOS_EIN != 0) {
+      TEFC_LL_KKOS_EIN = TEFC_LL_KKOS_EIN + -1;
+    }
+    TEFC_LL_KKOS_AUS = K_TEFC_LL_KKOS_AUS_MAX;
+  }
+  else {
+    if (TEFC_LL_KKOS_AUS != 0) {
+      TEFC_LL_KKOS_AUS = TEFC_LL_KKOS_AUS + -1;
+    }
+    TEFC_LL_KKOS_EIN = K_TEFC_LL_KKOS_EIN_MIN;
+  }
+  switch(TEFC_LL_ST) {
+  case 0:
+    TEFC_LL_CNT = 0;
+    TEFC_LL_OK = 0;
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+  case 8:
+  case 9:
+  case 10:
+  case 0xb:
+  case 0xd:
+  case 0xe:
+    KKOS_ST = KKOS_ST & 0x7f;
+  case 0xc:
+    TEFC_T_LL_DLY = K_TEFC_LL_DELAY;
+    TEFC_LWS_LRW_START = LWS_LRW;
+    TEFC_UB_START = UB;
+    break;
+  case 0xf:
+    if (((TEFC_FLAGS & 0x40) != 0) || ((cfg_s_baureihe & 0xf8) == 8)) {
+      KKOS_ST = KKOS_ST | 0x80;
+    }
+    if (TEFC_T_LL_DLY == '\0') {
+      TETV_FC = TETV;
+      TEFC_LL_ST = 0x10;
+      goto switchD_00027dfa_caseD_10;
+    }
+    TEFC_T_LL_DLY = TEFC_T_LL_DLY + -1;
+    break;
+  case 0x10:
+switchD_00027dfa_caseD_10:
+    TETV_FC = TETV_FC - K_TEFC_RAMPE;
+    if ((int)(short)TETV_FC < (int)(uint)K_TE_TV_MIN) {
+      TETV_FC = 0;
+      TEFC_LL_MESS = K_TEFC_LL_DAUER;
+      bVar1 = TEFC_LL_CNT;
+LAB_00027ec6:
+      TEFC_LL_CNT = bVar1;
+      TEFC_LL_ST = 0x11;
+    }
+    break;
+  case 0x11:
+    if (TEFC_LL_MESS == '\0') {
+      TEFC_LL_DELTA = 0;
+      TETV_FC = K_TE_TV_MIN;
+      TEFC_LL_ST = 0x12;
+      TEFC_LL_N_ALT = uVar6;
+      TEFC_LL_ML_ALT = uVar7;
+    }
+    else {
+LAB_00027edc:
+      TEFC_LL_MESS = TEFC_LL_MESS + -1;
+    }
+    break;
+  case 0x12:
+    uVar3 = abs((int)TEFC_LL_DELTA);
+    if (K_TEFC_LL_DELTA <= uVar3) goto switchD_00027dfa_caseD_13;
+    TETV_FC = K_TEFC_RAMPE + TETV_FC;
+    if (K_TEFC_TETV_MAX <= TETV_FC) {
+      TETV_FC = K_TEFC_TETV_MAX;
+      TEFC_LL_MESS = K_TEFC_LL_DAUER;
+      TEFC_LL_ST = 0x13;
+    }
+    break;
+  case 0x13:
+switchD_00027dfa_caseD_13:
+    uVar3 = abs((int)TEFC_LL_DELTA);
+    if (K_TEFC_LL_DELTA <= uVar3) {
+      TEFC_LL_OK = TEFC_LL_OK + 1;
+      TEFC_LL_MESS = '\0';
+    }
+    if (TEFC_LL_MESS != '\0') goto LAB_00027edc;
+    TEFC_LL_ST = 0x14;
+    TEFC_LL_N_ALT = uVar6;
+    TEFC_LL_ML_ALT = uVar7;
+  case 0x14:
+    TETV_FC = TETV_FC - K_TEFC_RAMPE;
+    if ((int)(short)TETV_FC < (int)(uint)K_TE_TV_MIN) {
+      TETV_FC = 0;
+      TEFC_LL_MESS = K_TEFC_LL_DAUER;
+      TEFC_LL_ST = 0x15;
+    }
+    break;
+  case 0x15:
+    uVar3 = abs((int)TEFC_LL_DELTA);
+    if (K_TEFC_LL_ZU_DELTA <= uVar3) {
+      TEFC_LL_OK = TEFC_LL_OK + 1;
+      bVar1 = TEFC_LL_CNT + 1;
+      if ((((cfg_s_baureihe & 0xf8) == 8) && ((SCHALTER_CAN & 2) != 0)) && (TEFC_LL_KKOS_AUS == 0))
+      {
+LAB_00028016:
+        TEFC_LL_CNT = TEFC_LL_CNT + 1;
+        KKOS_ST = KKOS_ST & 0x7f;
+        TEFC_T_LL_DLY = K_TEFC_LL_DELAY;
+        TEFC_LL_ST = 6;
+        break;
+      }
+      goto LAB_00027ec6;
+    }
+    if (TEFC_LL_MESS != '\0') goto LAB_00027edc;
+    if ((((cfg_s_baureihe & 0xf8) == 8) && ((SCHALTER_CAN & 2) != 0)) && (TEFC_LL_KKOS_AUS == 0))
+    goto LAB_00028016;
+    TEFC_LL_ST = 0x12;
+    TETV_FC = K_TE_TV_MIN;
+    TEFC_LL_CNT = TEFC_LL_CNT + 1;
+    TEFC_LL_N_ALT = uVar6;
+    TEFC_LL_ML_ALT = uVar7;
+    break;
+  case 0x16:
+  case 0x17:
+  case 0x18:
+    KKOS_ST = KKOS_ST & 0x7f;
+    break;
+  default:
+    FUN_0002779e('\x01');
+  }
+  if ((TEFC_LL_ST == 0) || (0x15 < TEFC_LL_ST)) goto LAB_000281a0;
+  if (TEFC_LL_OK < K_TEFC_LL_OK) {
+    if (TEFC_LL_CNT < K_TEFC_LL_ANZ) goto LAB_000281a0;
+    if ((((KKOS_ST_TREIBER & 0x40) != 0) && ((TEFC_FLAGS & 0x40) == 0)) &&
+       ((K_TEFC_CFG._0_1_ & 4) != 0)) {
+      TEFC_FLAGS = TEFC_FLAGS | 0x40;
+      TEFC_LL_CNT = 0;
+      TEFC_LL_OK = 0;
+      TEFC_LL_ST = 6;
+      goto LAB_000281a0;
+    }
+    uVar4 = ed_report(DTC_CD_MISFIRE_CYL1|DTC_84_DSC_CAN_TIMEOUT,4);
+    TEFC_ED = (undefined1)uVar4;
+    CRB_TEFC_CID = 0x82;
+    iVar5 = abs((int)TEFC_LL_DELTA);
+    _CRB_TEFC_MESS = (ushort)iVar5;
+    bVar1 = K_TEFC_LL_ZU_DELTA;
+    if (TEFC_LL_ST == 0x14) {
+      bVar1 = K_TEFC_LL_DELTA;
+    }
+    TEFC_LL_ST = 0x18;
+  }
+  else {
+    uVar4 = ed_report(DTC_CD_MISFIRE_CYL1|DTC_84_DSC_CAN_TIMEOUT,0);
+    TEFC_ED = (undefined1)uVar4;
+    CRB_TEFC_CID = 0x82;
+    iVar5 = abs((int)TEFC_LL_DELTA);
+    _CRB_TEFC_MESS = (ushort)iVar5;
+    bVar1 = K_TEFC_LL_ZU_DELTA;
+    if (TEFC_LL_ST == 0x14) {
+      bVar1 = K_TEFC_LL_DELTA;
+    }
+    TEFC_LL_ST = 0x17;
+  }
+  _CRB_TEFC_GRENZE = (ushort)bVar1;
+  TEFC_TEA_ST = 0xc;
+LAB_000281a0:
+  if ((b_diag == '\0') && ((TEFC_FLAGS & 1) != 0)) {
+    TEFC_FLAGS = TEFC_FLAGS & 0xfe;
+    TEFC_LL_ST = 0x16;
+  }
+  if ((bVar2) && ((TEFC_LL_ST < 0x10 || (0x15 < TEFC_LL_ST)))) {
+    TEFC_FLAGS = TEFC_FLAGS | 4;
+  }
+  return;
+}
+

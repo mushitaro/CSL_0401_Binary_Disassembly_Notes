@@ -1,0 +1,43 @@
+
+void can_rx_613(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined4 uVar1;
+  byte local_c;
+  byte local_b;
+  byte local_a;
+  byte local_9;
+  byte local_8;
+  
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    if (CAN_ED != '\0') {
+      uVar1 = ed_report(DTC_56_DME_CAN_SIGNAL,0);
+      CAN_ED = (char)uVar1;
+    }
+    can_a_rx_frame_data(&local_c,rx_frame_struct);
+    T_RELATIV = (ushort)local_9 + (ushort)local_8 * 0x100;
+    CAN_KM_STAND = (ushort)local_c + (ushort)local_b * 0x100;
+    if (((local_a & 0x80) == 0x80) && ((local_a & 0x7f) == 0x7f)) {
+      FST_ST = FST_ST | 2;
+    }
+    else {
+      FST_ST = FST_ST & 0xfd;
+      CAN_FST = local_a & 0x7f;
+    }
+    CAN_S_FST = local_a >> 7;
+    if ((CAN_TEL_EMPF & 0x80) == 0) {
+      FUN_0001f9da();
+      DAT_00ffe8fc = T_RELATIV;
+      FST_ST = FST_ST & 0xfb;
+    }
+    FST_ST = FST_ST & 0xfe;
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 0x80;
+  }
+  else {
+    FST_ST = FST_ST | 1;
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xff7f;
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+  }
+  return;
+}
+

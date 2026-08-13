@@ -1,0 +1,104 @@
+
+void Init_CPU(void)
+
+{
+  DAT_00fffa27 = 0xaa;
+  FUN_000367b4();
+  FUN_0003413c();
+  FUN_0001114e();
+  FUN_00040000();
+  sys_task_scheduler_init();
+  qsm_init_transfer_state();
+  FUN_00000bfe();
+  FUN_00000f70();
+  FUN_0003294c();
+  FUN_00034e6e();
+  FUN_000352d2();
+  FUN_00031fee();
+  FUN_00032162();
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    FUN_0003c978();
+  }
+  FUN_0003dc0c();
+  FUN_000126c2();
+  FUN_00040152();
+  sys_active_interrupts = sys_active_interrupts + '\x01';
+  set_status_register(0x2000);
+  FUN_0002a2b6();
+  FUN_00010dac();
+  FUN_00010e1a();
+  dpr_sync();
+  FUN_0002a78c();
+  FUN_0002532c();
+  FUN_00011ae8();
+  FUN_00011da8();
+  FUN_00011ae8();
+  FUN_00028848();
+  FUN_00024e5a();
+  FUN_00025006();
+  FUN_00024f7a();
+  FUN_00025e74();
+  FUN_00026002();
+  FUN_00025f62();
+  FUN_00022bc2();
+  FUN_00022bee();
+  if (((cfg_s_motortyp & 0xf7) == 4) || ((cfg_s_motortyp & 0xef) == 0x20)) {
+    FUN_00022bd8();
+    FUN_00022c04();
+  }
+  FUN_000416de();
+  FUN_00017000();
+  FUN_00011226();
+  FUN_00017814();
+  FUN_00017d2c();
+  FUN_0001e7b2();
+  FUN_0001e820();
+  FUN_00022c1a();
+  FUN_00017252();
+  FUN_00014974();
+  sa_init();
+  FUN_00026e4c();
+  FUN_0002753e();
+  FUN_00028806();
+  FUN_000286f2();
+  FUN_0002ade2();
+  FUN_00023d8a();
+  FUN_00012db8();
+  FUN_00014fc8();
+  FUN_0002947e();
+  FUN_00028ed2();
+  FUN_0003eb2c();
+  FUN_0002e94a();
+  FUN_00032572();
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    TI_EINFAHR_ST = 0xff;
+  }
+  FUN_000306de();
+  FUN_0002cec0();
+  FUN_00016eac();
+  FUN_0002530e();
+  FUN_00042536();
+  FUN_0001385a();
+  FUN_0002779e('\0');
+  FUN_00017f0e();
+  FUN_00015c24();
+  FUN_00016f9e();
+  FUN_00013dae();
+  FUN_00041034();
+  FUN_00024240();
+  FUN_000256ee();
+  FUN_0001f96e();
+  FUN_0001c3c4();
+  smg_init();
+  FUN_00037332();
+  sys_schedule_task_with_delay(0xc);
+  sys_schedule_task_with_delay(5);
+  sys_schedule_task_with_delay(2);
+  sys_schedule_task_with_delay(1);
+  FUN_00011770();
+  PSYNC_ST = PSYNC_ST | 0x80;
+  sys_active_interrupts = sys_active_interrupts + -1;
+  DAT_00fffa27 = 0xaa;
+  return;
+}
+

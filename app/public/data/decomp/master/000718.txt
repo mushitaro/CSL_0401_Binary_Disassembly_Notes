@@ -1,0 +1,17 @@
+
+char checksum_b(char *data,short length)
+
+{
+  char cVar1;
+  short sVar2;
+  
+  sVar2 = length + -1;
+  cVar1 = 36;
+  do {
+    cVar1 = *data + cVar1 * 2 + (cVar1 < 0);
+    sVar2 = sVar2 + -1;
+    data = data + 1;
+  } while (sVar2 != -1);
+  return cVar1;
+}
+

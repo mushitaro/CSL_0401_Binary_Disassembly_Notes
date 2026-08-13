@@ -1,0 +1,15 @@
+
+/* Reads the caller’s exception frame at SP+0x14 (SR high byte). Calls sys_task_dispatcher() only
+   if saved SR==0x20 (S=1, IPL=0). */
+
+void sys_dispatch_tasks(void)
+
+{
+  struct_cpu32_exc_frame_fmt0 exc_frame;
+  
+  if (exc_frame.sr._0_1_ == 0x20) {
+    sys_task_dispatcher();
+  }
+  return;
+}
+

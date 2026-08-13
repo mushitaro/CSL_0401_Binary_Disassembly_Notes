@@ -1,0 +1,75 @@
+
+/* WARNING: This function may have set the stack pointer */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void bootloader_entry(void)
+
+{
+  int iVar1;
+  short *psVar2;
+  bool bVar3;
+  
+  psVar2 = &DAT_00004800;
+  if (DAT_00004800 == 0) {
+    do {
+      psVar2 = psVar2 + 1;
+    } while (*psVar2 == 0);
+    if (*psVar2 == -1) {
+      uRamfffffffc = 0x230;
+      main();
+    }
+    if ((*psVar2 == -0xb00) || (*psVar2 == 0xf5)) {
+                    /* WARNING: Could not recover jumptable at 0x00000248. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+      (*DAT_00004884)();
+      return;
+    }
+  }
+  if (DAT_0000fffc == 0x5aa556c9) {
+    uRamfffffffc = 0x25c;
+    FUN_00001bde();
+  }
+  _DAT_00fffa00 = 0xc046;
+  DAT_00fffa21 = 0xbd;
+  DAT_00fffa27 = 0xaa;
+  iVar1 = 0x276;
+  do {
+    bVar3 = iVar1 != 0;
+    iVar1 = iVar1 + -1;
+  } while (bVar3);
+  _DAT_00fffa04 = 0xd700;
+  _DAT_00fffb44 = 0xffe000;
+  _DAT_00fffb40 = 0;
+  _DAT_00fffa50 = 0x13f8;
+  DAT_00fffa52 = 0x3830;
+  _DAT_00fffa54 = 0x13f8;
+  DAT_00fffa56 = 0x5830;
+  DAT_00ffe4fc = 0x2da;
+  FUN_00000496();
+  DAT_00ffe4fc = 0x2e0;
+  FUN_000003e8();
+  if ((CFG_RAM_SG_TYP & 1) != 0) {
+    _DAT_00fffa48 = 7;
+    _DAT_00fffa5a = 0;
+    _DAT_00fffa5e = 0;
+    _DAT_00fffb04 = 0xffd0;
+    _DAT_00fffb00 = 0x1000;
+  }
+  if (CPU_Identifier == 'M') {
+    DAT_00ffe4fc = 0x31a;
+    FUN_0000057c();
+  }
+  DAT_00ffe4fc = 800;
+  FUN_00000350();
+  do {
+    do {
+      DAT_00ffe4fc = 0x326;
+      FUN_00000f04();
+      DAT_00fffa27 = 0x55;
+    } while (CPU_Identifier != 'M');
+  } while ((DAT_00ffd15a & 0x20) != 0);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+

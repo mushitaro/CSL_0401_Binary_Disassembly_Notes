@@ -1,0 +1,634 @@
+import { useEffect, useMemo, useState } from "react";
+import type { EdgeOrigin, Graph, GraphNode } from "./types";
+import { type Direction, type Indexed, expand, index, searchNodes } from "./graph";
+import { Description, MetaLine, TreeView, ValueTable, useAgreement, nodeKindLabel } from "./components";
+import { Diagram } from "./Diagram";
+import { ValueChart } from "./ValueChart";
+import { FloatingWindow, type WindowPos } from "./FloatingWindow";
+import { Annotations } from "./Annotations";
+import { type BlockTreeKind, expandBlocks, owningBlock } from "./block-tree";
+import { displayNodeName } from "./names";
+import { type Lang, pickLocalised, t } from "./i18n";
+
+const LANG_KEY = "mss54.lang";
+const ORIGIN_KEY = "mss54.origins";
+const WINDOW_KEY = "mss54.windows";
+
+/** localStorage throws in sandboxed frames and in private mode on some
+ *  browsers; losing the preference is acceptable, taking the page down is not. */
+function readStored(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStored(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* preference simply does not persist here */
+  }
+}
+
+function useStoredLang(): [Lang, (l: Lang) => void] {
+  const [lang, setLang] = useState<Lang>(() => {
+    const stored = readStored(LANG_KEY);
+    if (stored === "ja" || stored === "en") return stored;
+    return navigator.language.startsWith("ja") ? "ja" : "en";
+  });
+  useEffect(() => {
+    writeStored(LANG_KEY, lang);
+    document.documentElement.lang = lang;
+  }, [lang]);
+  return [lang, setLang];
+}
+
+/* ------------------------------------------------------------------ windows */
+
+type WindowId = "table" | "desc" | "tree";
+
+/**
+ * Where each window lands the first time it is opened.
+ *
+ * Laid out from the viewport rather than fixed, so they open beside the
+ * diagram instead of on top of it, and stay on screen on a laptop display.
+ */
+function defaultPositions(): Record<WindowId, WindowPos> {
+  const vw = typeof window === "undefined" ? 1440 : window.innerWidth;
+  const vh = typeof window === "undefined" ? 900 : window.innerHeight;
+  const w = Math.min(620, Math.max(320, vw * 0.42));
+  const right = Math.max(16, vw - w - 24);
+  const half = Math.max(180, (vh - 140) / 2 - 12);
+  return {
+    table: { x: right, y: 86, w, h: half },
+    desc: { x: right, y: 86 + half + 16, w, h: Math.min(320, half) },
+    tree: { x: Math.max(16, right - w - 20), y: 140, w: Math.min(460, w), h: half + 60 },
+  };
+}
+
+interface WindowState {
+  open: Record<WindowId, boolean>;
+  pos: Record<WindowId, WindowPos>;
+  order: WindowId[];
+}
+
+function initialWindows(): WindowState {
+  const fallback: WindowState = {
+    open: { table: true, desc: false, tree: false },
+    pos: defaultPositions(),
+    order: ["tree", "desc", "table"],
+  };
+  const stored = readStored(WINDOW_KEY);
+  if (!stored) return fallback;
+  try {
+    const parsed = JSON.parse(stored) as Partial<WindowState>;
+    return {
+      open: { ...fallback.open, ...parsed.open },
+      pos: { ...fallback.pos, ...parsed.pos },
+      order: parsed.order?.length ? parsed.order : fallback.order,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+/* -------------------------------------------------------------------- about */
+
+function About({ g, lang }: { g: Indexed; lang: Lang }) {
+  const c = g.raw.meta.coverage;
+  const rows: [string, string][] = [
+    ["XDF parameters", String(c.params)],
+    [
+      "with a code reference",
+      `${c.paramsWithCodeReference} (${c.paramsWithCodeReferencePct}%) — master ${c.paramsWithCodeReferencePerBank.master ?? 0}/${c.paramsPerBank.master ?? 0}, slave ${c.paramsWithCodeReferencePerBank.slave ?? 0}/${c.paramsPerBank.slave ?? 0}`,
+    ],
+    [
+      "named in the Funktionsrahmen",
+      `${c.paramsInFunktionsrahmen} (${c.paramsInFunktionsrahmenPct}%)`,
+    ],
+    ["Ghidra functions", `${c.functions} (${c.namedFunctions} human-named)`],
+    ["RAM symbols", String(c.ramSymbols)],
+    ["Funktionsrahmen pages indexed", String(c.frPages)],
+    ["dense pages flagged as indexes", String(c.densePagesExcludedFromBlocks)],
+    ["names only the documents know", String(c.namesOnlyInDocuments)],
+    ["diagram signals matching a RAM symbol", String(c.signalsMatchingRamSymbols)],
+    [
+      "edges by origin",
+      Object.entries(c.edgesByOrigin)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(" · "),
+    ],
+  ];
+  return (
+    <div className="detail about">
+      <h2>{t(lang, "about")}</h2>
+      <p>{t(lang, "aboutIntro")}</p>
+      <h3>{t(lang, "coverageTitle")}</h3>
+      <dl className="facts">
+        {rows.map(([k, v]) => (
+          <div key={k} className="fact-row">
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <h3>⚠</h3>
+      <p className="caveat">{t(lang, "aboutFrDirection")}</p>
+      <p className="caveat">{t(lang, "aboutScan")}</p>
+      <p className="caveat">{t(lang, "aboutTranslation")}</p>
+      <h3>Sources</h3>
+      <ul className="doclist">
+        <li>
+          XDF: {g.raw.meta.xdf} (v{g.raw.meta.xdfVersion})
+        </li>
+        {Object.entries(g.raw.meta.ghidra).map(([bank, m]) => (
+          <li key={bank}>
+            Ghidra {bank}: {m.program} · {m.languageID} · written by {m.createdWith}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- app */
+
+export default function App() {
+  const [graph, setGraph] = useState<Indexed | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useStoredLang();
+  const [selected, setSelected] = useState<string | null>(null);
+  // What the diagram is drawn around. Kept apart from the selection so that
+  // picking a parameter lights it up in the current picture instead of
+  // replacing the picture with one centred somewhere else.
+  const [root, setRoot] = useState<string | null>(null);
+  const [trail, setTrail] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [openCategory, setOpenCategory] = useState<number | null>(null);
+  const [direction, setDirection] = useState<Direction>("downstream");
+  const [treeTab, setTreeTab] = useState<"param" | BlockTreeKind>("param");
+  const [dataTab, setDataTab] = useState<"table" | "chart">("table");
+  const [depth, setDepth] = useState(3);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showDense, setShowDense] = useState(false);
+  const [commenting, setCommenting] = useState(false);
+  const [windows, setWindows] = useState<WindowState>(initialWindows);
+  const [origins, setOrigins] = useState<Set<EdgeOrigin>>(() => {
+    const stored = readStored(ORIGIN_KEY);
+    if (stored) {
+      try {
+        return new Set(JSON.parse(stored) as EdgeOrigin[]);
+      } catch {
+        /* fall through to the default */
+      }
+    }
+    return new Set<EdgeOrigin>(["xref", "fr"]);
+  });
+
+  useEffect(() => {
+    writeStored(ORIGIN_KEY, JSON.stringify([...origins]));
+  }, [origins]);
+
+  useEffect(() => {
+    writeStored(WINDOW_KEY, JSON.stringify(windows));
+  }, [windows]);
+
+  useEffect(() => {
+    // The single-file build embeds the graph in a <script type="application/json">
+    // so the page works with no server and no network at all; the normal build
+    // fetches it so the 4 MB payload can be cached separately from the code.
+    const embedded = document.getElementById("graph-data")?.textContent;
+    if (embedded) {
+      try {
+        setGraph(index(JSON.parse(embedded) as Graph));
+      } catch (e) {
+        setError(`embedded graph data is unreadable: ${e}`);
+      }
+      return;
+    }
+    fetch(`${import.meta.env.BASE_URL}data/graph.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`graph.json: HTTP ${r.status}`);
+        return r.json() as Promise<Graph>;
+      })
+      .then((raw) => setGraph(index(raw)))
+      .catch((e) => setError(String(e)));
+  }, []);
+
+  const results = useMemo(
+    () => (graph ? searchNodes(graph, query) : []),
+    [graph, query],
+  );
+
+  const node: GraphNode | null = graph && selected ? (graph.byId.get(selected) ?? null) : null;
+  const rootAgreement = useAgreement(graph ?? ({} as Indexed), graph && selected ? selected : null);
+
+  const tree = useMemo(() => {
+    if (!graph || !selected) return null;
+    if (treeTab === "param") {
+      return expand(graph, selected, {
+        direction,
+        origins,
+        maxDepth: depth,
+        maxChildren: 40,
+        includeDensePages: showDense,
+      });
+    }
+    // The block trees are rooted at a block: a parameter is a leaf of the data
+    // flow, not a step in it, so it stands in for the block that reads it.
+    const owner = node ? owningBlock(graph, node) : null;
+    if (!owner) return null;
+    return expandBlocks(graph, owner.id, {
+      kind: treeTab,
+      direction,
+      maxDepth: depth,
+      maxChildren: 24,
+    });
+  }, [graph, selected, node, treeTab, direction, origins, depth, showDense]);
+
+  if (error) return <div className="fatal">{error}</div>;
+  if (!graph) return <div className="loading">…</div>;
+
+  const toggleOrigin = (o: EdgeOrigin) => {
+    setOrigins((prev) => {
+      const next = new Set(prev);
+      if (next.has(o)) next.delete(o);
+      else next.add(o);
+      return next;
+    });
+  };
+
+  // The trail is what makes following a chain reversible. Clicking through a
+  // diagram used to replace the whole view with no way back, so a reader who
+  // followed RF upstream lost the block they started from.
+  const select = (id: string) => {
+    setTrail((prev) => {
+      const seen = prev.indexOf(id);
+      return seen >= 0 ? prev.slice(0, seen + 1) : [...prev, id];
+    });
+    setSelected(id);
+    setShowAbout(false);
+    const picked = graph.byId.get(id);
+    // Only a block moves the picture. A parameter is found inside it.
+    if (picked?.t === "func") setRoot(id);
+    else if (!root) setRoot(owningBlock(graph, picked!)?.id ?? null);
+  };
+
+  const goBack = (id: string) => {
+    const seen = trail.indexOf(id);
+    if (seen >= 0) setTrail(trail.slice(0, seen + 1));
+    setSelected(id);
+    setShowAbout(false);
+    const picked = graph.byId.get(id);
+    if (picked?.t === "func") setRoot(id);
+  };
+
+  const toggleWindow = (id: WindowId) =>
+    setWindows((w) => ({
+      ...w,
+      open: { ...w.open, [id]: !w.open[id] },
+      order: [...w.order.filter((k) => k !== id), id],
+    }));
+
+  const raise = (id: WindowId) =>
+    setWindows((w) =>
+      w.order[w.order.length - 1] === id
+        ? w
+        : { ...w, order: [...w.order.filter((k) => k !== id), id] },
+    );
+
+  const movePos = (id: WindowId, pos: WindowPos) =>
+    setWindows((w) => ({ ...w, pos: { ...w.pos, [id]: pos } }));
+
+  const windowTitle = (label: string) =>
+    node ? (
+      <>
+        {label} — <strong>{displayNodeName(node)}</strong>
+      </>
+    ) : (
+      label
+    );
+
+  const hasValues = Boolean(node && (node.axes || node.value !== undefined));
+
+  return (
+    <div className="app">
+      <header>
+        <h1>{t(lang, "appTitle")}</h1>
+        <div className="header-actions">
+          <fieldset className="window-toggles">
+            <legend>{t(lang, "windows")}</legend>
+            {(["table", "desc", "tree"] as WindowId[]).map((id) => (
+              <label key={id}>
+                <input
+                  type="checkbox"
+                  checked={windows.open[id]}
+                  onChange={() => toggleWindow(id)}
+                />
+                {t(lang, id === "table" ? "wTable" : id === "desc" ? "wDesc" : "wTree")}
+              </label>
+            ))}
+          </fieldset>
+          <button
+            className={showAbout ? "active" : ""}
+            onClick={() => setShowAbout((v) => !v)}
+          >
+            {t(lang, "about")}
+          </button>
+          <div className="lang-toggle">
+            <button
+              className={lang === "ja" ? "active" : ""}
+              onClick={() => setLang("ja")}
+            >
+              日本語
+            </button>
+            <button
+              className={lang === "en" ? "active" : ""}
+              onClick={() => setLang("en")}
+            >
+              English
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="body">
+        <aside>
+          <input
+            className="search"
+            placeholder={t(lang, "search")}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query ? (
+            <>
+              <h3>
+                {t(lang, "results")} ({results.length})
+              </h3>
+              <ul className="list">
+                {results.map((r) => (
+                  <li key={r.id}>
+                    <button
+                      className={`node-name${r.id === selected ? " sel" : ""}`}
+                      onClick={() => select(r.id)}
+                    >
+                      {displayNodeName(r)}
+                    </button>
+                    <span className="node-kind">{nodeKindLabel(lang, r)}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <>
+              <h3>{t(lang, "categories")}</h3>
+              <ul className="list categories">
+                {graph.raw.categories.map((c) => {
+                  const members = graph.categoryMembers.get(c.id) ?? [];
+                  if (members.length === 0) return null;
+                  const open = openCategory === c.id;
+                  return (
+                    <li key={c.id}>
+                      <button
+                        className="category"
+                        onClick={() => setOpenCategory(open ? null : c.id)}
+                      >
+                        <span className="twisty">{open ? "▾" : "▸"}</span>
+                        {pickLocalised(lang, c)}
+                        <span className="count">{members.length}</span>
+                      </button>
+                      {open && (
+                        <ul className="list nested">
+                          {members.map((m) => (
+                            <li key={m.id}>
+                              <button
+                                className={`node-name${m.id === selected ? " sel" : ""}`}
+                                onClick={() => select(m.id)}
+                              >
+                                {displayNodeName(m)}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </aside>
+
+        <main>
+          {showAbout ? (
+            <About g={graph} lang={lang} />
+          ) : node ? (
+            <section className="diagram-panel">
+              <Diagram
+                g={graph}
+                rootId={root ?? node.id}
+                selectedId={node.id}
+                lang={lang}
+                trail={trail}
+                onSelect={select}
+                onBack={goBack}
+              />
+              <details className="legend">
+                <summary>{t(lang, "legend")}</summary>
+                <p className="note">{t(lang, "legendNotation")}</p>
+                <p className="note">{t(lang, "legendCase")}</p>
+                <p className="note">{t(lang, "legendAlt")}</p>
+                <p className="note">{t(lang, "legendInferred")}</p>
+                <p className="note">{t(lang, "legendFormula")}</p>
+              </details>
+            </section>
+          ) : (
+            <p className="empty-note">{t(lang, "selectPrompt")}</p>
+          )}
+        </main>
+      </div>
+
+      {/* The windows float over the diagram rather than pushing it down: they
+          are things you consult while looking at it. */}
+      {windows.open.table && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wTable"))}
+          pos={windows.pos.table}
+          onChange={(p) => movePos("table", p)}
+          onClose={() => toggleWindow("table")}
+          onFocus={() => raise("table")}
+          z={10 + windows.order.indexOf("table")}
+        >
+          {node && hasValues ? (
+            <>
+              <div className="seg tabs">
+                <button
+                  className={dataTab === "table" ? "active" : ""}
+                  onClick={() => setDataTab("table")}
+                >
+                  {t(lang, "tabTable")}
+                </button>
+                <button
+                  className={dataTab === "chart" ? "active" : ""}
+                  onClick={() => setDataTab("chart")}
+                >
+                  {t(lang, "tabChart")}
+                </button>
+              </div>
+              <MetaLine node={node} lang={lang} />
+              {dataTab === "table" ? (
+                <ValueTable node={node} lang={lang} />
+              ) : (
+                <ValueChart node={node} lang={lang} width={windows.pos.table.w - 40} />
+              )}
+            </>
+          ) : (
+            <p className="empty-note">
+              {/* A function is a legitimate selection that simply has no
+                  numbers; saying "pick something" implies nothing is. */}
+              {t(lang, node ? "noValuesForBlock" : "selectForWindows")}
+            </p>
+          )}
+        </FloatingWindow>
+      )}
+
+      {windows.open.desc && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wDesc"))}
+          pos={windows.pos.desc}
+          onChange={(p) => movePos("desc", p)}
+          onClose={() => toggleWindow("desc")}
+          onFocus={() => raise("desc")}
+          z={10 + windows.order.indexOf("desc")}
+        >
+          {node ? (
+            <Description node={node} g={graph} lang={lang} onSelect={select} />
+          ) : (
+            <p className="empty-note">{t(lang, "selectForWindows")}</p>
+          )}
+        </FloatingWindow>
+      )}
+
+      {/* The comment layer sits above everything, including the windows. */}
+      <Annotations
+        lang={lang}
+        context={
+          node
+            ? `${displayNodeName(node)}${root && root !== node.id ? ` / ${displayNodeName(graph.byId.get(root)!)}` : ""}`
+            : "-"
+        }
+        active={commenting}
+        onToggle={setCommenting}
+      />
+
+      {windows.open.tree && (
+        <FloatingWindow
+          title={windowTitle(t(lang, "wTree"))}
+          pos={windows.pos.tree}
+          onChange={(p) => movePos("tree", p)}
+          onClose={() => toggleWindow("tree")}
+          onFocus={() => raise("tree")}
+          z={10 + windows.order.indexOf("tree")}
+        >
+          {node ? (
+            <>
+              <div className="seg tabs">
+                <button
+                  className={treeTab === "param" ? "active" : ""}
+                  onClick={() => setTreeTab("param")}
+                >
+                  {t(lang, "tabParamTree")}
+                </button>
+                <button
+                  className={treeTab === "signal" ? "active" : ""}
+                  onClick={() => setTreeTab("signal")}
+                >
+                  {t(lang, "tabSignalTree")}
+                </button>
+                <button
+                  className={treeTab === "call" ? "active" : ""}
+                  onClick={() => setTreeTab("call")}
+                >
+                  {t(lang, "tabCallTree")}
+                </button>
+              </div>
+              <div className="controls">
+                <div className="seg">
+                  <button
+                    className={direction === "downstream" ? "active" : ""}
+                    onClick={() => setDirection("downstream")}
+                  >
+                    {t(lang, "downstream")}
+                  </button>
+                  <button
+                    className={direction === "upstream" ? "active" : ""}
+                    onClick={() => setDirection("upstream")}
+                  >
+                    {t(lang, "upstream")}
+                  </button>
+                </div>
+                <label>
+                  {t(lang, "depth")}
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    value={depth}
+                    onChange={(e) => setDepth(Number(e.target.value))}
+                  />
+                  <span className="depth-value">{depth}</span>
+                </label>
+                {treeTab === "param" && (
+                  <fieldset className="origins">
+                    <legend>{t(lang, "sources")}</legend>
+                    {(["xref", "scan", "fr"] as EdgeOrigin[]).map((o) => (
+                      <label key={o}>
+                        <input
+                          type="checkbox"
+                          checked={origins.has(o)}
+                          onChange={() => toggleOrigin(o)}
+                        />
+                        {t(
+                          lang,
+                          o === "xref"
+                            ? "originXref"
+                            : o === "scan"
+                              ? "originScan"
+                              : "originFr",
+                        )}
+                      </label>
+                    ))}
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={showDense}
+                        onChange={() => setShowDense((v) => !v)}
+                      />
+                      {t(lang, "showDense")}
+                    </label>
+                  </fieldset>
+                )}
+              </div>
+              {tree ? (
+                <TreeView
+                  tree={tree}
+                  g={graph}
+                  lang={lang}
+                  rootAgreement={rootAgreement}
+                  onSelect={select}
+                  direction={direction}
+                />
+              ) : (
+                <p className="empty-note">{t(lang, "noRelations")}</p>
+              )}
+            </>
+          ) : (
+            <p className="empty-note">{t(lang, "selectForWindows")}</p>
+          )}
+        </FloatingWindow>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,11 @@
+
+void ask_flap_closed_calibration_init(void)
+
+{
+  ask_flap_pot_calibration_count = k_ask_flap_pot_calibration_samples;
+  ask_roh_min = 0xffff;
+  ask_roh_max = 0;
+  ask_roh_sum = 0;
+  return;
+}
+

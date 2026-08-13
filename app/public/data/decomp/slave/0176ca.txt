@@ -1,0 +1,54 @@
+
+void ba_f_ti_calc(void)
+
+{
+  bool bVar1;
+  undefined4 uVar2;
+  short sVar3;
+  
+  if (BA_REGEL_COUNT != '\0') {
+    BA_F_TI = BA_BERECH;
+    BA_REGEL_COUNT = BA_REGEL_COUNT + -1;
+    return;
+  }
+  if (BA_REGEL_COUNT_RED != '\0') {
+    if ((DAT_00ffdab2 == '\0') &&
+       ((BA_REGEL_COUNT_RED == BA_IGN_RED_POS_TMOT || (BA_REGEL_COUNT_RED == BA_IGN_RED_NEG_TMOT))))
+    {
+      DAT_00ffdab2 = '\x01';
+      BA_F_TI = (short)((int)((uint)BA_RED_TMOT * (BA_BERECH - 0x400)) >> 10) + 0x400;
+    }
+    BA_REGEL_COUNT_RED = BA_REGEL_COUNT_RED + -1;
+    return;
+  }
+  if (BA_REGEL_COUNT_DECAY != '\0') {
+    BA_REGEL_COUNT_DECAY = BA_REGEL_COUNT_DECAY + -1;
+    return;
+  }
+  if ((BA_ST & 4) == 0) {
+    BA_REGEL_COUNT_DECAY = K_BA_IGN_DECAY_NEG + -1;
+    uVar2 = kfs_wint(&KF_BA_FAKT_RED_NEG_TMOT_N.sizeX,(ushort)TMOT,N);
+    sVar3 = BA_F_TI + (short)uVar2;
+    if (0x3ff < sVar3) goto LAB_000177ee;
+  }
+  else {
+    BA_REGEL_COUNT_DECAY = K_BA_IGN_DECAY_POS + -1;
+    uVar2 = kfs_wint(&KF_BA_FAKT_RED_POS_TMOT_N.sizeX,(ushort)TMOT,N);
+    sVar3 = BA_F_TI - (short)uVar2;
+    if (sVar3 < 0x401) {
+LAB_000177ee:
+      bVar1 = true;
+      goto LAB_000177f0;
+    }
+  }
+  bVar1 = false;
+  BA_F_TI = sVar3;
+LAB_000177f0:
+  if (bVar1) {
+    BA_ST = BA_ST & 0xf0;
+    BA_BERECH = 0;
+    BA_F_TI = 0x400;
+  }
+  return;
+}
+

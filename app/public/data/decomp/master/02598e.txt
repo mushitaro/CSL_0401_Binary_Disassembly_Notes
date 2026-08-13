@@ -1,0 +1,16 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void lfra_diag_write(short param_1,short param_2)
+
+{
+  LFRA_TIMER = 0;
+  _LFRA_MD_INTEGRATOR = (int)param_1 << 0x10;
+  LFRA_MD_START = param_1;
+  LFRA_FLAGS = 0;
+  _LFRA_KO_MD_INTEGRATOR = (int)param_2 << 0x10;
+  LFRA_KO_MD_START = param_2;
+  LFRA_KO_FLAGS = 0;
+  return;
+}
+

@@ -1,0 +1,50 @@
+
+uint sys_schedule_task_with_delay(byte task_id)
+
+{
+  undefined *puVar1;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  byte bVar2;
+  char cVar3;
+  undefined1 uVar4;
+  byte *pbVar5;
+  undefined3 in_stack_00000004;
+  
+  uVar4 = 0;
+  puVar1 = (&sys_task_pointer_table)[task_id];
+  bVar2 = set_status_register(0x2700);
+  pbVar5 = &sys_task_schedule_table;
+  if (((&sys_task_control_bytes)[(uint)task_id * 2] & 1) == 0) {
+    cVar3 = '\a';
+    do {
+      if (*pbVar5 == 0) break;
+      pbVar5 = pbVar5 + 4;
+      cVar3 = cVar3 + -1;
+    } while (-1 < cVar3);
+    if (cVar3 < '\0') {
+      uVar4 = 0x21;
+      syserror(_in_stack_00000004,0x100);
+    }
+    else {
+      *pbVar5 = task_id;
+      *(undefined2 *)(pbVar5 + 2) = *(undefined2 *)(puVar1 + 8);
+      (&sys_task_control_bytes)[(uint)task_id * 2] =
+           (&sys_task_control_bytes)[(uint)task_id * 2] | 1;
+    }
+  }
+  else {
+    cVar3 = '\a';
+    do {
+      if (task_id == *pbVar5) break;
+      pbVar5 = pbVar5 + 4;
+      cVar3 = cVar3 + -1;
+    } while (-1 < cVar3);
+    if (-1 < cVar3) {
+      *(undefined2 *)(pbVar5 + 2) = *(undefined2 *)(puVar1 + 6);
+    }
+  }
+  set_status_register((short)CONCAT31(extraout_var,bVar2));
+  return CONCAT31(extraout_var_00,uVar4);
+}
+

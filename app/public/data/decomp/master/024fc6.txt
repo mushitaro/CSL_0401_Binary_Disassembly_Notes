@@ -1,0 +1,9 @@
+
+/* EGAS Safety Concept Computer Core Test Task 12 - CPU test: unused */
+
+undefined4 SK_TR_Test_12(void)
+
+{
+  return 4;
+}
+

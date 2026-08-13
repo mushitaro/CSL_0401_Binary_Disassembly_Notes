@@ -1,0 +1,56 @@
+
+ushort fgr_init(void)
+
+{
+  DAT_00ffeb71 = 0;
+  DAT_00ffeb2a = 4;
+  DAT_00ffeb2b = 0;
+  FGR_B_AKTIV_DPR = 0;
+  fgr_b_aktiv = 0;
+  DAT_00ffeb02 = 0;
+  fgr_timeout_mfl = (ushort)K_FGR_TIMEOUT_MFL;
+  mfl_st = 0;
+  DAT_00ffeb5e = 0;
+  DAT_00ffeb6c = 0;
+  DAT_00ffeb2c = 0;
+  DAT_00ffeb2d = 0;
+  DAT_00ffeb08 = 0;
+  DAT_00ffeb09 = 0;
+  fgr_toggle_count = 0;
+  DAT_00ffeb3f = 0;
+  DAT_00ffeb3e = 0;
+  DAT_00ffeb44 = 200;
+  DAT_00ffeb48 = 0;
+  DAT_00ffeb4e = DAT_00ffeb1e;
+  DAT_00ffeb4b = 0;
+  DAT_00ffeb16 = 0;
+  DAT_00ffeb4c = K_FGR_DIA_SPE;
+  DAT_00ffeb3b = 0x40;
+  DAT_00ffeb57 = 0x40;
+  DAT_00ffeb51 = 0;
+  DAT_00ffeb7a = 0;
+  DAT_00ffeb50 = 0;
+  DAT_00ffeb56 = 0;
+  DAT_00ffeb54 = 0;
+  DAT_00ffeb5a = 0;
+  DAT_00ffeb58 = 0;
+  DAT_00ffeb60 = 0;
+  MD_IND_FGR = 0;
+  DAT_00ffeb62 = 0;
+  DAT_00ffeb68 = 0;
+  DAT_00ffeb69 = 0;
+  DAT_00ffeb6f = 0;
+  DAT_00ffeb6e = 0;
+  DAT_00ffeb6d = 0;
+  DAT_00ffeb15 = 0;
+  SK_FGR_DPR_STAT = 0;
+  FGR_DPR_ST = (cfg_m_baureihe & 0xf8) == 0x40;
+  if (K_FGR_CONFIG == '\0') {
+    DAT_00ffeb2a = 5;
+  }
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    DAT_00ffeb74 = 0;
+  }
+  return EE_ERROR_MASK & 0x1101;
+}
+

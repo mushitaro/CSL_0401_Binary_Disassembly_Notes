@@ -1,0 +1,24 @@
+
+void sys_task_dispatcher(void)
+
+{
+  uint current_task_position;
+  uint current_task_mask;
+  byte *current_task_status_byte;
+  
+  while (sys_executing_tasks_bitfield < (sys_pending_tasks_bitfield & ~sys_executing_tasks_bitfield)
+        ) {
+    current_task_position = Find_Position_of_MSB(sys_pending_tasks_bitfield);
+    current_task_mask = 1 << (current_task_position & 0x3f);
+    sys_executing_tasks_bitfield = current_task_mask | sys_executing_tasks_bitfield;
+    sys_pending_tasks_bitfield = ~current_task_mask & sys_pending_tasks_bitfield;
+    current_task_status_byte = &sys_task_control_bytes + (current_task_position & 0xff) * 2;
+    *current_task_status_byte = *current_task_status_byte & 0xbf;
+    *current_task_status_byte = *current_task_status_byte | 0x80;
+    (**(code **)(&sys_task_pointer_table)[current_task_position & 0xff])();
+    sys_executing_tasks_bitfield = ~current_task_mask & sys_executing_tasks_bitfield;
+    *current_task_status_byte = *current_task_status_byte & 0x7f;
+  }
+  return;
+}
+

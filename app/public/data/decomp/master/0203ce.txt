@@ -1,0 +1,84 @@
+
+void kkos_supervisor(void)
+
+{
+  uint uVar1;
+  
+  if ((KKOS_ST_TREIBER & 0x80) != 0) {
+    return;
+  }
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) ||
+     ((uint)K_KKOS_TIME_BA_VL * 0x400 <= SYS_TIMERTICS_COUNTER - DAT_00ffe918)) {
+    KKOS_ST = KKOS_ST & 0xf3;
+  }
+  if (((uint)K_KKOS_TIME_BA_VL_TRIGGER * 0x400 <= SYS_TIMERTICS_COUNTER - DAT_00ffe91c) &&
+     (N40 < K_KKOS_N)) {
+    if (((int)((uint)K_KKOS_DTL * 8) < (int)DYN_TRIGGER) && (V < K_KKOS_BA_V)) {
+      KKOS_ST = KKOS_ST | 4;
+    }
+    else {
+      if ((((ZUSTAND_MOTOR & VL) == 0) || (DAT_00ffe90c == ZUSTAND_MOTOR)) || (K_KKOS_VL_V <= V))
+      goto LAB_000204ac;
+      KKOS_ST = KKOS_ST | 8;
+    }
+    DAT_00ffe918 = SYS_TIMERTICS_COUNTER;
+    DAT_00ffe91c = SYS_TIMERTICS_COUNTER;
+  }
+LAB_000204ac:
+  DAT_00ffe90c = ZUSTAND_MOTOR;
+  if (K_KKOS_N_MAX < N) {
+    KKOS_ST = KKOS_ST | 2;
+  }
+  else if ((int)(uint)N < (int)((uint)K_KKOS_N_MAX - (uint)K_KKOS_N_MAX_HYS)) {
+    KKOS_ST = KKOS_ST & 0xfd;
+  }
+  if ((((((SCHALTER_CAN & 4) == 0) || ((SCHALTER_CAN & 2) == 0)) ||
+       (((KKOS_ST & 0x80) != 0 || (((KKOS_ST & 2) != 0 || ((KKOS_ST & 4) != 0)))))) ||
+      (((KKOS_ST & 8) != 0 ||
+       (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0 ||
+        (SYS_TIMERTICS_COUNTER - n_start_exit_time < (uint)K_KKOS_BEREIT * 0x400)))))) ||
+     ((((ELU_ED & 0x40) != 0 && (K_KKOS_ELU_TMOT < TMOT)) || (K_KKOS_TMOT_MAX < TMOT)))) {
+    if ((KKOS_ST & 1) != 0) {
+      DAT_00ffe914 = SYS_TIMERTICS_COUNTER;
+    }
+    KKOS_ST = KKOS_ST & 0xfe;
+  }
+  else if (((((((SCHALTER_CAN & 4) != 0) && ((SCHALTER_CAN & 2) != 0)) && ((KKOS_ST & 0x80) == 0))
+            && (((KKOS_ST & 2) == 0 && ((KKOS_ST & 4) == 0)))) &&
+           (((KKOS_ST & 8) == 0 &&
+            (((ZUSTAND_MOTOR & (VL|TL|LL)) != 0 &&
+             ((uint)K_KKOS_BEREIT * 0x400 <= SYS_TIMERTICS_COUNTER - n_start_exit_time)))))) &&
+          ((((ELU_ED & 0x40) == 0 ||
+            ((int)(uint)TMOT < (int)((uint)K_KKOS_ELU_TMOT - (uint)K_KKOS_TMOT_HYS))) &&
+           ((int)(uint)TMOT < (int)((uint)K_KKOS_TMOT_MAX - (uint)K_KKOS_TMOT_HYS))))) {
+    if ((KKOS_ST & 1) == 0) {
+      DAT_00ffe910 = SYS_TIMERTICS_COUNTER;
+    }
+    KKOS_ST = KKOS_ST | 1;
+  }
+  if ((((((KKOS_ST & 1) == 0) &&
+        (uVar1 = klu_wint(&KL_KKOS_OFF_DELAY.sizeX,N), uVar1 <= SYS_TIMERTICS_COUNTER - DAT_00ffe914
+        )) || ((DAT_00ffe90c & (VL|TL|LL)) == 0)) || ((KKOS_ST & 2) != 0)) &&
+     ((KKOS_ST_TREIBER & 0x40) != 0)) {
+    KKOS_ST_TREIBER = KKOS_ST_TREIBER | 0x20;
+    can_0xd_masked_update('\0',1,1);
+    KKOS_ST_TREIBER = KKOS_ST_TREIBER & 0xbf;
+    return;
+  }
+  if ((((KKOS_ST & 1) == 0) ||
+      (uVar1 = klu_wint(&KL_KKOS_ON_DELAY.sizeX,N), SYS_TIMERTICS_COUNTER - DAT_00ffe910 < uVar1))
+     || ((KKOS_ST_TREIBER & 0x40) != 0)) {
+    KKOS_ST_TREIBER = KKOS_ST_TREIBER & 0xdf;
+  }
+  else {
+    KKOS_ST_TREIBER = KKOS_ST_TREIBER | 0x60;
+    if ((cfg_m_motortyp & 0xef) == 0x20) {
+      can_0xd_masked_update('\0',0,1);
+    }
+  }
+  if (((KKOS_ST_TREIBER & 0x40) != 0) && ((cfg_m_motortyp & 0xef) != 0x20)) {
+    FUN_0003b7b4('\0',1);
+  }
+  return;
+}
+

@@ -1,0 +1,33 @@
+
+void tan_calc(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  ushort uVar4;
+  int iVar3;
+  
+                    /* This function has additional code to 1801 */
+  uVar4 = tan_ad;
+  uVar2 = klu_wint(&KL_TAN_NTC.sizeX,uVar4);
+  TAN_ROH = (ushort)uVar2;
+  uVar4 = tan_filter_calc(TAN_ROH);
+  tan_filter = IIR_Filter_US(uVar4,tan_filter,(ushort)K_TAN_TAU);
+  if (k_tanm_cfg == 0) {
+    iVar1 = (uint)tan_filter * 5;
+    iVar3 = iVar1 + 1;
+    if (iVar1 < -1) {
+      iVar3 = iVar1 + 2;
+    }
+    tan_m = (short)(iVar3 >> 1) + 0x8cc;
+  }
+  else {
+    tan_m = tan_m_adj + 0xaac;
+  }
+  TAN = (byte)((int)(tan_filter + 2) >> 2);
+  if (TAN < T_UMG_ERSATZ) {
+    T_UMG_ERSATZ = TAN;
+  }
+  return;
+}
+

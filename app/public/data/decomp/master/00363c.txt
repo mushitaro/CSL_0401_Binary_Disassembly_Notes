@@ -1,0 +1,14 @@
+
+uint32_t mem_block_is_erased(uint8_t *blk,uint32_t len)
+
+{
+  do {
+    if (*blk != 0xff) {
+      return 7;
+    }
+    len = len - 1;
+    blk = blk + 1;
+  } while (len != 0);
+  return 0;
+}
+

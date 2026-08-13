@@ -1,0 +1,11 @@
+
+undefined8 ivr_bootloader_periodic_interrupt_timer(void)
+
+{
+  undefined4 in_D0;
+  undefined4 in_D1;
+  
+  bootloader_increment_timer_tics();
+  return CONCAT44(in_D0,in_D1);
+}
+

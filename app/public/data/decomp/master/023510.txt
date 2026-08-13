@@ -1,0 +1,54 @@
+
+void pwg_a0_adapt(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  ushort uVar3;
+  ushort uVar4;
+  
+  uVar3 = PWG2_A0;
+  uVar2 = PWG2_ABS;
+  uVar1 = PWG1_ABS;
+  if ((((((PWG_MODE != '\0') || ((PWG1_ED & 0x20) != 0)) || ((UEXT1M_ED & 0x20) != 0)) ||
+       (((PWG2_ED & 0x20) != 0 || ((UEXT2M_ED & 0x20) != 0)))) ||
+      ((PWG1_ABS <= K_PWG1_A0_MIN || ((K_PWG1_A0_MAX <= PWG1_ABS || (PWG2_ABS <= K_PWG1_A0_MIN))))))
+     || ((K_PWG1_A0_MAX <= PWG2_ABS || (((DAT_00ffe6c8 & 1) == 0 || ((ZUSTAND_MOTOR & Start) != 0)))
+         ))) {
+    PWG1_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+    PWG2_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+    return;
+  }
+  uVar4 = PWG1_A0;
+  if (PWG1_ABS < PWG1_A0) {
+    DAT_00ffe6ba = PT1_Filter_US(PWG1_ABS << 6,DAT_00ffe6ba,K_PWG_A0_TAU);
+    uVar4 = (ushort)((int)(DAT_00ffe6ba + 0x20) >> 6);
+  }
+  if ((PWG1_A0 < uVar1) && ((uint)uVar1 <= (uint)K_PWG1_INC_A0_ADAPT + (uint)PWG1_A0)) {
+    PWG1_A0_ZAEHLER = PWG1_A0_ZAEHLER + -1;
+    if (PWG1_A0_ZAEHLER != '\0') goto LAB_00023626;
+    uVar4 = PWG1_A0 + 1;
+    DAT_00ffe6ba = uVar4 * 0x40;
+  }
+  PWG1_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+LAB_00023626:
+  if (uVar2 < PWG2_A0) {
+    DAT_00ffe6bc = PT1_Filter_US(uVar2 << 6,DAT_00ffe6bc,K_PWG_A0_TAU);
+    uVar3 = (ushort)((int)(DAT_00ffe6bc + 0x20) >> 6);
+  }
+  if ((PWG2_A0 < uVar2) && ((uint)uVar2 <= (uint)K_PWG1_INC_A0_ADAPT + (uint)PWG2_A0)) {
+    if ((char)(PWG2_A0_ZAEHLER + -1) != '\0') {
+      PWG1_A0 = uVar4;
+      PWG2_A0 = uVar3;
+      PWG2_A0_ZAEHLER = PWG2_A0_ZAEHLER + -1;
+      return;
+    }
+    uVar3 = PWG2_A0 + 1;
+    DAT_00ffe6bc = uVar3 * 0x40;
+  }
+  PWG2_A0_ZAEHLER = K_PWG_A0_ZAEHLER;
+  PWG1_A0 = uVar4;
+  PWG2_A0 = uVar3;
+  return;
+}
+

@@ -1,0 +1,22 @@
+
+void nw_edge_capture_handler(void)
+
+{
+  ushort uVar1;
+  
+  uVar1 = TPU_LINK;
+  TPU_NW_POS_M = (undefined1)uVar1;
+  if ((TPU_ST_M & nicht sync) != in Ordnung) {
+    nw_edge_detected = 0;
+    nw_edge_invalid_flag = 0;
+    return;
+  }
+  nw_edge_detected = nw_edge_detected + '\x01';
+  if (((ushort)K_NW_MFMIN_M <= (uVar1 & 0xff)) && ((uVar1 & 0xff) <= (ushort)K_NW_MFMAX_M)) {
+    nw_sync_pulse_if_peer_requested();
+    return;
+  }
+  nw_edge_invalid_flag = nw_edge_invalid_flag | 1;
+  return;
+}
+

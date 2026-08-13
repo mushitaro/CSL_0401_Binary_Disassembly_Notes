@@ -1,0 +1,53 @@
+
+ushort mil_update(void)
+
+{
+  enum_ZUSTAND_MOTOR eVar1;
+  undefined1 uVar2;
+  undefined2 in_D0w;
+  ushort uVar3;
+  enum_ZUSTAND_MOTOR eVar4;
+  bool bVar5;
+  
+  eVar1 = K_MIL_CONTROL & MIL_ST;
+  uVar2 = (undefined1)((ushort)in_D0w >> 8);
+  uVar3 = CONCAT11(uVar2,eVar1) & 0xff55;
+  if ((eVar1 & (Nachlauf|VL|LL|S)) == 0) {
+    MIL_ST = MIL_ST & (Nachlauf|KI.15 aus|VL|TL|LL|Start|S);
+    return uVar3;
+  }
+  if ((K_MIL_CONTROL & ~(Nachlauf|KI.15 aus|VL|TL|LL|Start|S)) == 0) {
+    MIL_ST = MIL_ST & (Nachlauf|KI.15 aus|VL|TL|LL|Start|S);
+LAB_0002f6ea:
+    MIL_ST = MIL_ST & ~Nachlauf;
+    return uVar3;
+  }
+  if ((eVar1 & Nachlauf) == 0) {
+    eVar4 = eVar1 & (KI.15 aus|TL|Start);
+    if (((eVar1 & (KI.15 aus|TL|Start)) == 0) ||
+       ((eVar4 = ZUSTAND_MOTOR & (VL|TL|LL), (ZUSTAND_MOTOR & (VL|TL|LL)) == 0 &&
+        ((eVar1 & VL) == 0)))) {
+      uVar3 = CONCAT11(uVar2,eVar4);
+      MIL_ST = MIL_ST | ~(Nachlauf|KI.15 aus|VL|TL|LL|Start|S);
+      DAT_00ff8146 = K_MIL_PERIODE;
+    }
+    else {
+      uVar3 = CONCAT11(uVar2,DAT_00ff8146);
+      bVar5 = K_MIL_PERIODE <= DAT_00ff8146;
+      DAT_00ff8146 = DAT_00ff8146 + 1;
+      if (bVar5) {
+        MIL_ST = MIL_ST ^ ~(Nachlauf|KI.15 aus|VL|TL|LL|Start|S);
+        DAT_00ff8146 = 0;
+        return CONCAT11(uVar2,0x80);
+      }
+    }
+  }
+  else {
+    uVar3 = N;
+    if ((K_DCY_N_MIN < N) ||
+       (uVar3 = CONCAT11((char)(N >> 8),eVar1) & 0xff15, (eVar1 & (VL|LL|S)) != 0))
+    goto LAB_0002f6ea;
+  }
+  return uVar3;
+}
+

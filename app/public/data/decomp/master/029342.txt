@@ -1,0 +1,70 @@
+
+void km_evaluate_knock(void)
+
+{
+  byte curr_cyl;
+  uint km_knock_threshold;
+  byte loop_index;
+  uint kd_strong_factor;
+  byte *pbVar1;
+  ushort cyl_measured_value;
+  byte km_signal_index;
+  byte knock_filter_strength;
+  
+  if (KD_CFG != 0) {
+    curr_cyl = (zyl_count + TPU_SEGM_INDEX_TASK) - 3;
+    if (zyl_count <= curr_cyl) {
+      curr_cyl = curr_cyl - zyl_count;
+    }
+    loop_index = 0;
+    km_signal_index = km_signal_source[(short)(ushort)KD_CFG];
+    pbVar1 = zyl_firing_order_table + (short)(ushort)curr_cyl + 1;
+    do {
+      curr_cyl = *pbVar1 - 1;
+      if (((KM_TEL_ST[curr_cyl] & 0x100) != 0) && ((KM_TEL_ST[curr_cyl] & 0x200) == 0)) {
+        cyl_measured_value = KM_TEL_MW[curr_cyl][km_signal_index];
+        if ((KM_ST & 8) == 0) {
+          km_knock_threshold = (int)((uint)KD_MEM[curr_cyl] * (uint)KD_KFAKT[curr_cyl]) >> 10;
+        }
+        else {
+          km_knock_threshold =
+               (int)((uint)KD_KWICHT_D *
+                    ((int)((uint)KD_MEM[curr_cyl] * (uint)KD_KFAKT[curr_cyl]) >> 10)) >> 6;
+        }
+        kd_strong_factor = (uint)KD_FAKT_STARK;
+        if (km_knock_threshold < cyl_measured_value) {
+          if (((K_KD_CFG_STAT == 1) || ((DAT_00ffe834_knock_evaluation_status_ & 4) == 0)) ||
+             ((KM_FEN_SCHIEB != 0 && ((curr_cyl == 2 || (curr_cyl == 3)))))) {
+            knock_filter_strength = KD_FILT_S;
+            if ((KM_ST & 8) != 0) {
+              knock_filter_strength = KD_FILT_D;
+            }
+            KD_MEM[curr_cyl] =
+                 (short)((int)((uint)cyl_measured_value - (uint)KD_MEM[curr_cyl]) >>
+                        (knock_filter_strength & 0x3f)) + KD_MEM[curr_cyl];
+          }
+          if (km_knock_threshold * kd_strong_factor + 0x20 >> 6 < (uint)cyl_measured_value) {
+            KM_TEL_ST[curr_cyl] = KM_TEL_ST[curr_cyl] | 0x80;
+          }
+          KM_TEL_ST[curr_cyl] = KM_TEL_ST[curr_cyl] | 0x1000;
+        }
+        else {
+          knock_filter_strength = KD_FILT_S;
+          if ((KM_ST & 8) != 0) {
+            knock_filter_strength = KD_FILT_D;
+          }
+          KD_MEM[curr_cyl] =
+               (short)((int)((uint)cyl_measured_value - (uint)KD_MEM[curr_cyl]) >>
+                      (knock_filter_strength & 0x3f)) + KD_MEM[curr_cyl];
+          KM_TEL_ST[curr_cyl] = KM_TEL_ST[curr_cyl] & 0xefff;
+          KM_TEL_ST[curr_cyl] = KM_TEL_ST[curr_cyl] & 0xff7f;
+        }
+        KM_TEL_ST[curr_cyl] = KM_TEL_ST[curr_cyl] | 0x200;
+      }
+      loop_index = loop_index + 1;
+      pbVar1 = pbVar1 + 1;
+    } while (loop_index < 2);
+  }
+  return;
+}
+

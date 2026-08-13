@@ -1,0 +1,31 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void pcntrl_engine_state_reset(void)
+
+{
+  MD_ST_TZ = 0;
+  MD_AR = 0;
+  MD_ETA_KATH = 0xffff;
+  MD_ETA_ZW_STAT = 0xffff;
+  MD_ETA_ZW_MIN = 0x8000;
+  MD_ETA_ZW_VE = 0xffff;
+  MD_ETA_ZW_NE = 0xffff;
+  LDP_FLAGS = 0;
+  LDP_ED_DECKEL_DPR = 0;
+  _EVAN_SOLL = 600;
+  _AVAN_SOLL = 0;
+  VAN_ED_ST = 0x50;
+  N_EVAN1 = 0;
+  SA_WE_ST = 0;
+  DAT_00ff824a = 0;
+  RF_DELTA = 0;
+  CAN_dt_reinf__drivetrain_reinforcement_ = 0;
+  SMG_DWF_DPR = 0;
+  _DAT_00ff8296 = 0xff;
+  FUN_0001b382();
+  smg_ax_berg_dpr = 0;
+  ask_zustand_dpr = 0;
+  return;
+}
+

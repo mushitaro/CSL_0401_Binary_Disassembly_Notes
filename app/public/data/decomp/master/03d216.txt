@@ -1,0 +1,56 @@
+
+void DA_related_(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  int unaff_D2;
+  char cVar3;
+  undefined4 *puVar4;
+  byte *pbVar5;
+  
+  if (K_DA_SEITE_M == '\0') {
+    cVar3 = '\x05';
+    pbVar5 = &K_DA_M6;
+    do {
+      if (*pbVar5 < 0x36) {
+        iVar2 = (uint)*pbVar5 * 10;
+        puVar4 = (undefined4 *)(&UNK_0003d2e2 + iVar2);
+        switch((&UNK_0003d2e6)[iVar2]) {
+        case 0:
+          uVar1 = (uint)*(byte *)*puVar4;
+          break;
+        case 1:
+          uVar1 = (uint)*(char *)*puVar4;
+          break;
+        case 2:
+          uVar1 = (uint)*(ushort *)*puVar4;
+          break;
+        case 3:
+          uVar1 = (uint)*(short *)*puVar4;
+          break;
+        default:
+          goto switchD_0003d260_caseD_4;
+        }
+        iVar2 = (uint)*(ushort *)(&UNK_0003d2ea + iVar2) *
+                (uVar1 - (int)*(short *)(&UNK_0003d2e8 + iVar2));
+        if (iVar2 < 0) {
+          iVar2 = iVar2 + 0x3ff;
+        }
+        unaff_D2 = iVar2 >> 10;
+switchD_0003d260_caseD_4:
+        if (unaff_D2 < 0) {
+          unaff_D2 = 0;
+        }
+        if (0xff < unaff_D2) {
+          unaff_D2 = 0xff;
+        }
+        (&DAT_00ff2000)[cVar3] = (char)unaff_D2;
+      }
+      pbVar5 = pbVar5 + -1;
+      cVar3 = cVar3 + -1;
+    } while (-1 < cVar3);
+  }
+  return;
+}
+

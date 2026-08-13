@@ -1,0 +1,31 @@
+
+void task_segm(void)
+
+{
+  if (((ZUSTAND_MOTOR & Start) != 0) || ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    ba_segm();
+    dkba_post_injection();
+  }
+  lu_segm();
+  auss_segm();
+  ll_sync_state_2_measurement();
+  ar_anti_jerking();
+  evan1_hall_diag_segment_check();
+  avan1_hall_diag_segment_check();
+  if ((TI_ST_START & 8) != 0) {
+    ti_update_active_channels();
+    kva_t_memory_calc();
+    DKBA_output_function();
+  }
+  sa_we_segm();
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    FUN_0003c9aa();
+  }
+  if (((ZUSTAND_MOTOR & Start) != 0) || ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    FUN_0001784c();
+  }
+  md_eta_segm();
+  can_segm();
+  return;
+}
+

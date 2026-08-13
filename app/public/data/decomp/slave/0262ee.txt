@@ -1,0 +1,33 @@
+
+void sa_rpm_thresholds_calc(void)
+
+{
+  byte bVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  
+  bVar1 = GANG & 7;
+  if (D_N40 < '\0') {
+    uVar2 = klu_bint(&KL_SA_N40_DN40.sizeX,-D_N40);
+    SA_N40_DN40 = (char)uVar2;
+  }
+  else {
+    SA_N40_DN40 = '\0';
+  }
+  SA_N40_GANG = KL_SA_N40_GANG.y[(short)(ushort)bVar1];
+  uVar2 = klu_bint(&KL_SA_N40_TMOT.sizeX,TMOT);
+  SA_N40_TMOT = (char)uVar2;
+  SA_N40_HYST_GANG = KL_SA_N40_HYS_GANG.y[(short)(ushort)bVar1];
+  uVar3 = kfu_bint(&KF_SA_TIME_TMOT_N40.sizeX,TMOT,N40);
+  SA_TRIGGER_DELAY = (char)uVar3;
+  if ((SCHALTER_CAN & 4) == 0) {
+    SA_N40_KKOS = '\0';
+  }
+  else {
+    SA_N40_KKOS = K_SA_N40_KKOS_ON;
+  }
+  SA_N40_WIEDEREINSETZEN = SA_N40_GANG + SA_N40_KKOS + SA_N40_DN40 + SA_N40_TMOT;
+  SA_N40 = SA_N40_HYST_GANG + K_SA_N40_HYS + SA_N40_WIEDEREINSETZEN;
+  return;
+}
+

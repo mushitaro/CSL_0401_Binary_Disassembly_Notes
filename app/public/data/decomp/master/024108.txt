@@ -1,0 +1,12 @@
+
+void edk_set_zero(void)
+
+{
+  byte bVar1;
+  
+  EDK__write_to_port_to_set_EDK_duty_cycle_(0);
+  bVar1 = SIM_PORTE0;
+  SIM_PORTE0 = bVar1 & 0xfb;
+  return;
+}
+

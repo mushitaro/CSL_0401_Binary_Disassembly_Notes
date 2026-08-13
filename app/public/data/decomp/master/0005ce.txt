@@ -1,0 +1,9 @@
+
+void ivr_bootloader_cpu_reset(void)
+
+{
+  reset();
+  bootloader_entry();
+  return;
+}
+

@@ -1,0 +1,48 @@
+
+uint tz_kath_faktor_calc(void)
+
+{
+  uint uVar1;
+  undefined2 uVar2;
+  uint in_D0;
+  
+  if ((KATH_ST & 2) == 0) {
+    if (TZ_KATH_FAKTOR != 0) {
+      if ((SA_WE_ST & 8) == 0) {
+        uVar2 = (undefined2)(in_D0 >> 0x10);
+        in_D0 = CONCAT22(uVar2,TZ_KATH_FAKTOR);
+        if (K_TZ_KATH_T_ABREG < TZ_KATH_FAKTOR) {
+          in_D0 = CONCAT22(uVar2,K_TZ_KATH_T_ABREG);
+          TZ_KATH_FAKTOR = TZ_KATH_FAKTOR - K_TZ_KATH_T_ABREG;
+          goto LAB_0002bbfa;
+        }
+      }
+      TZ_KATH_FAKTOR = 0;
+    }
+  }
+  else if ((KATH_ZUSTAND & 2) == 0) {
+    if ((TZ_KATH_FAKTOR != 0x8000) && (TZ_KATH_FAKTOR < 0x8000)) {
+      in_D0 = (uint)K_TZ_KATH_T_AUFREG;
+      uVar1 = in_D0 + TZ_KATH_FAKTOR;
+      if (uVar1 < 0x8000) {
+        TZ_KATH_FAKTOR = (ushort)uVar1;
+      }
+      else {
+        TZ_KATH_FAKTOR = 0x8000;
+      }
+    }
+  }
+  else {
+    TZ_KATH_FAKTOR = K_TZ_KATH_START;
+  }
+LAB_0002bbfa:
+  if ((((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (K_TZ_KATH_CONTROL != '\0')) && (TZ_KATH_FAKTOR != 0))
+  {
+    uVar1 = (int)((uint)TZ_KATH_ETA_ROH * (uint)TZ_KATH_FAKTOR) >> 0xf;
+    TZ_KATH_ETA_OFFSET = (short)uVar1;
+    return uVar1;
+  }
+  TZ_KATH_ETA_OFFSET = 0;
+  return CONCAT31((int3)(in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+}
+

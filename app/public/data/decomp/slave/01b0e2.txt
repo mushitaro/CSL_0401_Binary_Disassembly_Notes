@@ -1,0 +1,223 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001b2e2) */
+/* WARNING: Removing unreachable block (ram,0x0001b21a) */
+/* WARNING: Removing unreachable block (ram,0x0001b1d4) */
+/* WARNING: Removing unreachable block (ram,0x0001b120) */
+/* WARNING: Removing unreachable block (ram,0x0001b1ee) */
+/* WARNING: Removing unreachable block (ram,0x0001b282) */
+/* WARNING: Removing unreachable block (ram,0x0001b320) */
+/* WARNING: Removing unreachable block (ram,0x0001b136) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void ti_engine_running(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  int iVar6;
+  int iVar7;
+  uint uVar8;
+  uint uVar9;
+  undefined4 local_c;
+  undefined4 local_8;
+  
+  if ((TI_ST_START & 4) != 0) {
+    uVar1 = (uint)TI_F_GA;
+    uVar5 = (uint)TI_F_TMOT_VSP;
+    uVar4 = (uint)TI_F_NO_ZAEHLER_VSP;
+    uVar2 = klu_bint(&KL_TI_START_F_P_UMG.sizeX,P_UMG);
+    iVar3 = ((int)(((int)(uVar1 * uVar5) >> 10) * uVar4) >> 10 & 0xffffU) * uVar2;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x7f;
+    }
+    iVar3 = (uint)K_TI_START * (iVar3 >> 7 & 0xffffU);
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 0x7f;
+    }
+    TI_VSP = iVar3 >> 7;
+    if ((TI_ST_HELP & 1) == 0) {
+      TI_ST_HELP = TI_ST_HELP | 1;
+      TI_VSP_ACCU = TI_VSP;
+      FUN_0001b9d0();
+    }
+  }
+  if ((TI_ST_START & 8) == 0) {
+    return;
+  }
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+    if ((ZUSTAND_MOTOR & Start) == 0) {
+      uVar5 = (uint)TI_VORST;
+      goto LAB_0001b2bc;
+    }
+    uVar1 = (uint)TI_F_GA;
+    uVar5 = (uint)TI_F_START;
+    uVar4 = klu_bint(&KL_TI_START_F_P_UMG.sizeX,P_UMG);
+    uVar4 = ((int)(uVar1 * uVar5) >> 7) * uVar4;
+    uVar5 = (uint)K_TI_START;
+  }
+  else {
+    uVar4 = ((((uint)(((int)((uint)TI_F_GA * (uint)TI_F_NAS) >> 7) *
+                     ((int)((uint)TI_F_STAT * (uint)TI_F_WL) >> 10)) >> 10) *
+              ((int)((uint)TI_F_WE * (uint)BA_F_TI) >> 7 & 0xffffU) >> 7) * (uint)TI_F_PT_KORR >> 10
+            ) * (uint)TI_F_SKS;
+    uVar5 = (uint)TL * 2;
+  }
+  uVar5 = (uVar4 >> 7) * uVar5 >> 10;
+LAB_0001b2bc:
+  if (0xffff < uVar5) {
+    uVar5 = 0xffff;
+  }
+  TI_VORST = (ushort)uVar5;
+  iVar3 = (uVar5 & 0xffff) * ((int)((uint)TI_F_ADAPT1 * (uint)TI_F_KATS1) >> 7);
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x3ff;
+  }
+  iVar6 = (int)TI_OFFSET_ADAPT1 + (iVar3 >> 10);
+  iVar3 = (uVar5 & 0xffff) * ((int)((uint)TI_F_ADAPT2 * (uint)TI_F_KATS2) >> 7);
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x3ff;
+  }
+  iVar7 = (int)TI_OFFSET_ADAPT2 + (iVar3 >> 10);
+  iVar3 = iVar6 * (uint)TI_F_ZYL1;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  local_8 = (int)TI_SYNC1 + (iVar3 >> 7);
+  iVar3 = iVar6 * (uint)TI_F_ZYL2;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  local_c = (int)TI_SYNC2 + (iVar3 >> 7);
+  iVar6 = iVar6 * (uint)TI_F_ZYL3;
+  if (iVar6 < 0) {
+    iVar6 = iVar6 + 0x7f;
+  }
+  uVar5 = (int)TI_SYNC3 + (iVar6 >> 7);
+  iVar3 = iVar7 * (uint)TI_F_ZYL4;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  uVar4 = (int)TI_SYNC4 + (iVar3 >> 7);
+  iVar3 = iVar7 * (uint)TI_F_ZYL5;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  uVar1 = (int)TI_SYNC5 + (iVar3 >> 7);
+  iVar3 = iVar7 * (uint)TI_F_ZYL6;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  uVar2 = (int)TI_SYNC6 + (iVar3 >> 7);
+  iVar3 = iVar7 * (uint)TI_F_ZYL7;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0x7f;
+  }
+  uVar9 = (int)TI_SYNC7 + (iVar3 >> 7);
+  iVar7 = iVar7 * (uint)TI_F_ZYL8;
+  if (iVar7 < 0) {
+    iVar7 = iVar7 + 0x7f;
+  }
+  uVar8 = (int)TI_SYNC8 + (iVar7 >> 7);
+  if ((int)local_8 < (int)(uint)K_TI_MIN) {
+    local_8 = (uint)K_TI_MIN;
+  }
+  if ((int)local_c < (int)(uint)K_TI_MIN) {
+    local_c = (uint)K_TI_MIN;
+  }
+  if ((int)uVar5 < (int)(uint)K_TI_MIN) {
+    uVar5 = (uint)K_TI_MIN;
+  }
+  if ((int)uVar4 < (int)(uint)K_TI_MIN) {
+    uVar4 = (uint)K_TI_MIN;
+  }
+  if ((int)uVar1 < (int)(uint)K_TI_MIN) {
+    uVar1 = (uint)K_TI_MIN;
+  }
+  if ((int)uVar2 < (int)(uint)K_TI_MIN) {
+    uVar2 = (uint)K_TI_MIN;
+  }
+  if ((int)uVar9 < (int)(uint)K_TI_MIN) {
+    uVar9 = (uint)K_TI_MIN;
+  }
+  if ((int)uVar8 < (int)(uint)K_TI_MIN) {
+    uVar8 = (uint)K_TI_MIN;
+  }
+  if ((int)(uint)K_TI_MAX < (int)local_8) {
+    local_8 = (uint)K_TI_MAX;
+  }
+  if ((int)(uint)K_TI_MAX < (int)local_c) {
+    local_c = (uint)K_TI_MAX;
+  }
+  if ((int)(uint)K_TI_MAX < (int)uVar5) {
+    uVar5 = (uint)K_TI_MAX;
+  }
+  TI3 = (ushort)uVar5;
+  if ((int)(uint)K_TI_MAX < (int)uVar4) {
+    uVar4 = (uint)K_TI_MAX;
+  }
+  TI4 = (ushort)uVar4;
+  if ((int)(uint)K_TI_MAX < (int)uVar1) {
+    uVar1 = (uint)K_TI_MAX;
+  }
+  TI5 = (ushort)uVar1;
+  if ((int)(uint)K_TI_MAX < (int)uVar2) {
+    uVar2 = (uint)K_TI_MAX;
+  }
+  TI6 = (ushort)uVar2;
+  if ((int)(uint)K_TI_MAX < (int)uVar9) {
+    uVar9 = (uint)K_TI_MAX;
+  }
+  TI7 = (ushort)uVar9;
+  if ((int)(uint)K_TI_MAX < (int)uVar8) {
+    uVar8 = (uint)K_TI_MAX;
+  }
+  TI8 = (ushort)uVar8;
+  if ((((ZUSTAND_MOTOR & KI.15 aus) != 0) || ((ZUSTAND_MOTOR & S) != 0)) ||
+     ((ZUSTAND_MOTOR & Nachlauf) != 0)) {
+    local_8._2_2_ = 0;
+    local_c._2_2_ = 0;
+    TI3 = 0;
+    TI4 = 0;
+    TI5 = 0;
+    TI6 = 0;
+    TI7 = 0;
+    TI8 = 0;
+  }
+  TI1 = local_8._2_2_;
+  TI2 = local_c._2_2_;
+  uVar5 = kls_wint(&KL_TI_UB.sizeX,(ushort)UB);
+  TI_TPU_1OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI1) * 50000) / 0x1f08c);
+  TI_TPU_2OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI2) * 50000) / 0x1f08c);
+  TI_TPU_3OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI3) * 50000) / 0x1f08c);
+  TI_TPU_4OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI4) * 50000) / 0x1f08c);
+  TI_TPU_5OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI5) * 50000) / 0x1f08c);
+  TI_TPU_6OF8_ = (undefined2)((((uVar5 & 0xffff) + (uint)TI6) * 50000) / 0x1f08c);
+  if (((TI_ST_START & 8) != 0) && (N < 2000)) {
+    if (((TI_ST_PSP & 4) != 0) && ((TI_EV_DS2 & 1) == 0)) {
+      _PSP1_HIGH_TIME = TI_TPU_1OF8_;
+    }
+    if (((TI_ST_PSP & 8) != 0) && ((TI_EV_DS2 & 2) == 0)) {
+      _PSP2_HIGH_TIME = TI_TPU_2OF8_;
+    }
+    if (((TI_ST_PSP & 0x10) != 0) && ((TI_EV_DS2 & 4) == 0)) {
+      _PSP3_HIGH_TIME = TI_TPU_3OF8_;
+    }
+    if (((TI_ST_PSP & 0x20) != 0) && ((TI_EV_DS2 & 8) == 0)) {
+      _PSP4_HIGH_TIME = TI_TPU_4OF8_;
+    }
+    if (((TI_ST_PSP & 0x40) != 0) && ((TI_EV_DS2 & 0x10) == 0)) {
+      _PSP5_HIGH_TIME = TI_TPU_5OF8_;
+    }
+    if (((TI_ST_PSP & 0x80) != 0) && ((TI_EV_DS2 & 0x20) == 0)) {
+      _PSP6_HIGH_TIME = TI_TPU_6OF8_;
+    }
+  }
+  TI_UB = (short)uVar5;
+  TI_TPU_7OF8_ = (short)((((uVar5 & 0xffff) + (uint)TI7) * 50000) / 0x1f08c);
+  TI_TPU_8OF8_ = (short)((((uVar5 & 0xffff) + (uint)TI8) * 50000) / 0x1f08c);
+  return;
+}
+

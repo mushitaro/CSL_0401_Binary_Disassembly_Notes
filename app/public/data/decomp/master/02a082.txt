@@ -1,0 +1,111 @@
+
+void knock_related_4_(void)
+
+{
+  undefined4 uVar1;
+  int iVar2;
+  undefined4 unaff_D2;
+  uint uVar3;
+  byte bVar4;
+  byte bVar5;
+  short unaff_D4w;
+  byte bVar6;
+  undefined2 *puVar7;
+  short *psVar8;
+  short *psVar9;
+  byte *pbVar10;
+  
+  bVar4 = (zyl_count + TPU_SEGM_INDEX_TASK) - 3;
+  if (zyl_count <= bVar4) {
+    bVar4 = bVar4 - zyl_count;
+  }
+  uVar3 = CONCAT31((int3)((uint)unaff_D2 >> 8),bVar4);
+  bVar6 = 0;
+  pbVar10 = zyl_firing_order_table + (short)(ushort)bVar4 + 1;
+  do {
+    bVar4 = *pbVar10 - 1;
+    uVar3 = CONCAT31((int3)(uVar3 >> 8),bVar4);
+    if ((DAT_00ffe834_knock_evaluation_status_ & 1) != 0) {
+      puVar7 = &DAT_00ffe88c;
+      for (bVar4 = 0; bVar4 < zyl_count; bVar4 = bVar4 + 1) {
+        *puVar7 = 0;
+        puVar7 = puVar7 + 1;
+      }
+      KA_DTZ_SUM2 = 0;
+      KA_DTZ_SUM = 0;
+LAB_0002a0ee:
+      KA_DTZ_SUM1 = KA_DTZ_SUM2;
+      ka_can_calc(uVar3);
+      return;
+    }
+    if ((DAT_00ffe834_knock_evaluation_status_ & 2) != 0) {
+      uVar1 = FUN_00029dac((uint)K_KA_TZ_KS * -0x4000);
+      KA_DTZ_SUM = (short)uVar1;
+      psVar8 = &DAT_00ffe88e;
+      DAT_00ffe88c = KA_DTZ_SUM;
+      for (bVar4 = 1; bVar4 < zyl_count; bVar4 = bVar4 + 1) {
+        *psVar8 = DAT_00ffe88c;
+        KA_DTZ_SUM = DAT_00ffe88c + KA_DTZ_SUM;
+        psVar8 = psVar8 + 1;
+      }
+      iVar2 = (int)KA_DTZ_SUM;
+      if (iVar2 < 0) {
+        iVar2 = iVar2 + 1;
+      }
+      KA_DTZ_SUM2 = (short)(iVar2 >> 1);
+      goto LAB_0002a0ee;
+    }
+    if (((KM_TEL_ST[(short)(ushort)bVar4] & 0x400) != 0) &&
+       ((KM_TEL_ST[(short)(ushort)bVar4] & 0x800) == 0)) {
+      if (((KM_ST & 8) == 0) && (K_KA_BEGRENZ == '\x01')) {
+        unaff_D4w = -0x8000;
+        psVar8 = &DAT_00ffe836_knock_retard_adjustment_;
+        psVar9 = &DAT_00ffe88c;
+        for (bVar5 = 0; bVar5 < zyl_count; bVar5 = bVar5 + 1) {
+          if (unaff_D4w < (short)(*psVar8 + *psVar9)) {
+            unaff_D4w = *psVar8 + *psVar9;
+          }
+          psVar8 = psVar8 + 1;
+          psVar9 = psVar9 + 1;
+        }
+      }
+      if (((KM_FEN_SCHIEB == '\0') || (bVar4 < 2)) || (3 < bVar4)) {
+        iVar2 = (&DAT_00ffe89c)[bVar4];
+      }
+      else {
+        iVar2 = (uint)K_KA_TZ_KS * -0x4000;
+      }
+      uVar1 = FUN_00029dac(iVar2);
+      (&DAT_00ffe88c)[bVar4] = (short)uVar1;
+      if ((((KM_ST & 8) == 0) && (K_KA_BEGRENZ == '\x01')) &&
+         ((int)(short)(&DAT_00ffe836_knock_retard_adjustment_)[bVar4] + (int)(&DAT_00ffe88c)[bVar4]
+          < (int)((int)unaff_D4w - (uint)K_KR_DTZ_MAX))) {
+        (&DAT_00ffe88c)[bVar4] =
+             (unaff_D4w - (ushort)K_KR_DTZ_MAX) - (&DAT_00ffe836_knock_retard_adjustment_)[bVar4];
+        DAT_00ffe88a = '\x01' << (bVar4 & 0x3f) | DAT_00ffe88a;
+      }
+      KM_TEL_ST[(short)(ushort)bVar4] = KM_TEL_ST[(short)(ushort)bVar4] | 0x800;
+      ka_can_calc(uVar3);
+    }
+    bVar6 = bVar6 + 1;
+    pbVar10 = pbVar10 + 1;
+    if (1 < bVar6) {
+      if (zyl_count == 8) {
+        KA_DTZ_SUM1 = DAT_00ffe892 + DAT_00ffe890 + DAT_00ffe88e + DAT_00ffe88c;
+        KA_DTZ_SUM2 = DAT_00ffe89a + DAT_00ffe898 + DAT_00ffe896 + DAT_00ffe894;
+      }
+      else {
+        if (zyl_count != 6) {
+          KA_DTZ_SUM1 = DAT_00ffe892 + DAT_00ffe890 + DAT_00ffe88e + DAT_00ffe88c;
+          KA_DTZ_SUM = KA_DTZ_SUM1;
+          return;
+        }
+        KA_DTZ_SUM1 = DAT_00ffe890 + DAT_00ffe88e + DAT_00ffe88c;
+        KA_DTZ_SUM2 = DAT_00ffe896 + DAT_00ffe894 + DAT_00ffe892;
+      }
+      KA_DTZ_SUM = KA_DTZ_SUM2 + KA_DTZ_SUM1;
+      return;
+    }
+  } while( true );
+}
+

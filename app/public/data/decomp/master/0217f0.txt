@@ -1,0 +1,12 @@
+
+void rg_m_lookup(void)
+
+{
+  undefined4 uVar1;
+  
+                    /* 0401 Specific */
+  uVar1 = kfs_wint(&KF_RG_M.sizeX,N,RF);
+  rg_m = (short)uVar1;
+  return;
+}
+

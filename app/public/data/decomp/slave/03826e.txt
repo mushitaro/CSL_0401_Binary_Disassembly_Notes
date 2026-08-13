@@ -1,0 +1,42 @@
+
+void smg_clutch_demand_prep(void)
+
+{
+  undefined4 uVar1;
+  short sVar2;
+  byte bVar3;
+  ushort uVar4;
+  undefined1 *puVar5;
+  
+  DAT_00ffdb82 = 9;
+  if (DAT_00ffdc60 == 0) {
+    DAT_00ffdb84 = '\0';
+  }
+  sVar2 = DAT_00ffdb5a;
+  if ((DAT_00ffdb48 & 0x40) != 0) {
+    sVar2 = DAT_00ffdbb6;
+  }
+  if (sVar2 < 0) {
+    sVar2 = 0;
+  }
+  uVar1 = smg_asc_cap_request(sVar2,0x80);
+  uVar4 = (ushort)((int)((uint)DAT_00ffdb9c + (short)uVar1 * 0x100) / (int)(uint)DAT_00ffdb9a);
+  if (0xff < (short)uVar4) {
+    uVar4 = 0xff;
+  }
+  bVar3 = 0;
+  puVar5 = &DAT_00ffdb91;
+  do {
+    *puVar5 = (char)uVar4;
+    bVar3 = bVar3 + 1;
+    puVar5 = puVar5 + 1;
+  } while (bVar3 < 4);
+  DAT_00ffdb95 = (char)uVar4;
+  DAT_00ffdb86 = 0x80;
+  DAT_00ffdb88 = uVar4 & 0xff;
+  DAT_00ffdb8a = (short)uVar1;
+  DAT_00ffdb85 = DAT_00ffdc62;
+  DAT_00ffdb84 = DAT_00ffdb84 + '\x01';
+  return;
+}
+

@@ -1,0 +1,15 @@
+
+ulonglong can_b_rx_isr(void)
+
+{
+  undefined4 in_D0;
+  undefined4 in_D1;
+  
+  sys_active_interrupts = sys_active_interrupts + 1;
+  sys_isr_count = sys_isr_count + 1;
+  set_status_register(0x2200);
+  can_b_rx_handler();
+  sys_active_interrupts = sys_active_interrupts - 1;
+  return CONCAT44(in_D0,in_D1);
+}
+

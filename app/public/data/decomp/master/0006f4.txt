@@ -1,0 +1,24 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void db_stack_max_calc(void)
+
+{
+  short sVar1;
+  short *psVar2;
+  short *psVar3;
+  
+  if (K_DEBUG_CONTROL != 0) {
+                    /* The stack starts at 0x00ffe500 and expands downwards. Find the last entry in
+                       the stack */
+    psVar2 = &DAT_00ffe000;
+    do {
+      psVar3 = psVar2 + 1;
+      sVar1 = *psVar2;
+      psVar2 = psVar3;
+    } while (sVar1 == 0);
+    _DB_STACK_MAX = -0x1b00 - (short)psVar3;
+  }
+  return;
+}
+

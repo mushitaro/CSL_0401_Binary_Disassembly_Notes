@@ -1,0 +1,50 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void nmax_freeze_frame(void)
+
+{
+  byte bVar1;
+  short *psVar2;
+  
+  D_N = PT1_Filter_SS((N_SEGMENT - n_segment__t_1_) * 10,D_N,K_N_TAU_GRAD);
+  n_segment__t_1_ = N_SEGMENT;
+  if ((K_N_TBEGR < N) && ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    T_NBEGR = T_NBEGR + 100;
+    DAT_00ffecc0 = DAT_00ffecc0 + 100;
+    NMAX_FF_FLAG = NMAX_FF_FLAG | 1;
+  }
+  else {
+    if (NMAX_FF_FLAG == 7) {
+      NMAX_FF_DN = DAT_00ffecbe;
+      NMAX_FF_T = DAT_00ffecc0;
+      NMAX_FF_V = DAT_00ffecc2;
+      NMAX_FF_PWG = DAT_00ffecc4;
+      NMAX_FF_GANG = DAT_00ffecc5;
+      NMAX_FF_KM_STAND = DAT_00ffecc6;
+    }
+    NMAX_FF_FLAG = 0;
+  }
+  if ((NMAX_FF_FLAG != 0) && ((NMAX_FF_FLAG & 3) == 1)) {
+    NMAX_FF_FLAG = NMAX_FF_FLAG | 2;
+    _NMAX_FF_ANZAHL = _NMAX_FF_ANZAHL + 1;
+    DAT_00ffecc0 = 100;
+    DAT_00ffecc2 = V_ANTRIEB;
+    DAT_00ffecc4 = (undefined1)(PWG >> 2);
+    DAT_00ffecc5 = GANG;
+    DAT_00ffecc6 = CAN_KM_STAND;
+    DAT_00ffecbe = D_N;
+  }
+  if (0 < (short)(N - *(short *)(&DAT_000185e2 + (short)(DWF_ST & 7) * 4))) {
+    bVar1 = (byte)((int)(short)(N - *(short *)(&DAT_000185e2 + (short)(DWF_ST & 7) * 4)) / 500);
+    if (7 < bVar1) {
+      bVar1 = 7;
+    }
+    psVar2 = (short *)((int)N_T_DWF + (int)(short)((ushort)bVar1 * 2));
+    if (*psVar2 != -2) {
+      *psVar2 = *psVar2 + 1;
+    }
+  }
+  return;
+}
+

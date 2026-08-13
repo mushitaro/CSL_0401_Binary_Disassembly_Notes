@@ -1,0 +1,73 @@
+
+void smg_wheelbreak_recovery_controller(void)
+
+{
+  short sVar1;
+  short sVar4;
+  uint uVar2;
+  undefined4 uVar3;
+  ushort uVar5;
+  
+  DAT_00ffdbb2 = 6;
+  if (DAT_00ffdc60 == 0) {
+    DAT_00ffdbe2 = K_SMG_MOT_NL_T_MAX;
+    DAT_00ffdbe8 = 0;
+    DAT_00ffdb83 = DAT_00ffdb83 & 0xfb;
+  }
+  if (DAT_00ffdbe2 == K_SMG_MOT_NL_T_MAX) {
+    if (((V_ST & 0x40) == 0) && (DAT_00ffdc19 == '\0')) {
+      uVar5 = DAT_00ffdc08 + DAT_00ffdc36;
+      if ((short)uVar5 < 0) {
+        uVar5 = 0;
+      }
+      sVar4 = smg_expected_N_from_V_and_gear(uVar5,smg_can_istgang);
+      uVar2 = klu_wint(&KL_SMG_____DAT_0008aae4.sizeX,DAT_00ffdb9e);
+      uVar5 = sVar4 - (short)uVar2;
+      if (((DAT_00ffdb83 & 4) != 0) && ((int)(uint)DAT_00ffdbd8 < (int)(short)uVar5)) {
+        uVar5 = DAT_00ffdbd8;
+      }
+      uVar3 = smg_engine_speed_controller_step(uVar5,DAT_00ffdc60);
+      sVar4 = (short)uVar3;
+    }
+    else {
+      sVar4 = 0;
+    }
+    if ((((SCHALT_M_ST & 0x80) != 0) || ((ASC_SCHALTER & 0x20) != 0)) &&
+       ((ASC_SCHALTER & 0x10) != 0)) {
+      DAT_00ffdb83 = DAT_00ffdb83 | 4;
+    }
+    if ((int)DAT_00ffdb30 < (int)-(uint)K_SMG_N_NULL) {
+      DAT_00ffdbec = -DAT_00ffdb58;
+    }
+    else {
+      DAT_00ffdbec = K_SMG_MOT_RAB_M_MIN;
+    }
+    DAT_00ffdbea = K_SMG_MOT_RAB_M_MAX;
+    if (sVar4 < DAT_00ffdbec) {
+      sVar4 = DAT_00ffdbec;
+    }
+    if (K_SMG_MOT_RAB_M_MAX < sVar4) {
+      sVar4 = K_SMG_MOT_RAB_M_MAX;
+    }
+    sVar1 = DAT_00ffdb5a;
+    if (DAT_00ffdb5a <= sVar4) {
+      if (K_SMG_MOT_RAB_T_MAX <= DAT_00ffdbe8) {
+        if ((int)(short)DAT_00ffdb58 < (int)(uint)DAT_00ffdbba) {
+          DAT_00ffdbb6 = 0;
+          DAT_00ffdbba = DAT_00ffdb58;
+          DAT_00ffdbbc = DAT_00ffdb58;
+        }
+        goto LAB_00039b8e;
+      }
+      DAT_00ffdbe8 = DAT_00ffdbe8 + 1;
+      sVar1 = sVar4;
+    }
+    DAT_00ffdbb6 = sVar1;
+    smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,0x80);
+    return;
+  }
+LAB_00039b8e:
+  smg_start_window_service();
+  return;
+}
+

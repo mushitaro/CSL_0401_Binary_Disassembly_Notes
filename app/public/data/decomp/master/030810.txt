@@ -1,0 +1,112 @@
+
+void obd_schedule_advance(byte param_1)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  undefined1 *puVar4;
+  struct_ed_fil *psVar5;
+  undefined1 *puVar6;
+  undefined1 *puVar7;
+  undefined1 *local_8;
+  
+  if (param_1 < 0x20) {
+    if ((char)DAT_00ffd200 != '\0') {
+      DAT_00ffd200._1_1_ = (char)DAT_00ffd200 + -1;
+    }
+    if ((&DAT_00ffd202)[(uint)param_1 * 0x16] == FF_INDEX) {
+      obd_freeze_frame_reset();
+      obd_clear_cycle_counters();
+    }
+    for (bVar3 = 0; (int)(uint)bVar3 < (int)(0x1f - (uint)param_1); bVar3 = bVar3 + 1) {
+      bVar1 = bVar3 + param_1;
+      (&DAT_00ffd202)[(uint)bVar1 * 0x16] = (&DAT_00ffd218)[(uint)bVar1 * 0x16];
+      (&DAT_00ffd203)[(uint)bVar1 * 0x16] = (&DAT_00ffd219)[(uint)bVar1 * 0x16];
+      (&DAT_00ffd205)[(uint)bVar1 * 0x16] = (&DAT_00ffd21b)[(uint)bVar1 * 0x16];
+      (&DAT_00ffd204)[(uint)bVar1 * 0x16] = (&DAT_00ffd21a)[(uint)bVar1 * 0x16];
+      bVar2 = 0;
+      puVar6 = &DAT_00ffd21c + (uint)bVar1 * 0x16;
+      puVar7 = &DAT_00ffd206 + (uint)bVar1 * 0x16;
+      do {
+        bVar1 = 0;
+        puVar4 = puVar6;
+        local_8 = puVar7;
+        do {
+          *local_8 = *puVar4;
+          bVar1 = bVar1 + 1;
+          puVar4 = puVar4 + 1;
+          local_8 = local_8 + 1;
+        } while (bVar1 < 4);
+        puVar7[4] = puVar6[4];
+        puVar7[5] = puVar6[5];
+        puVar7 = puVar7 + 6;
+        puVar6 = puVar6 + 6;
+        bVar2 = bVar2 + 1;
+      } while (bVar2 < 3);
+    }
+    DAT_00ffd4ac = 0;
+    DAT_00ffd4ad = 0;
+    DAT_00ffd4af = 0;
+    DAT_00ffd4ae = 0;
+    bVar3 = 0;
+    puVar6 = &DAT_00ffd4b0;
+    do {
+      bVar1 = 0;
+      puVar7 = puVar6;
+      do {
+        *puVar7 = 0;
+        bVar1 = bVar1 + 1;
+        puVar7 = puVar7 + 1;
+      } while (bVar1 < 4);
+      puVar6[4] = 0;
+      puVar6[5] = 0;
+      puVar6 = puVar6 + 6;
+      bVar3 = bVar3 + 1;
+    } while (bVar3 < 3);
+  }
+  else {
+    bVar3 = 1;
+    psVar5 = ed_fil_base;
+    do {
+      psVar5 = psVar5 + 1;
+      psVar5->ED_FIL_FIL = 0;
+      psVar5->ED_FIL_CNT = 0;
+      psVar5->ED_FIL_ART = 0;
+      psVar5->ED_FIL_OBD = 0;
+      psVar5->ED_FIL_ST = 0;
+      psVar5->ED_FIL_XT = 0;
+      bVar3 = bVar3 + 1;
+    } while (bVar3 < 0x80);
+    DAT_00ffd200._1_1_ = '\0';
+    bVar3 = 0;
+    puVar6 = &DAT_00ffd202;
+    do {
+      *puVar6 = 0;
+      puVar6[1] = 0;
+      puVar6[3] = 0;
+      puVar6[2] = 0;
+      bVar1 = 0;
+      puVar7 = puVar6 + 4;
+      do {
+        bVar2 = 0;
+        puVar4 = puVar7;
+        do {
+          *puVar4 = 0;
+          bVar2 = bVar2 + 1;
+          puVar4 = puVar4 + 1;
+        } while (bVar2 < 4);
+        puVar7[4] = 0;
+        puVar7[5] = 0;
+        puVar7 = puVar7 + 6;
+        bVar1 = bVar1 + 1;
+      } while (bVar1 < 3);
+      puVar6 = puVar6 + 0x16;
+      bVar3 = bVar3 + 1;
+    } while (bVar3 < 0x20);
+    obd_full_reinit();
+  }
+  FUN_00030a34();
+  return;
+}
+

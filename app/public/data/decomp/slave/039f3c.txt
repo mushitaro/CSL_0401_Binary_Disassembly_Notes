@@ -1,0 +1,194 @@
+
+void smg_state_supervisor(void)
+
+{
+  undefined3 extraout_var;
+  byte bVar3;
+  int iVar1;
+  uint uVar2;
+  enum_smg_can_fahrzustand smg_can_fahrzustand_temp;
+  ushort uVar4;
+  ushort uVar5;
+  enum_smg_can_istgang smg_can_gewuenschter_gang_temp;
+  enum_smg_can_istgang smg_can_istgang_temp;
+  
+  bVar3 = set_status_register(0x2700);
+  smg_can_gewuenschter_gang_temp = smg_can_gewuenschter_gang;
+  smg_can_istgang_temp = smg_can_istgang;
+  smg_can_fahrzustand_temp = smg_can_fahrzustand;
+  if ((DAT_00ffdb00 & 8) != 0) {
+    smg_can_fahrzustand_temp = Schalten(Shifting);
+  }
+  set_status_register((short)CONCAT31(extraout_var,bVar3));
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (smg_can_istgang == Neutral)) {
+    if (((K_SMG_TESTMODE & 1) != 0) &&
+       (((CFG_RAM_SG_TYP & 2) != 0 &&
+        (smg_can_fahrzustand_temp = Abwuergen(Stalling),
+        (ushort)((ushort)K_SMG_N_ZIEL_ABWUERG * 0x28) != DAT_00ffdbd8)))) {
+      DAT_00ffdc60 = 0;
+      DAT_00ffdbc2 = 0;
+    }
+    if (((smg_can_fahrzustand_temp == Other) && (1 < DAT_00ffdb1d__SMGCAN_WAEHLHEBELANZEIGE_)) &&
+       (3 < V)) {
+      smg_can_fahrzustand_temp = Abwuergen(Stalling);
+    }
+  }
+  uVar5 = K_SMG_____DAT_0008a832;
+  uVar4 = K_SMG_____DAT_0008a830;
+  if (DAT_00ffdb3a == 0) {
+    uVar5 = K_SMG_____DAT_0008a832 >> 1;
+    uVar4 = K_SMG_____DAT_0008a830 >> 1;
+  }
+  if ((((ZUSTAND_MOTOR & LL) != 0) || ((int)DAT_00ffdb5a < (int)-(uint)uVar5)) || (5 < DAT_00ffdb6e)
+     ) {
+    if ((DAT_00ffdb6c & 1) != 0) {
+      DAT_00ffdc20 = 0;
+      DAT_00ffdb6e = DAT_00ffdb6e + 1;
+    }
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xfffe;
+  }
+  if ((int)(uint)uVar4 < (int)DAT_00ffdb5a) {
+    if ((DAT_00ffdb6c & 1) == 0) {
+      DAT_00ffdc20 = 0;
+      DAT_00ffdb6e = DAT_00ffdb6e + 1;
+    }
+    DAT_00ffdb6c = DAT_00ffdb6c | 1;
+  }
+  if ((smg_can_fahrzustand == Racestart) && (K_SMG_____DAT_0008a896 == '\0')) {
+    DAT_00ffdb6c = DAT_00ffdb6c | 0x80;
+  }
+  if ((DAT_00ff8066 & 1) == 0) {
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xff7f;
+  }
+  if ((ki_scha == '\x0e') || ((ki_scha == '\r' && (DAT_00ffdb3a < 2)))) {
+    DAT_00ffdb6c = DAT_00ffdb6c | 0x40;
+  }
+  else {
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xffbf;
+  }
+  if ((smg_fahrzustand == Schalten(Shifting)) &&
+     (smg_can_gewuenschter_gang_temp != smg_gewuenschter_gang)) {
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xfff9 | 0x10;
+  }
+  if ((smg_gewuenschter_gang < smg_can_gewuenschter_gang_temp) ||
+     (smg_can_istgang_temp < smg_can_gewuenschter_gang_temp)) {
+    DAT_00ffdb6c = DAT_00ffdb6c | 2;
+  }
+  else if ((smg_can_gewuenschter_gang_temp < smg_gewuenschter_gang) ||
+          (smg_can_gewuenschter_gang_temp < smg_can_istgang_temp)) {
+    DAT_00ffdb6c = DAT_00ffdb6c | 4;
+  }
+  if (smg_can_fahrzustand_temp == Schalten(Shifting)) {
+    if (smg_fahrzustand == Hillclimbassist) {
+      DAT_00ffdb6c = DAT_00ffdb6c | 0x820;
+    }
+    if ((DAT_00ffdb6c & 0x800) == 0) {
+      if ((((smg_can_istgang == Neutral) || (smg_can_istgang == Reverse)) ||
+          (smg_can_gewuenschter_gang == Neutral)) || (smg_can_gewuenschter_gang == Reverse)) {
+        DAT_00ffdb6c = DAT_00ffdb6c | 0x20;
+      }
+      else {
+        DAT_00ffdb6c = DAT_00ffdb6c & 0xffdf;
+      }
+    }
+    if (((DAT_00ffdb6c & 1) != 0) || (((DAT_00ffdc69 & 1) != 0 && (DAT_00ffdb3a == 2)))) {
+      DAT_00ffdb6c = DAT_00ffdb6c & 0xffdf;
+    }
+    if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+      DAT_00ffdb6c = DAT_00ffdb6c | 0x20;
+    }
+  }
+  else {
+    DAT_00ffdb3a = 0;
+    DAT_00ffdb4c = DAT_00ffdb6c & 0x89;
+    DAT_00ffdb6e = 0;
+    DAT_00ffdb28 = N40;
+    iVar1 = (int)DAT_00ffdc70;
+    if (iVar1 < 0) {
+      iVar1 = iVar1 + 0xff;
+    }
+    DAT_00ffdb29 = (undefined1)((uint)iVar1 >> 8);
+    DAT_00ffdb2a = ASC_AY;
+    if (SMG_DWF_DPR == '\0') {
+      DAT_00ffdbb3 = DAT_00ffdbb3 & 0xfd;
+    }
+    else {
+      DAT_00ffdbb3 = DAT_00ffdbb3 | 2;
+    }
+    if ((ASC_ST & 1) == 0) {
+      DAT_00ffdc7e = 0;
+    }
+    else if (DAT_00ffdc7e < K_SMG_____DAT_0008a81e) {
+      DAT_00ffdc7e = DAT_00ffdc7e + 1;
+    }
+    DAT_00ffe63a = DAT_00ffe63a + -1;
+    DAT_00ffdb6c = DAT_00ffdb4c;
+    if (DAT_00ffe63a == '\0') {
+      smg_ki_drive_logic_indicator_update();
+      smg_update_ki_regulation_params();
+      DAT_00ffe63a = '\x05';
+    }
+  }
+  if (smg_can_fahrzustand_temp != smg_fahrzustand) {
+    DAT_00ffdc60 = 0;
+    DAT_00ffdc64 = 0;
+  }
+  switch(smg_can_fahrzustand_temp) {
+  case Anfahren(Starting):
+    smg_clutch_demand_prep();
+    smg_start_baseline_demand_update();
+    break;
+  case Schalten(Shifting):
+    DAT_00ffdb3a = smg_shift_phase_fsm_update();
+    smg_shift_abregel_ramp_correction_update();
+    uVar5 = DAT_00ffdb6c & 0xe0;
+    if (uVar5 == 0x20) {
+      smg_shift_phase_dispatch_basic();
+    }
+    else if ((uVar5 == 0x40) || (uVar5 == 0xc0)) {
+      smg_shift_speed_reg_dispatcher();
+    }
+    else {
+      smg_shift_phase_dispatch_default();
+    }
+    uVar2 = (uint)(ushort)(DAT_00ffdc64 + 0x10);
+    iVar1 = uVar2 + 8;
+    if (SCARRY4(uVar2,8)) {
+      iVar1 = uVar2 + 0x17;
+    }
+    smg_fahrzustand = smg_can_fahrzustand_temp;
+    smg_gewuenschter_gang = smg_can_gewuenschter_gang_temp;
+    DAT_00ffdc60 = (short)(iVar1 >> 4);
+    DAT_00ffdc64 = DAT_00ffdc64 + 0x10;
+    return;
+  default:
+    DAT_00ffdc60 = 0;
+    DAT_00ffdc64 = 0;
+    DAT_00ffdb3a = 0;
+    smg_build_clutch_ff_curve();
+    smg_start_window_service();
+    smg_fahrzustand = smg_can_fahrzustand_temp;
+    smg_gewuenschter_gang = smg_can_gewuenschter_gang_temp;
+    return;
+  case Abwuergen(Stalling):
+    smg_build_clutch_ff_curve();
+    smg_anti_stall_handler();
+    break;
+  case Radabriss(WheelBreakage):
+    smg_clutch_demand_prep();
+    smg_wheelbreak_recovery_controller();
+    break;
+  case Racestart:
+    smg_clutch_demand_prep();
+    smg_racestart_target_update();
+    break;
+  case Anfahrhilfe(TractionAid):
+    smg_clutch_demand_prep();
+    smg_traction_aid_target_update(DAT_00ffdc60);
+  }
+  DAT_00ffdc60 = DAT_00ffdc60 + 1;
+  smg_fahrzustand = smg_can_fahrzustand_temp;
+  smg_gewuenschter_gang = smg_can_gewuenschter_gang_temp;
+  return;
+}
+

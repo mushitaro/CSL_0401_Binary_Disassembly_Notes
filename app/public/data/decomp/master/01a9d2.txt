@@ -1,0 +1,62 @@
+
+/* This function runs in the Segment Task */
+
+void rf_soll_calc(void)
+
+{
+  uint rf_soll_temp;
+  int rf_soll_kath_temp;
+  undefined4 rf_soll_ask_temp;
+  ushort rf_soll_no_filter;
+  ushort tau_local;
+  uint rf_soll__t_1_;
+  
+                    /* Base target from Alpha-N. This is the steady-state reference the ECU would
+                       use with no special phases active. */
+  rf_soll_temp = kfu_wint(&kf_rf_soll.sizeX,N,aq_rel_rf);
+                    /* Warmup/catalyst adjustment. During warm up the engine is intentionally run
+                       off its normal targets. AVAN1_SOLL_FAKTOR acts like a “blend knob”: near
+                       100% during warmup (favor the warmup map), then ramps down toward 0 as warmup
+                       completes (returning to the base map). */
+  rf_soll_no_filter = (ushort)rf_soll_temp;
+  if (AVAN1_SOLL_FAKTOR != 0) {
+    rf_soll_kath_temp = kfu_wint(&kf_rf_soll_kath.sizeX,N,aq_rel_rf);
+                    /* Blend the warmup target toward/away from the base depending on the current
+                       factor. */
+    rf_soll_kath_temp = (int)AVAN1_SOLL_FAKTOR * (rf_soll_kath_temp - (rf_soll_temp & 0xffff));
+    if (rf_soll_kath_temp < 0) {
+                    /* Keep rounding neutral when the intermediate is negative. */
+      rf_soll_kath_temp = rf_soll_kath_temp + 0x3fff;
+    }
+    rf_soll_no_filter = (short)(rf_soll_kath_temp >> 0xe) + (ushort)rf_soll_temp;
+  }
+                    /* Intake-flap (ASK) contribution. When the flap is open an additive factor is
+                       added to rf_soll */
+  if ((ask_zustand_dpr & 1) != 0) {
+    rf_soll_ask_temp = kfu_wint(&kf_rf_soll_ask.sizeX,N,aq_rel_rf);
+    rf_soll_no_filter = (short)rf_soll_ask_temp + rf_soll_no_filter;
+  }
+                    /* let the target rise more gently (avoids abrupt tip-in) but let it fall
+                       quickly (keeps up with lifting the pedal or fuel cuts). We pick a “rise”
+                       or “fall” time constant based on whether the new request is above or
+                       below the previous filtered value. */
+  tau_local = k_rf_soll_tau_down;
+  if (rf_soll_filter < rf_soll_no_filter) {
+    tau_local = rf_soll_tau_up;
+  }
+                    /* Standard one-pole smoothing with rounding to avoid bias on tiny changes. */
+  rf_soll__t_1_ =
+       (int)((uint)tau_local * (uint)rf_soll_no_filter +
+             (uint)rf_soll_filter * (16384 - (uint)tau_local) + 8192) >> 0xe;
+  rf_soll_filter = (short)rf_soll__t_1_;
+                    /* Final pressure/temperature correction. After shaping the request, scale it so
+                       the target corresponds to current air density. This keeps the commanded fill
+                       consistent across ambient and thermal conditions.  */
+  rf_soll_kath_temp = (rf_soll__t_1_ & 0xffff) * (uint)RF_PT_KORR;
+  if (rf_soll_kath_temp < 0) {
+    rf_soll_kath_temp = rf_soll_kath_temp + 0xfff;
+  }
+  rf_soll = (uint16_t)(rf_soll_kath_temp >> 0xc);
+  return;
+}
+

@@ -1,0 +1,67 @@
+
+void n_segment_calc(void)
+
+{
+  short sVar1;
+  int iVar2;
+  char cVar3;
+  uint uVar4;
+  int *piVar5;
+  bool bVar6;
+  
+  sVar1 = tpu_last_tooth_timestamp;
+  T_PERIOD = sVar1 - tpu_previous_tooth_timestamp;
+  sys_tics_since_prev_seg = SYS_TIMERTICS_COUNTER._2_2_ - sys_tics_prev_seg;
+  sys_tics_prev_seg = SYS_TIMERTICS_COUNTER._2_2_;
+  if (T_PERIOD < 0x8001) {
+    bVar6 = SCARRY4((uint)sys_tics_since_prev_seg * 0x30,0x120);
+    iVar2 = (uint)sys_tics_since_prev_seg * 0x30 + 0x120;
+  }
+  else {
+    bVar6 = SBORROW4((uint)sys_tics_since_prev_seg * 0x30,0x120);
+    iVar2 = (uint)sys_tics_since_prev_seg * 0x30 + -0x120;
+  }
+  if (bVar6 != iVar2 < 0) {
+    iVar2 = iVar2 + 0x3ff;
+  }
+  T_SEGMENT_HW = (undefined2)(iVar2 >> 10);
+  T_SEGMENT = (uint)T_PERIOD + (iVar2 >> 10) * 0x10000;
+  tpu_previous_tooth_timestamp = sVar1;
+  n_st_calc();
+  if ((N < 0xc9) || ((TPU_ST_M & N-Segm gesperrt) != in Ordnung)) {
+    N_ST = N_ST | 1;
+    N_SEGMENT_ROH = N;
+  }
+  else if (T_SEGMENT == 0) {
+    N_ST = N_ST | 1;
+  }
+  else {
+    N_SEGMENT_ROH = (ushort)(0x1681a844 / (int)(T_SEGMENT * (uint)zyl_count));
+    N_ST = N_ST & 0xfe;
+  }
+  t_segm_history[(short)(ushort)TPU_SEGM_INDEX_M] = T_SEGMENT;
+  uVar4 = 0;
+  piVar5 = t_segm_history;
+  for (cVar3 = '\0'; (int)cVar3 < (int)(uint)zyl_count; cVar3 = cVar3 + '\x01') {
+    uVar4 = *piVar5 + uVar4;
+    piVar5 = piVar5 + 1;
+  }
+  if (uVar4 == 0) {
+    D_N_SEGMENT = 0;
+  }
+  else {
+    D_N_SEGMENT = (undefined2)
+                  ((int)(((uint)N_SEGMENT_ROH - (uint)n_segment_history[TPU_SEGM_INDEX_M]) * 0x30039
+                        ) / (int)(uVar4 >> 4));
+  }
+  n_segment_history[TPU_SEGM_INDEX_M] = N_SEGMENT_ROH;
+  for (cVar3 = TPU_SEGM_INDEX_M - K_N_FILTER_SEGMENTE; cVar3 < '\0'; cVar3 = zyl_count + cVar3) {
+  }
+  iVar2 = (uint)N_SEGMENT_ROH + (uint)n_segment_history[cVar3];
+  if (SCARRY4((uint)N_SEGMENT_ROH,(uint)n_segment_history[cVar3])) {
+    iVar2 = iVar2 + 1;
+  }
+  N_SEGMENT = (short)(iVar2 >> 1);
+  return;
+}
+

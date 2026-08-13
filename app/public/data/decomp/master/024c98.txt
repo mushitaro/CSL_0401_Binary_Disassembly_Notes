@@ -1,0 +1,13 @@
+
+/* EGAS Safety Concept Computer Core Test Task 2 - Characteristic interpolation of the type singed
+   short */
+
+byte SK_TR_Test_2(byte *param_1)
+
+{
+  short sVar1;
+  
+  sVar1 = kls_wint(&KL_SK_TR_SW_M.sizeX,(ushort)param_1[1] + (ushort)*param_1 * 0x100);
+  return (byte)sVar1 ^ (byte)((ushort)sVar1 >> 8);
+}
+

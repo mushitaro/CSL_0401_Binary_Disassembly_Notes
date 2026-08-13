@@ -1,0 +1,56 @@
+
+/* WARNING: This function may have set the stack pointer */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void main(void)
+
+{
+  int iVar1;
+  bool bVar2;
+  
+  _DAT_00fffa00 = 0xc046;
+  DAT_00fffa21 = 0xbd;
+  DAT_00fffa27 = 0xaa;
+  iVar1 = 0x276;
+  do {
+    bVar2 = iVar1 != 0;
+    iVar1 = iVar1 + -1;
+  } while (bVar2);
+  _DAT_00fffa04 = 0xd700;
+  FUN_000106d6();
+  DAT_00fffa41 = 0x40;
+  _DAT_00fffa44 = 0x2fff;
+  _DAT_00fffa46 = 0x20a;
+  _DAT_00fffa50 = 0x13f8;
+  DAT_00fffa52 = 0x3830;
+  _DAT_00fffa54 = 0x13f8;
+  DAT_00fffa56 = 0x5830;
+  DAT_00ffe3fc = 0x10498;
+  FUN_000111b0();
+  DAT_00ffe3fc = 0x1049e;
+  SIM_Init();
+  if ((CFG_RAM_SG_TYP & 2) != 0) {
+    DAT_00ffe3fc = 0x104ae;
+    FUN_0004192c();
+    DAT_00ffe3fc = 0x104b4;
+    FUN_00041a42();
+  }
+  DAT_00ffe3fc = 0x104ba;
+  FUN_00010778();
+  DAT_00ffe3fc = 0x104c0;
+  FUN_0001104e();
+  DAT_00ffe3fc = 0x104c6;
+  TPU_Init();
+  DAT_00ffe3fc = 0x104cc;
+  FUN_00011118();
+  DAT_00ffe3fc = 0x104d2;
+  FUN_000408ca();
+  DAT_00ffe3fc = 0x104d8;
+  FUN_00040898();
+  DAT_00ffe3fc = 0x104fc;
+  Init_CPU();
+  DAT_00ffe3fc = 0x10502;
+  task_bgnd();
+  return;
+}
+

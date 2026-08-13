@@ -1,0 +1,48 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+byte mil_bmw_st_calc(void)
+
+{
+  byte bVar1;
+  byte in_D0b;
+  char cVar2;
+  
+  if (K_MIL_MODE_M == '\x01') {
+    cVar2 = K_MIL_MIN_ERR_CNT_M <= (byte)DAT_00ffd200;
+    bVar1 = RESET_STATUS;
+    in_D0b = bVar1 & 0x3d;
+    if ((in_D0b != 0) || ((bVar1 = RESET_STATUS, (bVar1 & 2) != 0 && (_EXC_PC != 0)))) {
+      cVar2 = '\x03';
+    }
+    if (CPU_Identifier == 'M') {
+      if (cVar2 == '\0') {
+        MIL_ST = MIL_ST & 0xfe;
+      }
+      else {
+        MIL_ST = MIL_ST | 1;
+      }
+      if (cVar2 == '\x03') {
+        MIL_ST = MIL_ST | 2;
+      }
+      else {
+        MIL_ST = MIL_ST & 0xfd;
+      }
+      MIL_ST = MIL_ST_S & 3 | MIL_ST;
+      return MIL_ST_S & 3;
+    }
+    if (cVar2 == '\0') {
+      MIL_ST_S = MIL_ST_S & 0xfe;
+    }
+    else {
+      MIL_ST_S = MIL_ST_S | 1;
+    }
+    if (cVar2 == '\x03') {
+      MIL_ST_S = MIL_ST_S | 2;
+      return in_D0b;
+    }
+    MIL_ST_S = MIL_ST_S & 0xfd;
+  }
+  return in_D0b;
+}
+

@@ -1,0 +1,60 @@
+
+void smg_vehicle_speed_slope_estimator(void)
+
+{
+  ushort uVar1;
+  int iVar2;
+  short sVar3;
+  
+  uVar1 = DAT_00ffdc36;
+  if (((((SCHALTER_CAN & 0x40) != 0) || ((DAT_00ffdc16 & 0x20) != 0)) || ((V_ST & 0x40) != 0)) ||
+     ((cfg_s_betriebsmode == '\x02' || (CFG_ROLLENBETRIEB != '\0')))) {
+    DAT_00ffdc06 = '\0';
+    DAT_00ffdc02 = 0;
+    DAT_00ffdc0b = 'd';
+  }
+  if (((smg_can_fahrzustand == Radabriss(WheelBreakage)) ||
+      (((DAT_00ffdb6c & 1) != 0 && ((ASC_SCHALTER & 1) != 0)))) ||
+     (((SCHALT_M_ST & 0x80) != 0 || (((ASC_SCHALTER & 0x10) != 0 || (smg_can_istgang == Reverse)))))
+     ) {
+    DAT_00ffdc0b = 'd';
+  }
+  else if (DAT_00ffdc0b != '\0') {
+    DAT_00ffdc0b = DAT_00ffdc0b + -1;
+  }
+  if (DAT_00ffdc06 == -6) {
+    if (DAT_00ffdc0a == '\0') {
+      DAT_00ffdc00 = (short)(DAT_00ffdc02 / 0xfa);
+      DAT_00ffdc06 = '\0';
+      DAT_00ffdc02 = 0;
+    }
+    else {
+      DAT_00ffdc0a = DAT_00ffdc0a + -1;
+    }
+  }
+  else {
+    DAT_00ffdc0a = '\x14';
+    if ((((DAT_00ffdb3a == '\x02') && (DAT_00ffdb0e == '\0')) && (0x14 < DAT_00ffdc62)) &&
+       ((DAT_00ffdc0b == '\0' && (0x140 < DAT_00ffdc36)))) {
+      iVar2 = abs((int)LWS_LRW);
+      if (iVar2 < 0xfa) {
+        sVar3 = DAT_00ffdc38 - uVar1;
+        if (sVar3 < -0x140) {
+          sVar3 = -0x140;
+        }
+        if (0x140 < sVar3) {
+          sVar3 = 0x140;
+        }
+        DAT_00ffdc02 = ((int)sVar3 << 0xc) / (int)(uint)uVar1 + DAT_00ffdc02;
+        DAT_00ffdc06 = DAT_00ffdc06 + '\x01';
+      }
+    }
+  }
+  iVar2 = (uint)uVar1 * (int)DAT_00ffdc00;
+  if (iVar2 < 0) {
+    iVar2 = iVar2 + 0xfff;
+  }
+  DAT_00ffdc08 = (short)(iVar2 >> 0xc);
+  return;
+}
+

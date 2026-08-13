@@ -1,0 +1,51 @@
+
+uint can_rx_62f(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  undefined4 in_D0;
+  uint uVar1;
+  byte local_c [8];
+  
+                    /* 0401 Specific? */
+  if (*rx_frame_struct->slot_state_table_entry_ptr == '\0') {
+    uVar1 = can_a_rx_frame_data(local_c,rx_frame_struct);
+    CAN_TEL_EMPF = CAN_TEL_EMPF | 0x20;
+    if (local_c[0] == 0xff) {
+      if ((T_UMG_ST & 1) != 0) {
+        T_UMG = T_UMG_ERSATZ;
+      }
+      T_UMG_ST = T_UMG_ST | 0x80;
+    }
+    else {
+      if ((char)local_c[0] < '\0') {
+        local_c[0] = -(local_c[0] & 0x7f);
+        uVar1 = (uint)(char)local_c[0];
+        if ((int)uVar1 < -0x30) {
+          local_c[0] = 0xd0;
+        }
+      }
+      T_UMG = local_c[0] + 0x30;
+      uVar1 = CONCAT31((int3)(uVar1 >> 8),T_UMG);
+      T_UMG_ST = 0;
+    }
+    if (CAN_ED_ZSG != '\0') {
+      uVar1 = ed_report(DTC_DE_ZSG_CAN_TIMEOUT,0);
+      CAN_ED_ZSG = (char)uVar1;
+    }
+  }
+  else {
+    *rx_frame_struct->slot_state_table_entry_ptr = 0;
+    CAN_TEL_EMPF = CAN_TEL_EMPF & 0xffdf;
+    uVar1 = CONCAT22((short)((uint)in_D0 >> 0x10),CAN_TEL_ST) & 0xffff0020;
+    if ((CAN_TEL_ST & 0x20) != 0) {
+      uVar1 = ed_report(DTC_DE_ZSG_CAN_TIMEOUT,4);
+      CAN_ED_ZSG = (char)uVar1;
+    }
+    if ((T_UMG_ST & 1) != 0) {
+      T_UMG = T_UMG_ERSATZ;
+    }
+    T_UMG_ST = T_UMG_ST | 0x80;
+  }
+  return uVar1;
+}
+

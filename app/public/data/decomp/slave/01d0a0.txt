@@ -1,0 +1,23 @@
+
+void ti_idle_sync_offset_per_cyl(void)
+
+{
+  byte bVar1;
+  uint uVar2;
+  
+  bVar1 = N40;
+  if (N40 < 0x10) {
+    bVar1 = 0xf;
+  }
+  uVar2 = (uint)K_N_LL_SYNC;
+  TI_SYNC1 = (short)((int)(uVar2 * (int)TI_LL_Z1) / (int)(uint)bVar1);
+  TI_SYNC2 = (short)((int)(uVar2 * (int)TI_LL_Z2) / (int)(uint)bVar1);
+  TI_SYNC3 = (short)((int)(uVar2 * (int)TI_LL_Z3) / (int)(uint)bVar1);
+  TI_SYNC4 = (short)((int)(uVar2 * (int)TI_LL_Z4) / (int)(uint)bVar1);
+  TI_SYNC5 = (short)((int)(uVar2 * (int)TI_LL_Z5) / (int)(uint)bVar1);
+  TI_SYNC6 = (short)((int)(uVar2 * (int)TI_LL_Z6) / (int)(uint)bVar1);
+  TI_SYNC7 = (short)((int)(uVar2 * (int)TI_LL_Z7) / (int)(uint)bVar1);
+  TI_SYNC8 = (short)((int)(uVar2 * (int)TI_LL_Z8) / (int)(uint)bVar1);
+  return;
+}
+

@@ -1,0 +1,13 @@
+
+void qsm_interrupt_handler(void)
+
+{
+  if (((DAT_00ffe98e & 4) != 0) || ((DAT_00ffe98e & 1) != 0)) {
+    qsm_recieve_fsm();
+  }
+  if (((DAT_00ffe98e & 2) != 0) || ((DAT_00ffe98e & 1) != 0)) {
+    qsm_transmit_fsm();
+  }
+  return;
+}
+

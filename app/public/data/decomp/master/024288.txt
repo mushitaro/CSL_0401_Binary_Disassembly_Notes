@@ -1,0 +1,13 @@
+
+void edk_diag_reset(void)
+
+{
+  if ((b_diag == 0) || ((ZUSTAND_MOTOR & S) == 0)) {
+    EDK_TR_DIAG_STAT = EDK_TR_DIAG_STAT & 0x3f;
+    EDK_SOLL_DIAG = 0;
+    EDK_DS2_STATUS = 0;
+    EDK_DS2_SOLLW_ALT = 0xfff6;
+  }
+  return;
+}
+

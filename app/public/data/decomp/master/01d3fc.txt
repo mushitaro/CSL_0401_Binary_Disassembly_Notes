@@ -1,0 +1,37 @@
+
+void v_calc(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  if ((K_V_CONTROL == '\x02') && ((V_ST & 0x40) == 0)) {
+    iVar2 = (uint)V_RAD_HR + (uint)V_RAD_HL;
+    if (SCARRY4((uint)V_RAD_HR,(uint)V_RAD_HL)) {
+      iVar2 = iVar2 + 1;
+    }
+    V_ANTRIEB = (ushort)(iVar2 >> 1);
+    uVar1 = iVar2 >> 1 & 0xffff;
+    iVar2 = uVar1 + 8;
+    if (SCARRY4(uVar1,8)) {
+      iVar2 = uVar1 + 0x17;
+    }
+    V = (word)(iVar2 >> 4);
+    V_VORDERACHSE = V_ASC;
+  }
+  else {
+    uVar1 = (uint)V_DIREKT;
+    iVar2 = uVar1 + 8;
+    if (SCARRY4(uVar1,8)) {
+      iVar2 = uVar1 + 0x17;
+    }
+    V = (word)(iVar2 >> 4);
+    V_ANTRIEB = V_DIREKT;
+    V_VORDERACHSE = V_DIREKT;
+  }
+  if (V_MAX < V) {
+    V_MAX = V;
+  }
+  return;
+}
+

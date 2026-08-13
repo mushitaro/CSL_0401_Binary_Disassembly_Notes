@@ -1,0 +1,28 @@
+
+void can_b_rx(byte slot_index)
+
+{
+  uint uVar1;
+  uint uVar2;
+  struct_can_slot_state *psVar3;
+  struct_rx_tx_frame rx_frame_struct;
+  
+  rx_frame_struct.slot_index = slot_index;
+  rx_frame_struct.slot_id = slot_index - 0xe;
+  uVar1 = (uint)slot_index;
+  rx_frame_struct.slot_cfg_table_entry_ptr = (undefined *)(can_a_slot_cfg_table + uVar1);
+  psVar3 = can_slot_status_table + slot_index;
+  can_slot_status_table[slot_index].recv_status = 0;
+  if (can_a_slot_cfg_table[uVar1].recv_rate_limit < psVar3->recv_count) {
+    uVar2 = (uint)rx_frame_struct.slot_id;
+    can_b_control_message_table.message_block[uVar2 - 1].slot_control_1 = 0xf7;
+    rx_frame_struct.slot_state_table_entry_ptr = &psVar3->recv_count;
+    (*(code *)can_a_slot_cfg_table[uVar1].message_handler)(&rx_frame_struct);
+    can_b_control_message_table.message_block[uVar2 - 1].slot_control_1 = 0xfb;
+  }
+  if (psVar3->recv_count != 0xff) {
+    psVar3->recv_count = psVar3->recv_count + 1;
+  }
+  return;
+}
+

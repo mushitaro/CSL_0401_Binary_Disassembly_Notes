@@ -1,0 +1,31 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void md_interventions_init_FUN_0001602c(void)
+
+{
+  MD_FW_REL = 0;
+  _md_wunsch_rel_dpr = 0;
+  MD_WUNSCH_REL = 0;
+  MD_FW = 0;
+  _MD_FW_DPR = 0;
+  MD_FW_FILTER = 0;
+  _DAT_00ff816a = 0;
+  MD_RES = 0;
+  MD_ETA_KR_FILTER = 0xffff;
+  MD_ETA_KR = 0xffff;
+  MD_DP_FAKTOR = 0x400;
+  MD_SAWE_FILTER = MD_IND_MIN;
+  MD_Torque_Interventions_Ignition_Angle_and_TL_Coordination_of_Limits_FUN_000166bc();
+  MD_Torque_Limitation_FUN_00016088();
+  MD_RF_ROH = 0;
+  MD_RF_SOLL = 0;
+  MD_MAX_BEGR = 10000;
+  MD_BEGR_AUSS = 10000;
+  MD_NMAX_BEGR = 10000;
+  MD_IND_VMAX = K_MD_VMAX_MAX;
+  MD_ST = 0;
+  DAT_00ffd936 = 0;
+  return;
+}
+

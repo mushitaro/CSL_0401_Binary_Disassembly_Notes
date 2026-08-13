@@ -1,0 +1,60 @@
+
+void dwf_st_calc(void)
+
+{
+  bool bVar1;
+  byte bVar2;
+  byte bVar3;
+  
+  if (K_DWF_TOEL_0SEG < TOEL) {
+    bVar3 = 0;
+  }
+  else if (K_DWF_TOEL_1SEG < TOEL) {
+    bVar3 = 1;
+  }
+  else if (K_DWF_TOEL_2SEG < TOEL) {
+    bVar3 = 2;
+  }
+  else if (K_DWF_TOEL_3SEG < TOEL) {
+    bVar3 = 3;
+  }
+  else if ((cfg_m_motortyp == '\f') && (TOEL <= K_DWF_TOEL_4SEG)) {
+    if (K_DWF_TOEL_5SEG < TOEL) {
+      bVar3 = 5;
+    }
+    else if ((K_DWF_TOEL_6SEG < TOEL) || (cfg_m_getriebetyp == '@')) {
+      bVar3 = 6;
+    }
+    else {
+      bVar3 = 7;
+    }
+  }
+  else {
+    bVar3 = 4;
+  }
+  if (2 < SK_NMAX_CONTR) {
+    if (cfg_m_motortyp == '\f') {
+      if (cfg_m_getriebetyp == '@') {
+        bVar3 = 6;
+        DWF_ST = 6;
+      }
+      else {
+        bVar3 = 7;
+        DWF_ST = 7;
+      }
+    }
+    else {
+      bVar3 = 4;
+      DWF_ST = 4;
+    }
+  }
+  bVar2 = DWF_ST;
+  if ((DWF_ST <= bVar3) ||
+     (bVar1 = K_DWF_T_HYS < DWF_TIMER, bVar2 = bVar3, DWF_TIMER = DWF_TIMER + 1, bVar1)) {
+    DWF_ST = bVar2;
+    DWF_TIMER = '\0';
+  }
+  DWF_ST_DPR = DWF_ST;
+  return;
+}
+

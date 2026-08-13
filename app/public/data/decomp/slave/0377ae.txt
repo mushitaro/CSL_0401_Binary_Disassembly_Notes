@@ -1,0 +1,39 @@
+
+uint smg_shift_reg_prestep_flatten_profile(void)
+
+{
+  uint uVar1;
+  byte bVar2;
+  ushort uVar3;
+  undefined1 *puVar4;
+  
+  DAT_00ffdb82 = 7;
+  DAT_00ffdb84 = DAT_00ffdb84 + '\x01';
+  uVar3 = (ushort)((int)((uint)DAT_00ffdb9c + DAT_00ffdb5c * 0x100) / (int)(uint)DAT_00ffdb9a);
+  if (0xff < uVar3) {
+    uVar3 = 0xff;
+  }
+  bVar2 = 0;
+  puVar4 = &DAT_00ffdb91;
+  do {
+    DAT_00ffdb95 = (undefined1)uVar3;
+    *puVar4 = DAT_00ffdb95;
+    bVar2 = bVar2 + 1;
+    puVar4 = puVar4 + 1;
+  } while (bVar2 < 4);
+  DAT_00ffdb86 = 0x80;
+  DAT_00ffdb96 = 0x80;
+  DAT_00ffdb88 = uVar3 & 0xff;
+  DAT_00ffdb8a = DAT_00ffdb5c;
+  DAT_00ffdb85 = 0;
+  if ((DAT_00ffdb6c & 1) == 0) {
+    DAT_00ffdb83 = DAT_00ffdb83 & 0xf7;
+  }
+  if (2 < DAT_00ffdb3a) {
+    uVar1 = smg_shift_deltaN_request_update();
+    return uVar1;
+  }
+  DAT_00ffdb83 = DAT_00ffdb83 & 0xdf;
+  return DAT_00ffdb6c & 0xffff0001;
+}
+

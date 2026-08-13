@@ -1,0 +1,28 @@
+
+void ub_uext2m_calc(void)
+
+{
+  ushort uVar1;
+  
+  if (((UB_HR_ST & 2) != 0) && ((UB_UEXT_HR_ST & 4) == 0)) {
+    UB_UEXT_HR_ST = UB_UEXT_HR_ST | 4;
+  }
+  uVar1 = uext2m_ad;
+  uVar1 = ub_uext2m_diag(uVar1);
+  if ((UB_UEXT_HR_ST & 4) != 0) {
+    if ((UB_UEXT_HR_ST & 0x20) == 0) {
+      UEXT2M = uVar1 << 6;
+    }
+    UEXT2M = PT1_Filter_US(uVar1 << 6,UEXT2M,K_UEXTM_TAU);
+    UEXT1M_KORREKTUR = (undefined2)(0x80000 / (uint)((int)(UEXT2M + 0x20) >> 6));
+    UEXT1M_KORREKTUR_DPR = UEXT1M_KORREKTUR;
+    UB_UEXT_HR_ST = UB_UEXT_HR_ST | 0x20;
+    return;
+  }
+  UEXT2M = (ushort)K_UEXTM_ERSATZ << 8;
+  UEXT1M_KORREKTUR = (undefined2)(0x80000 / (uint)((int)((uint)K_UEXTM_ERSATZ * 0x100 + 0x20) >> 6))
+  ;
+  UEXT1M_KORREKTUR_DPR = UEXT1M_KORREKTUR;
+  return;
+}
+

@@ -1,0 +1,27 @@
+
+void md_res_kath_roh_calc(void)
+
+{
+  undefined4 uVar1;
+  ushort uVar2;
+  uint uVar3;
+  
+  if (MD_RES_KATH_FAKTOR == 0) {
+    MD_RES_KATH_ROH = 0;
+    return;
+  }
+  uVar3 = T_ML >> 10;
+  if (0xffff < uVar3) {
+                    /* This section is slightly different to 1801 */
+    uVar3 = 0xffff;
+  }
+  uVar2 = K_MD_RES_KATH_LL;
+  if ((ZUSTAND_MOTOR & LL) == 0) {
+    uVar1 = kfu_wint(&KF_MD_RES_KATH.sizeX,N,RF);
+    uVar2 = (ushort)uVar1;
+  }
+  uVar3 = kfu_wint(&KF_MD_RES_KATH_GEW.sizeX,(ushort)uVar3,(ushort)TMOT);
+  MD_RES_KATH_ROH = (short)((int)((uVar3 & 0xffff) * (uint)uVar2) >> 0xf);
+  return;
+}
+

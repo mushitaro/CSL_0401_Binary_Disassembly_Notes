@@ -1,0 +1,52 @@
+# Building the viewer always runs, so a broken app fails CI.  Deployment is
+# opt-in: actions/deploy-pages 404s until Pages is switched on for the
+# repository, which is a settings change no workflow can make for you.
+#
+# To turn deployment on:
+#   1. Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+#   2. Settings -> Secrets and variables -> Actions -> Variables ->
+#      new repository variable ENABLE_PAGES = true
+name: Deploy viewer to GitHub Pages
+
+on:
+  push:
+    branches: [claude/mss54hp-csl-dme-tool-x7qcrw]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+        working-directory: app
+      - run: npm run build
+        working-directory: app
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    if: vars.ENABLE_PAGES == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

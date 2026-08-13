@@ -1,0 +1,169 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* PDR - Pre-drive Check (ref funktionsrahmen 3.03 PDR) */
+
+void pdr_m(void)
+
+{
+  undefined4 uVar1;
+  char cVar2;
+  bool bVar3;
+  
+  cVar2 = pdr_t;
+  if (PDR_STATUS == 0) {
+    PDR_ABL_CNT = 0;
+  }
+  if ((((SK_EDK_CONTR & 2) != 0) || ((DAT_00ffda36 & 2) != 0)) && ((EDK_DS2_ADAPT_STAT & 2) == 0)) {
+    PDR_ABL_CNT = 13;
+  }
+  switch(PDR_ABL_CNT) {
+  case 0:
+    if (((UB_UEXT_HR_ST & 0x10) != 0) && ((UB_UEXT_HR_ST & 0x20) != 0)) {
+      EGAS_IPK = 0;
+      EDK_STATUS = EDK_STATUS | 2;
+      PDR_STATUS = PDR_STATUS | 1;
+      DAT_00ffda83 = 6;
+      PDR_PHASE = 1;
+      PDR_ZUSTAND = 0;
+      PDR_M_ZUSTAND = 0;
+      PDR_ABL_CNT = 1;
+      uVar1 = ed_report(DTC_6B_THROTTLE_SELF_TEST,0x80);
+      PDR_ED = (byte)uVar1 & 0xe0;
+      FUN_00019896();
+      return;
+    }
+    break;
+  case 1:
+    pdr_t = K_PDR_T_PHASE1;
+    EDK__write_to_port_to_set_EDK_duty_cycle_(K_PDR_EGAS_TV);
+    goto LAB_000225b4;
+  case 2:
+    pdr_t = pdr_t + -1;
+    if (cVar2 == 0) {
+      PDR_ABL_CNT = 4;
+      return;
+    }
+    break;
+  default:
+    goto LAB_000227cc;
+  case 4:
+    cVar2 = FUN_000198d2();
+    if (cVar2 == 0) {
+      if (((cfg_m_motortyp & 0xef) == 0x20) || ((WDK_ADAPT & 0x10) != 0)) {
+        pdr_t = K_PDR_T_PHASE2;
+        PDR_ABL_CNT = 7;
+        DAT_00ffda83 = 5;
+        PDR_PHASE = 2;
+      }
+      else {
+        pdr_t = K_PDR_T_WDK2;
+        DAT_00ffda83 = 7;
+        PDR_ABL_CNT = PDR_ABL_CNT + 1;
+      }
+      EDK_STATUS = EDK_STATUS & 0xfd;
+      return;
+    }
+    break;
+  case 5:
+    bVar3 = pdr_t == 0;
+    pdr_t = pdr_t + -1;
+    if (bVar3) {
+      pdr_t = K_PDR_A0_TIMEOUT;
+      goto LAB_000225b4;
+    }
+    break;
+  case 6:
+    cVar2 = FUN_00019ad0();
+    if (cVar2 == 0) {
+      pdr_t = K_PDR_T_PHASE2;
+      PDR_ABL_CNT = PDR_ABL_CNT + 1;
+      DAT_00ffda83 = 5;
+      PDR_PHASE = 2;
+      return;
+    }
+    break;
+  case 7:
+    cVar2 = pdr_t + -1;
+    bVar3 = pdr_t == 0;
+    pdr_t = cVar2;
+    if (bVar3) goto LAB_000225b4;
+    if ((EDK_DS2_ADAPT_STAT & 2) != 0) {
+      PDR_ABL_CNT = 0xd;
+      return;
+    }
+    break;
+  case 8:
+    FUN_000227d8();
+    if (PDR_ZUSTAND != 0) {
+      PDR_ABL_CNT = 0xd;
+      return;
+    }
+    goto LAB_000225b4;
+  case 9:
+                    /* PDR - Pre-drive check Phase 3 - CHECKING THE SLAVE SAFETY SHUTDOWN */
+    PDR_PHASE = 3;
+    pdr_t = K_PDR_T_PHASE3;
+    EGAS_IPK = EGAS_IPK | 1;
+    _DAT_00ffe6ae = SYS_TIMERTICS_COUNTER;
+    _EDK_DS2_TSCHLIESS = 0;
+    goto LAB_000225b4;
+  case 10:
+    if ((int)(uint)WDK_WORD <= (int)K_PDR_DKM0) {
+      _EDK_DS2_TSCHLIESS = SYS_TIMERTICS_COUNTER._2_2_ - DAT_00ffe6b0;
+      PDR_ABL_CNT = 0xd;
+      return;
+    }
+    bVar3 = pdr_t == 0;
+    pdr_t = pdr_t + -1;
+    if (bVar3) {
+      pdr_t = K_PDR_T_PHASE3;
+      DAT_00ffda83 = 6;
+      goto LAB_000225b4;
+    }
+    break;
+  case 0xb:
+    if ((int)(uint)WDK_WORD <= (int)K_PDR_DKM0) {
+      PDR_ZUSTAND = 2;
+      PDR_ED = PDR_ED | 2;
+      PDR_M_ZUSTAND = 2;
+      PDR_ABL_CNT = 0xd;
+      return;
+    }
+    bVar3 = pdr_t == 0;
+    pdr_t = pdr_t + -1;
+    if (bVar3) {
+      pdr_t = K_PDR_T_PHASE3;
+      EGAS_IPK = EGAS_IPK & 0xfe;
+      goto LAB_000225b4;
+    }
+    break;
+  case 0xc:
+    if ((int)K_PDR_DKM0 < (int)(uint)WDK_WORD) {
+      if (pdr_t != 0) {
+        pdr_t = pdr_t + -1;
+        return;
+      }
+      PDR_M_ZUSTAND = 3;
+      PDR_ZUSTAND = 3;
+      PDR_ED = PDR_ED | 1;
+      pdr_t = -1;
+    }
+    else {
+      PDR_M_ZUSTAND = 2;
+      PDR_ZUSTAND = 2;
+      PDR_ED = PDR_ED | 4;
+    }
+LAB_000225b4:
+    PDR_ABL_CNT = PDR_ABL_CNT + 1;
+    return;
+  case 0xd:
+LAB_000227cc:
+    EDK_STATUS = EDK_STATUS & 0xfd;
+    EGAS_IPK = EGAS_IPK & 0xfe;
+    PDR_PHASE = 4;
+    PDR_STATUS = 0x80;
+    FUN_00022854();
+  }
+  return;
+}
+

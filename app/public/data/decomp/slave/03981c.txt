@@ -1,0 +1,87 @@
+
+void smg_start_baseline_demand_update(void)
+
+{
+  uint uVar1;
+  short sVar2;
+  
+  DAT_00ffdbb2 = 9;
+  if (DAT_00ffdc60 == 0) {
+    DAT_00ffdbe2 = K_SMG_MOT_NL_T_MAX;
+    uVar1 = klu_bint(&KL_SMG_MOT_ANF_M_RAM.sizeX,(byte)(DAT_00ffdb54 / 10));
+    DAT_00ffdbe6 = (ushort)uVar1 & 0xff;
+    if (0 < smg_ax_berg) {
+      DAT_00ffdbe6 = (short)((int)(&UNK_00050000 +
+                                  (int)(short)(ushort)K_SMG_____DAT_0008a88d * (int)smg_ax_berg) /
+                            0x50000) * DAT_00ffdbe6;
+    }
+    if (0xff < DAT_00ffdbe6) {
+      DAT_00ffdbe6 = 0xff;
+    }
+    if (smg_fahrzustand == Anfahrhilfe(TractionAid)) {
+      DAT_00ffdb48 = DAT_00ffdb48 | 0x80;
+    }
+    if (((smg_fahrzustand == Schalten(Shifting)) &&
+        ((int)(uint)K_SMG_____DAT_0008a88a < (int)DAT_00ffdb5a - (int)DAT_00ffdbb6)) &&
+       ((DAT_00ffdbb3 & 8) == 0)) {
+      DAT_00ffdb48 = DAT_00ffdb48 | 0x40;
+    }
+    else {
+      DAT_00ffdb48 = DAT_00ffdb48 & 0xbf;
+    }
+  }
+  DAT_00ffdb4a = N;
+  sVar2 = DAT_00ffdb5a;
+  if ((DAT_00ffdb48 & 0x40) != 0) {
+    uVar1 = abs((int)DAT_00ffdb60 / 100);
+    if ((int)(short)DAT_00ffdbe6 < (int)(uVar1 & 0xffff)) {
+      DAT_00ffdbe6 = (ushort)uVar1;
+    }
+    if ((((ASC_SCHALTER & 1) == 0) && (smg_can_istgang != 2nd)) &&
+       ((short)(ushort)K_SMG_____DAT_0008a88c < (short)DAT_00ffdbe6)) {
+      DAT_00ffdbe6 = (ushort)K_SMG_____DAT_0008a88c;
+    }
+    sVar2 = DAT_00ffdbe6 + (DAT_00ffdbba - DAT_00ffdb58);
+    if (DAT_00ffdb5a <= sVar2) {
+      DAT_00ffdb48 = DAT_00ffdb48 & 0xbf;
+      sVar2 = DAT_00ffdb5a;
+    }
+  }
+  DAT_00ffdbb6 = sVar2;
+  if (DAT_00ffdbb6 < 0) {
+    DAT_00ffdbb6 = 0;
+  }
+  DAT_00ffdbd8 = DAT_00ffdb1e + K_SMG_MOT_ANF_N_OFF * 0x28;
+  if ((int)(short)DAT_00ffdbd8 < (int)(uint)LLR_N_SOLL) {
+    DAT_00ffdbd8 = LLR_N_SOLL;
+  }
+  if (DAT_00ffdbd8 < N) {
+    DAT_00ffdbb6 = DAT_00ffdbb6 -
+                   (short)((int)((int)DAT_00ffdb5a * ((uint)N - (uint)DAT_00ffdbd8)) /
+                          (int)(uint)K_SMG_MOT_ANF_FW_X);
+  }
+  if (((DAT_00ffdb48 & 0x80) == 0) || (DAT_00ffdbf0 == 0)) {
+    DAT_00ffdb48 = DAT_00ffdb48 & 0x7f;
+  }
+  else {
+    sVar2 = K_SMG_MOT_ANF_STG_X + DAT_00ffdbf2;
+    if (sVar2 < 1) {
+      sVar2 = 1;
+    }
+    sVar2 = DAT_00ffdbf2 - (short)(((int)DAT_00ffdbf2 * (int)DAT_00ffdb5a) / (int)sVar2);
+    if (sVar2 < 0) {
+      sVar2 = 0;
+    }
+    if (DAT_00ffdbf0 < sVar2) {
+      sVar2 = DAT_00ffdbf0;
+    }
+    DAT_00ffdbf0 = sVar2;
+    if (DAT_00ffdbf2 < sVar2) {
+      DAT_00ffdbf0 = DAT_00ffdbf2;
+    }
+    DAT_00ffdbb6 = DAT_00ffdbf0 + DAT_00ffdbb6;
+  }
+  smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,K_SMG_ETA_RES_ANF);
+  return;
+}
+

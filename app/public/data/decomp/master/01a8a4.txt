@@ -1,0 +1,71 @@
+
+ushort p_saug_no_filter_calc(ushort p_saug_no_filter)
+
+{
+  int p_saug_umg_diff;
+  undefined4 uVar1;
+  byte errortype;
+  byte bVar2;
+  ushort p_saug_no_filter_temp;
+  
+                    /* Specific to 0401 */
+  errortype = 0;
+  bVar2 = 3;
+  p_saug_no_filter_temp = p_saug_no_filter;
+  if ((UEXT1M_ED & 0x40) == 0) {
+    if (rf_diag_laa_st == 8) {
+      errortype = 2;
+    }
+    if (rf_diag_laa_st == 4) {
+      errortype = 1;
+    }
+    if (p_saug_no_filter < k_p_saug_diag_min) {
+      errortype = 2;
+      p_saug_no_filter_temp = k_p_saug_diag_min;
+    }
+    else if (k_p_saug_diag_max < p_saug_no_filter) {
+      errortype = 1;
+      p_saug_no_filter_temp = k_p_saug_diag_max;
+    }
+    if ((errortype == 0) && (P_UMG_DIAG_ST == error_free)) {
+      if (N_EVAN1 == 0 && N == 0) {
+        if (k_p_saug_tdme_min < TDME) {
+          bVar2 = 7;
+          p_saug_umg_diff = abs((uint)p_saug_no_filter - (uint)P_UMG_FILTER);
+          if ((int)(uint)k_p_saug_umg_diff_max_ans < p_saug_umg_diff) {
+            errortype = 4;
+          }
+        }
+      }
+      else {
+        bVar2 = 0xb;
+        if ((int)(uint)k_p_saug_umg_diff_max_ans <
+            (int)((uint)p_saug_no_filter - (uint)P_UMG_FILTER)) {
+          errortype = 8;
+        }
+      }
+    }
+    if (errortype == 0) {
+      if ((p_saug_ed == 0) ||
+         (uVar1 = ed_report(DTC_DF_MAP_PRESSURE,0x80), (bVar2 & (byte)uVar1) == 0))
+      goto LAB_0001a9a6;
+      errortype = 0;
+    }
+    uVar1 = ed_report(DTC_DF_MAP_PRESSURE,errortype);
+    p_saug_ed = (byte)uVar1;
+  }
+LAB_0001a9a6:
+  if (((UEXT1M_ED & 0x40) == 0) && ((p_saug_ed & 0x40) == 0)) {
+    if ((p_saug_ed & 0x20) == 0) {
+      p_saug_st = 0;
+    }
+    else {
+      p_saug_st = p_saug_st | 1;
+    }
+  }
+  else {
+    p_saug_st = p_saug_st | 3;
+  }
+  return p_saug_no_filter_temp;
+}
+

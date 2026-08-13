@@ -1,0 +1,27 @@
+
+byte smg_start_window_service(void)
+
+{
+  byte bVar1;
+  
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) && (DAT_00ffdbe2 != '\0')) {
+    bVar1 = smg_start_window_torque_ramp_update();
+    return bVar1;
+  }
+  DAT_00ffdb72 = DAT_00ffdb72 & 0xfd;
+  DAT_00ffdb4a = N;
+  DAT_00ffdbb2 = 0;
+  DAT_00ffdbb6 = DAT_00ffdb5a;
+  DAT_00ffdbbc = 0;
+  DAT_00ffdbba = 0;
+  DAT_00ffdbc2 = 0;
+  DAT_00ffdbc6 = 0;
+  DAT_00ffdbf0 = 0;
+  DAT_00ffdbf2 = 0;
+  DAT_00ffdbd2 = 0;
+  DAT_00ffdbe2 = 0;
+  DAT_00ffdbe0 = 0x80;
+  DAT_00ffdb3b = 0;
+  return ZUSTAND_MOTOR & (VL|TL|LL);
+}
+

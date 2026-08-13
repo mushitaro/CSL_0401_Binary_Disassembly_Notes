@@ -1,0 +1,33 @@
+
+uint kl50_diag(void)
+
+{
+  uint uVar1;
+  byte errortype;
+  
+  if ((cfg_m_baureihe & 0xf8) == 0x40) {
+    if ((ZUSTAND_MOTOR & KI.15 aus) != 0) {
+      S_KL50_ED = 0xe0;
+      return 0x40;
+    }
+    if ((SCHALT_M_ST & 8) == 0) {
+      S_KL50_ED = 0;
+    }
+  }
+  else if ((ZUSTAND_MOTOR & KI.15 aus) != 0) {
+    if ((SCHALT_M_ST & 8) == 0) {
+      if ((S_KL50_ED & 0xe0) == 0) {
+        return 0;
+      }
+      errortype = 0;
+    }
+    else {
+      errortype = 1;
+    }
+    uVar1 = ed_report(DTC_AD_STARTER_SWITCH_INPUT,errortype);
+    S_KL50_ED = (char)uVar1;
+    return uVar1;
+  }
+  return cfg_m_baureihe & 0xf8;
+}
+

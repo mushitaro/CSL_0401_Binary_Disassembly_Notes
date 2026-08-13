@@ -1,0 +1,12 @@
+
+void pcntrl_init(void)
+
+{
+  PCNTRL_TIMER_M = 0;
+  DAT_00ffe5d2 = 0;
+  pcntrl_m = 0;
+  pcntrl_zeit_m = K_PCNTRL_ZEIT_M;
+  PCNTRL_ZUSTAND = 0;
+  return;
+}
+

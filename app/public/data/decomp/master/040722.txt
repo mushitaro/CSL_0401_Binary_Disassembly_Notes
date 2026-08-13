@@ -1,0 +1,58 @@
+
+int ipk_enqueue_tx(struct_ipk_send_desc_t *d)
+
+{
+  uint8_t *puVar1;
+  undefined3 extraout_var;
+  byte bVar2;
+  uint uVar3;
+  int iVar4;
+  char *pcVar5;
+  uint8_t *puVar6;
+  uint8_t *puVar7;
+  ushort uVar8;
+  
+  if (d->len < 0x11) {
+    bVar2 = set_status_register(0x2700);
+    iVar4 = 0;
+    uVar3 = (uint)ipk_tx_slot_count;
+    for (pcVar5 = &ipk_tx_slots_base; (0 < (int)uVar3 && (*pcVar5 != '\0')); pcVar5 = pcVar5 + 6) {
+      uVar3 = uVar3 - 1;
+      iVar4 = iVar4 + 1;
+    }
+    uVar8 = (ushort)CONCAT31(extraout_var,bVar2);
+    if ((int)uVar3 < 1) {
+      set_status_register(uVar8);
+      *d->ack = 0x90;
+      iVar4 = -0x70;
+    }
+    else {
+      *pcVar5 = '\x01';
+      set_status_register(uVar8);
+      puVar1 = ipk_tx_buf_base + iVar4 * 0x16;
+      puVar1[0x12] = '\x01';
+      puVar1[0x13] = '\0';
+      *puVar1 = d->cmd;
+      puVar1[1] = d->len;
+      puVar6 = d->src;
+      puVar7 = puVar1 + 2;
+      for (uVar3 = (uint)d->len; 0 < (int)uVar3; uVar3 = uVar3 - 1) {
+        *puVar7 = *puVar6;
+        puVar6 = puVar6 + 1;
+        puVar7 = puVar7 + 1;
+      }
+      *(uint8_t **)(pcVar5 + 2) = d->ack;
+      *d->ack = '\0';
+      pcVar5[1] = '\x04';
+      *pcVar5 = '\x02';
+      puVar1[0x12] = '\x02';
+      iVar4 = 0;
+    }
+  }
+  else {
+    *d->ack = 0x91;
+    iVar4 = -0x6f;
+  }
+  return iVar4;
+}
+

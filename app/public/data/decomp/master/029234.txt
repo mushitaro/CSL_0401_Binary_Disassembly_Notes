@@ -1,0 +1,45 @@
+
+void kd_init(void)
+
+{
+  byte bVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  byte bVar4;
+  word (*pawVar5) [5];
+  word *pwVar6;
+  
+  uVar2 = kd_cfg_calc();
+  KD_CFG = (byte)uVar2;
+  bVar4 = 0;
+  bVar1 = km_signal_source[(short)(ushort)KD_CFG];
+  pawVar5 = KM_TEL_MW;
+  pwVar6 = KD_MEM;
+  do {
+    *pwVar6 = (*pawVar5)[bVar1];
+    pawVar5 = pawVar5 + 1;
+    bVar4 = bVar4 + 1;
+    pwVar6 = pwVar6 + 1;
+  } while (bVar4 < 8);
+  KD_FILT_S = 4;
+  KD_FILT_D = 2;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_1.sizeX,1000,200);
+  KD_KFAKT[0] = (word)uVar3;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_2.sizeX,1000,200);
+  KD_KFAKT[1] = (word)uVar3;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_3.sizeX,1000,200);
+  KD_KFAKT[2] = (word)uVar3;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_4.sizeX,1000,200);
+  KD_KFAKT[3] = (word)uVar3;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_5.sizeX,1000,200);
+  KD_KFAKT[4] = (word)uVar3;
+  uVar3 = kfu_wint(&KF_KD_KFAKT_6.sizeX,1000,200);
+  KD_KFAKT[6] = 0xa00;
+  KD_KFAKT[7] = 0xa00;
+  KD_KFAKT[5] = (word)uVar3;
+  uVar2 = klu_bint(&KL_KD_FAKT_STARK.sizeX,0x19);
+  KD_FAKT_STARK = (char)uVar2;
+  KD_KWICHT_D = 0x40;
+  return;
+}
+

@@ -1,0 +1,152 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void pwg_calc(void)
+
+{
+  byte bVar1;
+  ushort uVar2;
+  ushort uVar3;
+  undefined2 uVar4;
+  undefined3 extraout_var;
+  byte bVar8;
+  int iVar5;
+  int iVar6;
+  undefined4 uVar7;
+  uint uVar9;
+  short sVar10;
+  byte bVar11;
+  
+  pcntrl_m = pcntrl_m | 1;
+  if (((UB_UEXT_HR_ST & 0x10) == 0) || ((UB_UEXT_HR_ST & 0x20) == 0)) {
+    _SK_HW_PWG1M_AD = pwg1_ad;
+    return;
+  }
+  bVar8 = set_status_register(0x2700);
+  uVar2 = pwg1_ad;
+  uVar3 = pwg2_ad;
+  set_status_register((ushort)CONCAT31(extraout_var,bVar8));
+  uVar9 = (uint)UEXT1M_KORREKTUR;
+  _SK_HW_PWG1M_AD = uVar2;
+  PWG1_ABS = FUN_00023710((ushort)((int)((uint)uVar2 * (uint)UEXT2M_KORREKTUR + 0x200) >> 10));
+  PWG2_ABS = FUN_0002375c((ushort)((int)(uVar9 * (uint)uVar3 * 2 + 0x200) >> 10));
+  iVar5 = (uint)K_PWG1_NORM * (int)(short)(PWG1_ABS - PWG1_A0);
+  iVar6 = iVar5 + 0x400;
+  if (iVar5 < -0x400) {
+    iVar6 = iVar5 + 0xbff;
+  }
+  PWG1 = (short)(iVar6 >> 0xb);
+  iVar5 = (uint)K_PWG1_NORM * (int)(short)(PWG2_ABS - PWG2_A0);
+  iVar6 = iVar5 + 0x400;
+  if (iVar5 < -0x400) {
+    iVar6 = iVar5 + 0xbff;
+  }
+  PWG2 = (short)(iVar6 >> 0xb);
+  PWG_ST = FUN_000237a8(PWG1,PWG2);
+  bVar8 = (&DAT_0003d554)[(short)(ushort)PWG_ST];
+  if ((2 < PWG_MODE) && ((SCHALT_S_ST & 0x20) != 0)) {
+    if ((uint)bVar8 + (uint)PWG_MODE == 0xb) {
+      bVar8 = 7;
+    }
+    if (bVar8 < PWG_MODE) {
+      bVar8 = PWG_MODE;
+    }
+  }
+  switch(bVar8) {
+  case 0:
+  case 1:
+  case 5:
+    break;
+  case 2:
+    if ((PWG1_VGL_ED & 0xf) != 0) {
+      sVar10 = PWG_MAX_DIFF + PWG2;
+      goto LAB_00023156;
+    }
+    break;
+  case 3:
+    if (PWG2 <= PWG1) goto switchD_00023114_caseD_6;
+    break;
+  case 4:
+    if (PWG2 < PWG1) goto switchD_00023114_caseD_6;
+    break;
+  case 6:
+switchD_00023114_caseD_6:
+    sVar10 = PWG2;
+    goto LAB_00023156;
+  default:
+    sVar10 = 0;
+    goto LAB_00023156;
+  }
+  sVar10 = PWG1;
+LAB_00023156:
+  if (bVar8 < 3) {
+    DAT_00ffe6c9 = 0;
+  }
+  else {
+    if ((int)sVar10 <= (int)(uint)K_PWG1_SK_NULLAGE) {
+      DAT_00ffe6c9 = DAT_00ffe6c9 & 0xfd;
+    }
+    if (((SCHALT_M_ST & 0x80) == 0) && ((S_BLS_ED & 0x40) == 0)) {
+      bVar11 = DAT_00ffe6c9 & 0xfe;
+      bVar1 = DAT_00ffe6c9 & 2;
+      DAT_00ffe6c9 = bVar11;
+      if (bVar1 != 0) {
+        sVar10 = 0;
+      }
+    }
+    else {
+      sVar10 = 0;
+      if ((DAT_00ffe6c9 & 1) == 0) {
+        DAT_00ffe6c9 = DAT_00ffe6c9 | 2;
+      }
+      DAT_00ffe6c9 = DAT_00ffe6c9 | 1;
+    }
+  }
+  if ((bVar8 == 0) && ((int)(uint)K_PWG_KD <= (int)sVar10)) {
+    pwg_kickdown_st = pwg_kickdown_st | 1;
+  }
+  else {
+    pwg_kickdown_st = pwg_kickdown_st & 0xfe;
+  }
+  if (sVar10 < 0) {
+    sVar10 = 0;
+  }
+  else if (1000 < sVar10) {
+    sVar10 = 1000;
+  }
+  if ((((bVar8 < 3) || ((int)sVar10 <= (int)(uint)PWG)) ||
+      (bVar11 = K_PWG_TAU_FEHLER, DAT_00ffe6ca != 0)) &&
+     ((bVar11 = K_PWG_TAU_NORM_UP, (int)sVar10 < (int)(uint)PWG && (GANG != '\0')))) {
+    iVar6 = (int)sVar10;
+    if (iVar6 < 0) {
+      iVar6 = iVar6 + 3;
+    }
+    uVar7 = kfu_bint(&KF_PWG_TAU_NORM_DOWN.sizeX,N40,(byte)(iVar6 >> 2));
+    bVar11 = (byte)uVar7;
+  }
+  DAT_00ffe6be = PT1_Filter_US(sVar10 << 6,DAT_00ffe6be,bVar11);
+  DAT_00ffe6c6 = DAT_00ffe6c4;
+  uVar4 = DAT_00ffe6c2;
+  DAT_00ffe6c4 = DAT_00ffe6c2;
+  DAT_00ffe6c2 = (short)((int)(DAT_00ffe6be + 0x20) >> 6);
+  if (bVar8 < 3) {
+    PWG_ZUSTAND = 0;
+  }
+  else if (bVar8 < 7) {
+    PWG_ZUSTAND = 1;
+  }
+  else {
+    PWG_ZUSTAND = 2;
+  }
+  PWG_MODE = bVar8;
+  PWG_MODE_DPR = bVar8;
+  PWG = DAT_00ffe6c2;
+  D_PWG = DAT_00ffe6c2 - DAT_00ffe6c6;
+  if ((DAT_00ffe6c8 & 1) != 0) {
+    DAT_00ffe6c4 = uVar4;
+    return;
+  }
+  DAT_00ffe6c8 = DAT_00ffe6c8 | 1;
+  return;
+}
+

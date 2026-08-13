@@ -1,0 +1,41 @@
+
+void IPK__FUN_00011af0(void)
+
+{
+  byte bVar1;
+  struct_cpu32_exc_frame_any_t frame;
+  undefined4 unaff_A2;
+  undefined4 unaff_A3;
+  undefined4 unaff_A4;
+  word in_stack_00000000;
+  
+  if ((((N != 0) && ((DAT_00ff8022 != 126 || (DAT_00ff8023 != -127)))) &&
+      ((DAT_00ff8022 != 60 || (DAT_00ff8023 != -61)))) &&
+     (((sk_stufe_egas_sk_prog_level_ < 4 && (DAT_00ffda32 < 4)) &&
+      (((CFG_RAM_SG_MODE & 0x10) == 0 || ((cfg_m_status & 0x80) != 0)))))) {
+    set_status_register(0x2700);
+    bVar1 = SIM_PFPAR._1_1_;
+    SIM_PFPAR._1_1_ = bVar1 & 0x7f;
+    bVar1 = SIM_DDRF;
+    SIM_DDRF = bVar1 | 0x80;
+    bVar1 = SIM_PORTF0;
+    SIM_PORTF0 = bVar1 & 0x7f;
+    edk_set_zero();
+    pcntrl_engine_state_reset();
+    if (PCNTRL_RESET_COUNT != -1) {
+      PCNTRL_RESET_COUNT = PCNTRL_RESET_COUNT + '\x01';
+    }
+    frame._0_4_ = 0x11b8e;
+    frame._4_4_ = unaff_A2;
+    frame.fault_addr = unaff_A3;
+    frame.pad = unaff_A4;
+    frame.ssw = in_stack_00000000;
+    sys_isr_exception(frame);
+    return;
+  }
+  PCNTRL_ZUSTAND = 0;
+  DAT_00ffda42 = 0;
+  skm_ipk_timer = 0;
+  return;
+}
+

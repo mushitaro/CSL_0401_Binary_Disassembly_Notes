@@ -1,0 +1,79 @@
+
+void saug_calc(void)
+
+{
+  undefined3 extraout_var;
+  byte bVar2;
+  int iVar1;
+  ushort uVar3;
+  uint uVar4;
+  int iVar5;
+  ushort uVar6;
+  ushort n_temp;
+  
+                    /* Specific to 0401 */
+  uVar3 = 0;
+  iVar5 = 0;
+  uVar4 = 0;
+  bVar2 = set_status_register(0x2700);
+  p_saug_ad_loop_counter = p_saug_ad_loop_counter + 1;
+  if (p_saug_ad_loop_counter == 16) {
+    p_saug_ad_loop_counter = 0;
+  }
+  p_saug_ad_ring_buffer.UnusedBuffer[(short)(ushort)p_saug_ad_loop_counter] = 0;
+  p_saug_ad_ring_buffer.kadADSample[(short)(ushort)p_saug_ad_loop_counter] = 0;
+  p_saug_ad_ring_buffer.IOFlag[p_saug_ad_loop_counter] = 0;
+  set_status_register((ushort)CONCAT31(extraout_var,bVar2));
+  n_temp = N;
+  bVar2 = p_saug_ad_loop_counter;
+                    /* Ok this is the ring buffer implementation.
+                        */
+  for (uVar6 = 0; bVar2 = bVar2 - 1, uVar6 < k_p_saug_segmente; uVar6 = uVar6 + 1) {
+    if (bVar2 == 0xff) {
+      bVar2 = 0xf;
+    }
+    uVar3 = p_saug_ad_ring_buffer.IOFlag[(char)bVar2] + uVar3;
+    iVar5 = p_saug_ad_ring_buffer.UnusedBuffer[(short)(char)bVar2] + iVar5;
+    uVar4 = p_saug_ad_ring_buffer.kadADSample[(short)(char)bVar2] + uVar4;
+  }
+  for (; uVar3 < k_p_saug_sample; uVar3 = p_saug_ad_ring_buffer.IOFlag[iVar1] + uVar3) {
+    if (bVar2 == 0xff) {
+      bVar2 = 0xf;
+    }
+    iVar1 = (int)(char)bVar2;
+    iVar5 = p_saug_ad_ring_buffer.UnusedBuffer[(short)(char)bVar2] + iVar5;
+    uVar4 = p_saug_ad_ring_buffer.kadADSample[(short)(char)bVar2] + uVar4;
+    bVar2 = bVar2 - 1;
+  }
+  if (uVar3 != 0) {
+    ml_roh1 = (short)(iVar5 / (int)(uint)uVar3);
+    p_saug_roh = (ushort)(uVar4 / uVar3);
+    if ((UEXT1M_ED & 0x40) == 0) {
+      p_saug_roh = (ushort)((int)((uVar4 / uVar3 & 0xffff) * (uint)UEXT2M_KORREKTUR + 0x200) >> 10);
+    }
+    if (((k_rf_hfm_cfg & 1) == 0) || (N == 0)) {
+      ml_hfm1 = 0;
+      rf_hfm1 = 0;
+    }
+    else {
+      ml_hfm1 = ml_hfm1_calc(ml_roh1);
+      rf_hfm1 = (undefined2)((int)((uint)ml_hfm1 * (uint)rf_ml_const) / (int)(uint)n_temp);
+    }
+    iVar1 = (uint)k_p_saug_steigung * (uint)p_saug_roh;
+    iVar5 = iVar1 + 0x200;
+    if (iVar1 < -0x200) {
+      iVar5 = iVar1 + 0x5ff;
+    }
+    iVar5 = (int)k_p_saug_offset + (iVar5 >> 10);
+    p_saug_ist = (ushort)iVar5;
+    if (iVar5 < 0) {
+      p_saug_ist = 0;
+    }
+                    /* p_kad (p_krummerabsolutdruck) is intake manifold absolute pressure */
+    p_saug_no_filter = p_saug_no_filter_calc(p_saug_ist);
+                    /* p_kvd (krummervakuumdruck) is manifold vacuum */
+    p_kvd = P_UMG_FILTER - p_saug_no_filter;
+  }
+  return;
+}
+

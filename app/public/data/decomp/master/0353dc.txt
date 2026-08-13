@@ -1,0 +1,52 @@
+
+short obd_check_monitor(byte *param_1,byte param_2)
+
+{
+  byte bVar1;
+  short sVar2;
+  byte bVar3;
+  byte *pbVar4;
+  
+  pbVar4 = param_1;
+  for (bVar3 = 0; bVar3 < param_2; bVar3 = bVar3 + 1) {
+    if (((k_ed_fil_base[*pbVar4 & 0x7f].K_ED_FIL_CTL & 1) != 0) &&
+       ((ed_fil_base[*pbVar4 & 0x7f].ED_FIL_OBD & 0x2b) == 0x2b)) {
+      return 0;
+    }
+    pbVar4 = pbVar4 + 1;
+  }
+  pbVar4 = param_1;
+  for (bVar3 = 0; bVar3 < param_2; bVar3 = bVar3 + 1) {
+    if (((k_ed_fil_base[*pbVar4 & 0x7f].K_ED_FIL_CTL & 1) != 0) &&
+       ((ed_fil_base[*pbVar4 & 0x7f].ED_FIL_OBD & 0x20) == 0)) goto LAB_0003546a;
+    pbVar4 = pbVar4 + 1;
+  }
+  sVar2 = 0;
+  bVar3 = 0;
+  do {
+    if (param_2 <= bVar3) {
+LAB_000354c6:
+      if (sVar2 != 0) {
+        for (bVar3 = 0; bVar3 < param_2; bVar3 = bVar3 + 1) {
+          bVar1 = *param_1 & 0x7f;
+          if ((((k_ed_fil_base[bVar1].K_ED_FIL_CTL & 1) != 0) &&
+              ((ed_fil_base[bVar1].ED_FIL_OBD & 0x50) != 0x50)) &&
+             ((ed_fil_base[bVar1].ED_FIL_OBD & 0x10) != 0)) {
+LAB_0003546a:
+            return 1 << (bVar3 & 0x3f);
+          }
+          param_1 = param_1 + 1;
+        }
+      }
+      return 0;
+    }
+    if (((k_ed_fil_base[*param_1 & 0x7f].K_ED_FIL_CTL & 1) != 0) &&
+       ((ed_fil_base[*param_1 & 0x7f].ED_FIL_OBD & 0x10) != 0)) {
+      sVar2 = 1 << (bVar3 & 0x3f);
+      goto LAB_000354c6;
+    }
+    param_1 = param_1 + 1;
+    bVar3 = bVar3 + 1;
+  } while( true );
+}
+

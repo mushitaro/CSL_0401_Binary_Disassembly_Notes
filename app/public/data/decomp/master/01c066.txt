@@ -1,0 +1,91 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001c24a) */
+
+void trg_calc(void)
+
+{
+  byte bVar1;
+  undefined *puVar2;
+  uint uVar3;
+  int iVar4;
+  uint tabg_ersatz_tau;
+  int iVar5;
+  uint uVar4;
+  short trg_no_filter__n_1_;
+  KL_4_2byte_2byte *curve;
+  ushort xValue;
+  
+  xValue = ML;
+  bVar1 = TMOT;
+  if (k_trg_offset == '\0') {
+    bVar1 = TAN;
+  }
+  trg_no_filter__n_1_ = (ushort)bVar1 * 0x10 + -0x300;
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    if ((((DAT_00ffed74 & 1) != 0) && (T_RELATIV_ST == '\0')) && ((CAN_TEL_EMPF & 0x80) != 0)) {
+      uVar4 = klu_wint(&kl_trg_stand.sizeX,T_RELATIV - T_MOTOR_AUS);
+      iVar5 = (uVar4 & 0xffff) * ((int)trg_filter + (uint)t_umg_rg * -0x10 + 0x300);
+      if (iVar5 < 0) {
+        iVar5 = iVar5 + 0x3ff;
+      }
+      trg_no_filter = (ushort)t_umg_rg * 0x10 + (short)(iVar5 >> 10) + -0x300;
+    }
+  }
+  else {
+    if ((SA_WE_ST & 8) == 0) {
+      if (((SLV_ST & 0x40) == 0) || (ML == 0)) {
+        uVar4 = kfu_wint(&kf_trg.sizeX,N,RF);
+        puVar2 = (undefined *)(uVar4 & 0xffff);
+      }
+      else {
+        iVar4 = (uint)k_trg_t_f_slp * (uint)SLP_ML * 4;
+        iVar5 = iVar4 + 0x20;
+        if (iVar4 < -0x20) {
+          iVar5 = iVar4 + 0x5f;
+        }
+        iVar5 = (uint)ML + (iVar5 >> 6);
+        uVar4 = kfu_wint(&kf_trg.sizeX,N,RF);
+        puVar2 = (undefined *)((int)(iVar5 * (uVar4 & 0xffff)) / (int)(uint)xValue);
+        if (16000 < (int)puVar2) {
+          puVar2 = &DAT_00003e80;
+        }
+      }
+      if (T_ML_SEIT_START < (uint)k_trg_start << 10) {
+        puVar2 = (undefined *)((T_ML_SEIT_START * (int)puVar2) / ((uint)k_trg_start << 10));
+      }
+      uVar4 = klu_bint(&kl_trg_ti.sizeX,(byte)(((uint)MD_LA_IST << 10) / (uint)TI_F_KATS2));
+      uVar3 = klu_wint(&kl_trg_tz.sizeX,MD_ETA_ZW_NE);
+      iVar4 = (uVar3 & 0xffff) * (int)puVar2 * (uVar4 & 0xff);
+      iVar5 = iVar4 + 0x2000;
+      if (iVar4 < -0x2000) {
+        iVar5 = iVar4 + 0x5fff;
+      }
+                    /* The below differs from 1801 */
+      trg_no_filter__n_1_ = trg_no_filter__n_1_ + (short)(iVar5 >> 0xe);
+    }
+    else {
+      trg_no_filter__n_1_ =
+           trg_no_filter__n_1_ + ((ushort)k_trg_tmot_offset + (ushort)TMOT) * 0x10 + -0x300;
+    }
+    if (((SLV_ST & 0x40) == 0) || (xValue == 0)) {
+      curve = &kl_trg_tau;
+    }
+    else {
+      xValue = xValue + (short)((int)((uint)k_trg_tau_f_slp * (uint)SLP_ML) >> 2);
+      curve = &kl_trg_tau_slp;
+    }
+    tabg_ersatz_tau = klu_wint(&curve->sizeX,xValue);
+    iVar5 = IIR_Filter_SS(trg_no_filter__n_1_,trg_no_filter,(ushort)tabg_ersatz_tau);
+    trg_no_filter = (short)iVar5;
+    t_umg_rg = T_UMG;
+    trg_filter = trg_no_filter;
+  }
+  iVar4 = (int)trg_no_filter;
+  iVar5 = iVar4 + 8;
+  if (iVar4 < -8) {
+    iVar5 = iVar4 + 0x17;
+  }
+  trg = (short)(iVar5 >> 4);
+  return;
+}
+

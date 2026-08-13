@@ -1,0 +1,10 @@
+
+void tpu_segm_reset_if_engine_off(void)
+
+{
+  if (((ZUSTAND_MOTOR & KI.15 aus) != 0) && ((TPU_ST_M & nicht sync) != in Ordnung)) {
+    tpu_last_tooth_timestamp = 8;
+  }
+  return;
+}
+

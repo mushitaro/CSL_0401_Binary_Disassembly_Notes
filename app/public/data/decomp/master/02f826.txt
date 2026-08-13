@@ -1,0 +1,14 @@
+
+void task_1s(void)
+
+{
+  tog_corrections_update();
+  FUN_0003720a();
+  mil_bmw_st_calc();
+  mil_obd_st_calc();
+  wdk_doppel_ed();
+  FUN_00038a38();
+  fst_calc();
+  return;
+}
+

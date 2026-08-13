@@ -1,0 +1,69 @@
+
+void ti_ende_calc(void)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  short sVar3;
+  ushort uVar4;
+  
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) {
+    TI_ENDE_TAU = K_TIENDE_TAU1;
+    sVar3 = K_TIENDE_START;
+  }
+  else {
+    if (K_TIENDE_N_TAU < N40) {
+      TI_ENDE_TAU = K_TIENDE_TAU;
+    }
+    if ((K_TIENDE_TMOT <= TMOT) &&
+       ((int)(((uint)K_TIENDE_TMOT_HYS + (uint)K_TIENDE_TMOT) - (uint)TI_ENDE_TMOT_HYS) <
+        (int)(uint)TMOT)) {
+      TI_ENDE_TMOT_HYS = (ushort)K_TIENDE_TMOT_HYS;
+      uVar2 = kfu_wint(&KF_TIENDE_N_RF.sizeX,N,RF);
+      sVar3 = (short)uVar2 - EVAN1_IST;
+      if (TI_ENDE_TAU_HELP < K_TIENDE_TAU2) {
+        TI_ENDE_TAU_HELP = TI_ENDE_TAU_HELP + 1;
+      }
+      TI_ENDE_TAU_OFFSET = K_TIENDE_TAU2 - TI_ENDE_TAU_HELP;
+      goto LAB_0001b8b6;
+    }
+    TI_ENDE_TMOT_HYS = 0;
+    uVar1 = klu_wint(&KL_TIENDE_N.sizeX,N);
+    sVar3 = (short)uVar1 - EVAN1_IST;
+  }
+  TI_ENDE_TAU_HELP = 0;
+  TI_ENDE_TAU_OFFSET = 0;
+LAB_0001b8b6:
+  uVar4 = K_TIENDE_TEST_OFFSET + sVar3;
+  if ((short)uVar4 < 0) {
+    uVar4 = 0;
+  }
+  else if (0x1c20 < (short)uVar4) {
+    uVar4 = 0x1c20;
+  }
+  TI_ENDE = IIR_Filter_US(uVar4,TI_ENDE,(ushort)TI_ENDE_TAU_OFFSET + (ushort)TI_ENDE_TAU);
+  uVar1 = FUN_00011e22(DAT_00ffe510 - TI_ENDE);
+  DAT_00ffe788 = (short)uVar1;
+  uVar1 = FUN_00011e22(DAT_00ffe512 - TI_ENDE);
+  DAT_00ffe78a = (short)uVar1;
+  uVar1 = FUN_00011e22(DAT_00ffe514 - TI_ENDE);
+  DAT_00ffe78c = (short)uVar1;
+  uVar1 = FUN_00011e22(DAT_00ffe516 - TI_ENDE);
+  DAT_00ffe78e = (short)uVar1;
+  uVar1 = FUN_00011e22(DAT_00ffe518 - TI_ENDE);
+  DAT_00ffe790 = (short)uVar1;
+  uVar1 = FUN_00011e22(DAT_00ffe51a - TI_ENDE);
+  DAT_00ffe792 = (short)uVar1;
+  uVar1 = klu_wint(&KL_TIENDE_N_NSP.sizeX,N);
+  TI_ENDE_NSP = (short)uVar1 - EVAN1_IST;
+  if (TI_ENDE_NSP < 0) {
+    TI_ENDE_NSP = 0;
+    return;
+  }
+  if (0x1c20 < TI_ENDE_NSP) {
+    TI_ENDE_NSP = 0x1c20;
+    return;
+  }
+  return;
+}
+

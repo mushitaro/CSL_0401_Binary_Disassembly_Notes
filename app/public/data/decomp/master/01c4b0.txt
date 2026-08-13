@@ -1,0 +1,130 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001c6d8) */
+
+short tabg_filter_calc(short tabg_roh)
+
+{
+  uint uVar1;
+  undefined *puVar2;
+  uint uVar3;
+  int iVar4;
+  int iVar5;
+  undefined4 uVar6;
+  short sVar7;
+  ushort xValue;
+  byte bVar8;
+  
+  uVar1 = kfu_wint(&kf_rf_tabg_modell.sizeX,N,RF);
+  xValue = ML;
+  rg_tabg_modell = (undefined2)((uVar1 & 0xffff) >> 4);
+  bVar8 = TMOT;
+  if (K_TABG_ERSATZ_OFFSET == '\0') {
+    bVar8 = TAN;
+  }
+  sVar7 = (ushort)bVar8 * 0x10 + -0x300;
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    if ((((DAT_00ffed74 & 1) != 0) && (T_RELATIV_ST == '\0')) && ((CAN_TEL_EMPF & 0x80) != 0)) {
+      uVar1 = klu_wint(&KL_TABG_STAND.sizeX,T_RELATIV - T_MOTOR_AUS);
+      iVar5 = (uVar1 & 0xffff) * ((int)tabg_ersatz_last + (uint)t_umg_last * -0x10 + 0x300);
+      if (iVar5 < 0) {
+        iVar5 = iVar5 + 0x3ff;
+      }
+      TABG_ERSATZ = (ushort)t_umg_last * 0x10 + (short)(iVar5 >> 10) + -0x300;
+    }
+  }
+  else {
+    if ((SA_WE_ST & 8) == 0) {
+      if (((SLV_ST & 0x40) == 0) || (ML == 0)) {
+        uVar1 = kfu_wint(&KF_TABG_ERSATZ.sizeX,N,RF);
+        puVar2 = (undefined *)(uVar1 & 0xffff);
+      }
+      else {
+        iVar4 = (uint)K_TABG_ERSATZ_T_F_SLP * (uint)SLP_ML * 4;
+        iVar5 = iVar4 + 0x20;
+        if (iVar4 < -0x20) {
+          iVar5 = iVar4 + 0x5f;
+        }
+        iVar5 = (uint)ML + (iVar5 >> 6);
+        uVar1 = kfu_wint(&KF_TABG_ERSATZ.sizeX,N,RF);
+        puVar2 = (undefined *)((int)(iVar5 * (uVar1 & 0xffff)) / (int)(uint)xValue);
+        if (16000 < (int)puVar2) {
+          puVar2 = &DAT_00003e80;
+        }
+      }
+      if (T_ML_SEIT_START < (uint)K_TABG_ERSATZ_START << 10) {
+        puVar2 = (undefined *)((T_ML_SEIT_START * (int)puVar2) / ((uint)K_TABG_ERSATZ_START << 10));
+      }
+      uVar1 = klu_bint(&KL_TABG_ERSATZ_TI.sizeX,(byte)(((uint)MD_LA_IST << 10) / (uint)TI_F_KATS2));
+      uVar3 = klu_wint(&KL_TABG_ERSATZ_TZ.sizeX,MD_ETA_ZW_NE);
+      iVar4 = (uVar3 & 0xffff) * (int)puVar2 * (uVar1 & 0xff);
+      iVar5 = iVar4 + 0x2000;
+      if (iVar4 < -0x2000) {
+        iVar5 = iVar4 + 0x5fff;
+      }
+      sVar7 = sVar7 + (short)(iVar5 >> 0xe);
+    }
+    else {
+      sVar7 = sVar7 + ((ushort)K_TABG_ERSATZ_TMOT_OFFSET + (ushort)TMOT) * 0x10 + -0x300;
+    }
+    if (((SLV_ST & 0x40) != 0) && (xValue != 0)) {
+      xValue = xValue + (short)((int)((uint)K_TABG_ERSATZ_TAU_F_SLP * (uint)SLP_ML) >> 2);
+    }
+    uVar1 = klu_wint(&kl_trg_tau.sizeX,xValue);
+    iVar5 = IIR_Filter_SS(sVar7,TABG_ERSATZ,(ushort)uVar1);
+    tabg_ersatz_last = (short)iVar5;
+    t_umg_last = T_UMG;
+    TABG_ERSATZ = tabg_ersatz_last;
+  }
+  if (K_TABG_CFG != '\0') goto LAB_0001c886;
+  if (tabg_roh < K_TABG_DIAG_MAX) {
+    if (K_TABG_DIAG_MIN < tabg_roh) {
+      if ((ZUSTAND_MOTOR & S) != 0) {
+        TABG_ST = '\0';
+      }
+      if (TABG_ST == '\0') {
+        if ((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || (TABG_ERSATZ <= K_TABG_DIAG_SCHWELLE)) ||
+           (sk_stufe_egas_sk_prog_level_ != '\0')) {
+          TABG_DIAG_TIME = K_TABG_DIAG_TIME;
+        }
+        else if (((int)((int)TABG_ERSATZ + (uint)K_TABG_DIAG_OBERHALB * 0x10) < tabg_roh * 0x10) ||
+                (tabg_roh * 0x10 < (int)((int)TABG_ERSATZ + (uint)K_TABG_DIAG_UNTERHALB * -0x10))) {
+          if (TABG_DIAG_TIME == 0) {
+            uVar1 = ed_report(DTC_4F_EGT_SIGNAL,8);
+            TABG_ED = (byte)uVar1;
+            if ((uVar1 & 0x40) != 0) {
+              TABG_ST = '\x01';
+            }
+          }
+          else {
+            TABG_DIAG_TIME = TABG_DIAG_TIME + -1;
+          }
+        }
+        else {
+          TABG_ST = '\x02';
+        }
+        goto LAB_0001c886;
+      }
+      if (((TABG_ED & 0xe0) == 0) || (TABG_ST != '\x02')) goto LAB_0001c886;
+      bVar8 = 0;
+    }
+    else {
+      bVar8 = 2;
+    }
+  }
+  else {
+    bVar8 = 1;
+  }
+  uVar6 = ed_report(DTC_4F_EGT_SIGNAL,bVar8);
+  TABG_ED = (byte)uVar6;
+LAB_0001c886:
+  if (((TABG_ED & 0x40) != 0) || (K_TABG_CFG != '\0')) {
+    iVar4 = (int)TABG_ERSATZ;
+    iVar5 = iVar4 + 8;
+    if (iVar4 < -8) {
+      iVar5 = iVar4 + 0x17;
+    }
+    tabg_roh = (short)(iVar5 >> 4);
+  }
+  return tabg_roh;
+}
+

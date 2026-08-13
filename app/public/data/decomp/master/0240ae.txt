@@ -1,0 +1,25 @@
+
+void EDK__write_to_port_to_set_EDK_duty_cycle_(ushort param_1)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  byte bVar3;
+  
+  if ((short)param_1 < 1) {
+    param_1 = -param_1;
+    bVar3 = SIM_PORTE0;
+    SIM_PORTE0 = bVar3 | 0x40;
+  }
+  else {
+    bVar3 = SIM_PORTE0;
+    SIM_PORTE0 = bVar3 & 0xbf;
+  }
+  uVar2 = CTM4_DASM3A;
+  uVar1 = (uint)uVar2 + (((uint)param_1 * 0x53) / 100 & 0xffff);
+  if (uVar1 < 0x10000) {
+    Ram00fff41c = (short)uVar1;
+  }
+  return;
+}
+

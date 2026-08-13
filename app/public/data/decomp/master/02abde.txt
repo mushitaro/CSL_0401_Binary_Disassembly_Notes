@@ -1,0 +1,39 @@
+
+void tz_calc(void)
+
+{
+  short sVar3;
+  short sVar4;
+  undefined4 uVar1;
+  int iVar2;
+  KF_18x3_2byte_2byte_2byte *table;
+  
+  if ((ZUSTAND_MOTOR & (Nachlauf|KI.15 aus|Start|S)) == 0) {
+    if ((ZUSTAND_MOTOR & VL) == 0) {
+      if ((ZUSTAND_MOTOR & LL) == 0) {
+        table = (KF_18x3_2byte_2byte_2byte *)&KF_TZ_GRUND;
+      }
+      else {
+        table = (KF_18x3_2byte_2byte_2byte *)&KF_TZ_LL;
+      }
+    }
+    else {
+      table = &KF_TZ_VL;
+    }
+    uVar1 = kfs_wint(&table->sizeX,N,RF);
+    TZ_GRUND = (short)uVar1;
+  }
+  else {
+    sVar3 = kls_wint(&KL_TZ_START_TMOT.sizeX,(ushort)TMOT);
+    sVar4 = kls_wint(&KL_TZ_START_N.sizeX,N);
+    TZ_GRUND = sVar3 + sVar4;
+  }
+  TZ_ETA_BASIS = TZ_TKORR + TZ_GRUND;
+  sVar3 = kls_wint(&KL_TZ_MIN_TMOT.sizeX,(ushort)TMOT);
+  uVar1 = kfs_wint(&KF_TZ_MIN.sizeX,N,RF);
+  TZ_MIN = sVar3 + (short)uVar1;
+  iVar2 = tz_sa_calc();
+  TZ_SA_OFFSET = (short)iVar2;
+  return;
+}
+

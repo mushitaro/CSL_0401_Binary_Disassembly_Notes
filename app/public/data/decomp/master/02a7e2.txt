@@ -1,0 +1,29 @@
+
+void km_scheduler(void)
+
+{
+  uint uVar1;
+  uint unaff_D2;
+  byte bVar2;
+  
+  if (((((KM_ST & 8) == 0) && ((DAT_00ffe834_knock_evaluation_status_ & 1) == 0)) &&
+      ((DAT_00ffe834_knock_evaluation_status_ & 2) == 0)) &&
+     ((DAT_00ffe834_knock_evaluation_status_ & 8) == 0)) {
+    uVar1 = klu_wint(&KL_KA_RF_MIN.sizeX,N);
+    if ((ushort)uVar1 < RF) {
+      for (uVar1 = unaff_D2 & 0xffffff00; bVar2 = (byte)uVar1, bVar2 < zyl_count;
+          uVar1 = CONCAT31((int3)(uVar1 >> 8),bVar2 + 1)) {
+        if (((uint)DAT_00ffe88a & 1 << (uVar1 & 0x3f)) == 0) {
+          if (((KM_FEN_SCHIEB == '\0') || (bVar2 < 2)) || (3 < bVar2)) {
+            FUN_00029e16(uVar1);
+          }
+        }
+        else {
+          DAT_00ffe88a = ~('\x01' << (uVar1 & 0x3f)) & DAT_00ffe88a;
+        }
+      }
+    }
+  }
+  return;
+}
+

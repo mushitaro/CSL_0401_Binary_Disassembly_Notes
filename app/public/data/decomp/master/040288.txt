@@ -1,0 +1,13 @@
+
+void sys_timer_tics_calc(void)
+
+{
+  SYS_TIMERTICS_COUNTER = SYS_TIMERTICS_COUNTER + 1;
+  TimerTics_To_Next_Sec = TimerTics_To_Next_Sec + -1;
+  if (TimerTics_To_Next_Sec == 0) {
+    SYS_SEC_COUNTER = SYS_SEC_COUNTER + 1;
+    TimerTics_To_Next_Sec = 1024;
+  }
+  return;
+}
+

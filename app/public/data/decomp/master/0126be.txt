@@ -1,0 +1,10 @@
+
+undefined1 tpu_get_channel_function(byte param_1)
+
+{
+  short sVar1;
+  
+  sVar1 = (param_1 & 3) << 2;
+  return (char)((int)(uint)(0xf << sVar1 & (&TPU_CFSR3)[-((int)(uint)param_1 >> 2)]) >> sVar1);
+}
+

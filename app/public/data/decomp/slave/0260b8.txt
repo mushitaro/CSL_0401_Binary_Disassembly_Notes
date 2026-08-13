@@ -1,0 +1,65 @@
+
+void sa_we_st_calc(void)
+
+{
+  if (((ASC_ST & 2) == 0) && (smg_can_fahrzustand != Radabriss(WheelBreakage))) {
+    if (DAT_00ffda98 != '\0') {
+      DAT_00ffda98 = DAT_00ffda98 + -1;
+    }
+  }
+  else {
+    DAT_00ffda98 = K_SA_MSR_SPERRZEIT;
+  }
+                    /* SA Triggering */
+  if (((((ZUSTAND_MOTOR & LL) != 0) && (MD_FW_DPR <= K_SA_MD_HYS)) && (K_SA_TKAT < TKATM)) &&
+     ((((ASC_ST & 2) == 0 && (DAT_00ffda98 == 0)) &&
+      (((FGR_DPR_ST & 2) == 0 && (((DAT_00ffdb3b & 0x80) == 0 && (EGS_STATUS == '\0')))))))) {
+    if (SA_N40 < N40) {
+      if ((SA_WE_ST & 1) == 0) {
+        DAT_00ffda9a = SYS_TIMERTICS_COUNTER;
+      }
+      SA_WE_ST = SA_WE_ST & 0xcf | 1;
+      goto LAB_0002618a;
+    }
+    if (SA_N40_WIEDEREINSETZEN <= N40) goto LAB_0002618a;
+  }
+  if (((SA_WE_ST & 8) == 0) && ((SA_WE_ST & 1) != 0)) {
+    SA_WE_ST = SA_WE_ST & 0xfc | 0x40;
+  }
+LAB_0002618a:
+  if (((((ASC_ST & 2) == 0) && (cfg_s_getriebetyp != '@')) && (DAT_00ffda98 == '\0')) &&
+     (((SA_N40 < N40 && (K_SA_TKAT < TKATM)) &&
+      ((S_KRAFTSCHLUSS == '\0' && ((K_SA_WDK <= WDK && (MD_FW_DPR <= K_SA_MD_HYS)))))))) {
+    SA_WE_ST = SA_WE_ST & 0xcf | 0xb;
+    DAT_00ffda9e = SYS_TIMERTICS_COUNTER;
+  }
+  if (((((SA_WE_ST & 1) != 0) && ((SA_WE_ST & 2) == 0)) && ((SA_WE_ST & 8) == 0)) &&
+     ((uint)SA_TRIGGER_DELAY << 5 < (uint)(SYS_TIMERTICS_COUNTER - DAT_00ffda9a))) {
+    SA_WE_ST = SA_WE_ST | 2;
+  }
+  if ((SA_WE_ST & 8) == 0) {
+    if ((((SA_WE_ST & 2) != 0) || ((SA_WE_ST & 8) != 0)) &&
+       (((ASC_ST & 2) == 0 &&
+        ((((int)TZ_MD_MITTEL < (int)K_SA_TZ_MIN_HYS + (int)TZ_MIN || (TZ_SA_FLAG != '\0')) ||
+         (MD_IND_NE <= K_SA_MD_NE_MIN)))))) {
+      SA_WE_ST = SA_WE_ST | 8;
+      DAT_00ffda9e = SYS_TIMERTICS_COUNTER;
+      return;
+    }
+  }
+  else if (((N40 < SA_N40_WIEDEREINSETZEN) || (K_WE_MD_HYS < MD_FW_DPR)) ||
+          (((ASC_ST & 2) != 0 || ((DAT_00ffdb3b & 0x80) != 0)))) {
+    if (N40 < SA_N40_WIEDEREINSETZEN) {
+      if (D_N40 < K_WE_DN40_HARD) {
+        SA_DYN_HANDSHAKE = 2;
+      }
+      else {
+        SA_DYN_HANDSHAKE = 1;
+      }
+    }
+    DAT_00ffdaa2 = SYS_TIMERTICS_COUNTER;
+    SA_WE_ST = SA_WE_ST & 0xf0 | 0x20;
+  }
+  return;
+}
+

@@ -1,0 +1,46 @@
+
+void v_direkt_calc(void)
+
+{
+  word wVar1;
+  word wVar2;
+  undefined2 uVar3;
+  short sVar4;
+  int iVar5;
+  uint uVar6;
+  ushort uVar7;
+  
+  iVar5 = DAT_00ffffd8;
+  uVar6 = (uint)(iVar5 * 0x18c) / 500;
+  wVar1 = TPU_CISR;
+  wVar2 = TPU_CISR;
+  TPU_CISR = wVar2 & 0xdfff;
+  if ((wVar1 & 0x2000) == 0) {
+    if ((uVar6 != 0) && (V_ISR_TIMEOUT = V_ISR_TIMEOUT + 1, uVar6 < (uint)V_ISR_TIMEOUT << 0xc)) {
+      uVar6 = (uint)V_ISR_TIMEOUT * 0x1ec2;
+    }
+  }
+  else {
+    V_ISR_TIMEOUT = 0;
+  }
+  uVar3 = DAT_00ffffd8._0_2_;
+  sVar4 = DAT_00ffffd8._0_2_;
+  if ((sVar4 == 0) && (V_ISR_TIMEOUT < 0xb)) {
+    if ((uVar6 == 0) || (K_V_WEGIMPULSZAHL == 0)) {
+      uVar7 = 0;
+    }
+    else {
+      uVar7 = (ushort)((0x430e2340 / K_V_WEGIMPULSZAHL << 4) / uVar6);
+    }
+  }
+  else {
+    uVar7 = 0;
+    V_ISR_TIMEOUT = 0;
+    tpu_disable_channel(0xd);
+    DAT_00ffffd8._0_2_ = 0;
+    FUN_0001d4f4();
+  }
+  V_DIREKT = v_direkt_diag(uVar7);
+  return;
+}
+

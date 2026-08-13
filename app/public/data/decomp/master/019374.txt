@@ -1,0 +1,40 @@
+
+void wdk_segm_calc(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  if (WDK_AUSWAHL != '\0') {
+    if (WDK_AUSWAHL == '\x01') {
+      uVar2 = DK1_AD;
+      uVar1 = (int)((uint)uVar2 * (uint)UEXT1M_KORREKTUR + 0x200) >> 10;
+      if ((uint)WDK1_A0 < (uVar1 & 0xffff)) {
+        uVar2 = (short)uVar1 - WDK1_A0;
+        goto LAB_00019422;
+      }
+    }
+    else if (WDK_AUSWAHL == '\x02') {
+      if (K_WDK2_INVERS == '\0') {
+        uVar2 = dk2_ad;
+        uVar2 = (ushort)((int)((uint)uVar2 * (uint)UEXT2M_KORREKTUR + 0x200) >> 10);
+      }
+      else {
+        uVar2 = dk2_ad;
+        uVar2 = (ushort)((int)((uint)UEXT2M_KORREKTUR * (0x3ff - (uint)uVar2) + 0x200) >> 10);
+      }
+      if (uVar2 < WDK2_A0) {
+        uVar2 = WDK2_A0 - uVar2;
+        goto LAB_00019422;
+      }
+    }
+  }
+  uVar2 = 0;
+LAB_00019422:
+  WDK_SEGM = (ushort)((int)((uint)uVar2 * (uint)WDK1_NORM + 0x400) >> 0xb);
+  if (1000 < WDK_SEGM) {
+    WDK_SEGM = 1000;
+  }
+  return;
+}
+

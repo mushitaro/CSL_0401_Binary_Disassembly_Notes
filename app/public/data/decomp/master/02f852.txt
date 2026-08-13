@@ -1,0 +1,18 @@
+
+void obd_refresh_secondary_air_dtcs(void)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = ed_report(DTC_13_SAP_RELAY,0x80);
+  SLP_ED = (char)uVar1;
+  uVar1 = ed_report(DTC_AA_SAP_LOW_Q,0x80);
+  SLS_D_ED = (char)uVar1;
+  uVar1 = ed_report(DTC_AB_UNKOWN_TABLE_IDX_45,0x80);
+  SLS_K_ED = (char)uVar1;
+  uVar1 = ed_report(DTC_3F_UNKOWN_TABLE_IDX_43,0x80);
+  SLV_ED = (char)uVar1;
+  wdk_doppel_ed_calc();
+  return;
+}
+

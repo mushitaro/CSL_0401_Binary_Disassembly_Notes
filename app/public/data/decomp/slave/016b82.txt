@@ -1,0 +1,103 @@
+
+/* CSL Flap Diagnostic/Test Mode Handler
+   Called from main flap state machine during diagnostic or test operation
+   
+   - Manages diagnostic cycle sequencing, plausibility checks, and actuator commands when in a
+   special test/diag mode.
+   - Interacts with timers, counters, and filter outputs to validate flap response and plausibility.
+   - Uses status and counter variables for debouncing, cycle timing, and recovery from error/test
+   conditions. */
+
+void ask_diag(void)
+
+{
+  byte value;
+  uint uVar1;
+  byte bVar2;
+  
+  value = 0;
+                    /* Only run this logic if in diagnostic mode (b_diag flag set) */
+  if (b_diag != '\0') {
+                    /* If bit 1 (0x2) is NOT set in event status, do the following checks */
+    if ((ask_flap_diag_st & 2) == 0) {
+                    /* If bit 2 (0x4) IS set (diagnostic/test event active), check filter
+                       plausibility */
+      if ((ask_flap_diag_st & 4) != 0) {
+                    /* Compute movement/plausibility delta between expected and actual (scaled by
+                       10) */
+        bVar2 = (byte)((int)((uint)DAT_00ffdcb0 - (uint)ask_filter) / 10);
+                    /* If movement is negative or accumulator is zero, handle test completion or
+                       continue */
+        if (((char)bVar2 < '\0') || (DAT_00ffdcb0 == 0)) {
+          DAT_00ffdcb0 = 0;
+                    /* If not enough cycles elapsed (< threshold), increment cycle counter and stay
+                       in this state */
+          if (ask_diag_cycle_cnt < k_ask_diag_min_cycles) {
+            value = 0;
+            ask_diag_cycle_cnt = ask_diag_cycle_cnt + 1;
+          }
+          else {
+                    /* If enough cycles elapsed, run plausibility lookup for error reporting */
+            if ((char)bVar2 < '\0') {
+              bVar2 = -bVar2;
+            }
+            else {
+              bVar2 = 0;
+            }
+            ask_diag_cycle_cnt = ask_diag_cycle_cnt + 1;
+            uVar1 = kls_bint(&kl_ask_flap_delta_to_driver.sizeX,bVar2);
+                    /* Negate for error/fault signal
+                       If the event timer expired, clear event state bits */
+            value = -(char)uVar1;
+            if (ask_flap_driver_timer == '\0') {
+              value = 0;
+              ask_flap_diag_st = ask_flap_diag_st & 0xeb;
+            }
+                    /* Decrement event timer */
+            ask_flap_driver_timer = ask_flap_driver_timer + -1;
+            if ((uint)ask_roh < (uint)k_ask_flap_pot_tol + (uint)ask_flap_pot_learned_close_pos) {
+                    /* If sensor reading is below reference + tolerance, reset timer and event bits
+                        */
+              ask_flap_driver_timer = k_flap_driver_transition_timer;
+              ask_flap_diag_st = ask_flap_diag_st & 0xeb;
+            }
+          }
+        }
+        else {
+                    /* If positive movement detected, run plausibility check and apply actuator
+                       output */
+          if ('\0' < (char)bVar2) {
+            uVar1 = kls_bint(&kl_ask_flap_delta_to_driver.sizeX,bVar2);
+            value = (byte)uVar1;
+          }
+                    /* If timer expired, clear bits and zero actuator */
+          if (ask_flap_driver_timer == '\0') {
+            value = 0;
+            ask_flap_diag_st = ask_flap_diag_st & 0xeb;
+          }
+                    /* If filter plausibility fails, reset accumulators/timers */
+          ask_flap_driver_timer = ask_flap_driver_timer + -1;
+          if ((int)((uint)k_ask_flap_pot_setpoint - (uint)k_ask_flap_pot_min) <
+              (int)(uint)ask_filter) {
+            DAT_00ffdcb0 = 0;
+            ask_diag_cycle_cnt = 0;
+            ask_flap_driver_timer = k_flap_driver_transition_timer;
+          }
+        }
+      }
+    }
+    else {
+                    /* If event status bit 1 is set, run next step/finish handler and reset counter
+                        */
+      value = ask_flap_pot_closed_calibration();
+      ask_diag_cycle_cnt = 0;
+    }
+                    /* Set actuator output for this cycle */
+    ask_flap_driver_write(value);
+    return;
+  }
+                    /* Not in diagnostic mode: clear event status bits (keep only bits 0 and 3) */
+  ask_flap_diag_st = ask_flap_diag_st & 0xe9;
+  return;
+}
+

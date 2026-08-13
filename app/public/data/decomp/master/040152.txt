@@ -1,0 +1,8 @@
+
+void pit_clear_interrupt_flag(void)
+
+{
+  SIM_PITR = 8;
+  return;
+}
+

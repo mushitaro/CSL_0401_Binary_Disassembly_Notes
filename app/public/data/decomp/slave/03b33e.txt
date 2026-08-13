@@ -1,0 +1,72 @@
+
+void smg_driver_torque_ramp_update(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  short sVar3;
+  
+  if ((DAT_00ffdb3b == '\0') || (MD_ETA_KR < DAT_00ffdb2c)) {
+    DAT_00ffdb2c = MD_ETA_KR;
+  }
+  uVar1 = (int)((uint)md_ind_max_dpr * (uint)DAT_00ffdb2c) / 0xffff;
+  sVar3 = DAT_00ffdb56;
+  if ((int)(uVar1 & 0xffff) < (int)DAT_00ffdb56) {
+    sVar3 = (short)uVar1;
+  }
+  sVar3 = sVar3 - DAT_00ffdb58;
+  if ((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || (K_SA_MD_HYS < MD_FW_DPR)) || (TKATM <= K_SA_TKAT)) {
+    DAT_00ffdb48 = DAT_00ffdb48 & 0xfb;
+    DAT_00ffdb5a = sVar3;
+  }
+  else {
+    if ((((DAT_00ffdb6c & 1) == 0) && (DAT_00ffdb3a != '\x01')) && ((ushort)SA_N40 < n_zie / 0x28))
+    {
+      DAT_00ffdb48 = DAT_00ffdb48 | 4;
+    }
+    if ((DAT_00ffdb48 & 4) == 0) {
+      DAT_00ffdb5a = DAT_00ffdb5a + (ushort)K_SMG_MD_FW_SA_D_M;
+      if (sVar3 < DAT_00ffdb5a) {
+        DAT_00ffdb5a = sVar3;
+      }
+    }
+    else {
+      DAT_00ffdb5a = DAT_00ffdb5a - (ushort)K_SMG_MD_FW_SA_D_M;
+      if ((int)DAT_00ffdb5a < -(int)DAT_00ffdb58) {
+        DAT_00ffdb5a = (short)-(int)DAT_00ffdb58;
+      }
+      if (((n_zie / 0x28 < (ushort)SA_N40_WIEDEREINSETZEN) || (DAT_00ffdbe2 == '\0')) ||
+         ((DAT_00ffdb3a == '\x01' ||
+          ((smg_can_fahrzustand == Radabriss(WheelBreakage) || ((ASC_ST & 2) != 0)))))) {
+        DAT_00ffdb48 = DAT_00ffdb48 & 0xfb;
+      }
+    }
+  }
+  DAT_00ffdc16 = DAT_00ffdc16 & 0xff7f;
+  if (10000 < DAT_00ffdb5a) {
+    DAT_00ffdb5a = 1000;
+    DAT_00ffdc16 = DAT_00ffdc16 | 0x80;
+  }
+  if (DAT_00ffdb5a < -5000) {
+    DAT_00ffdb5a = -500;
+    DAT_00ffdc16 = DAT_00ffdc16 | 0x80;
+  }
+  DAT_00ffdb22 = PT1_Filter_SS(DAT_00ffdb5a,DAT_00ffdb22,K_SMG_TAU_MD_FAHRER);
+  iVar2 = abs((int)DAT_00ffdb5a);
+  DAT_00ffdb5c = (ushort)iVar2;
+  if ((int)(short)(ushort)iVar2 < (int)(uint)K_SMG_____DAT_0008a82a) {
+    DAT_00ffdb5c = K_SMG_____DAT_0008a82a;
+  }
+  iVar2 = abs((int)DAT_00ffdb22);
+  DAT_00ffdb5e = (ushort)iVar2;
+  if ((int)(short)(ushort)iVar2 < (int)(uint)K_SMG_____DAT_0008a82c) {
+    DAT_00ffdb5e = K_SMG_____DAT_0008a82c;
+  }
+  sVar3 = -(short)DAT_00ffdb29;
+  if (sVar3 < 0) {
+    sVar3 = 0;
+  }
+  DAT_00ffdb2e = (char)sVar3;
+  return;
+}
+

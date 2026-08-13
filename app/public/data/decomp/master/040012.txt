@@ -1,0 +1,38 @@
+
+undefined1 sys_mark_task_pending(uint task_struct)
+
+{
+  undefined3 extraout_var;
+  byte saved_sr;
+  undefined1 return_code;
+  byte *control_byte_ptr;
+  undefined4 uVar1;
+  
+                    /* Only support task IDs 0 to 31 */
+  if ((byte)task_struct < 32) {
+    control_byte_ptr = (byte *)(sys_task_control_bytes + (task_struct & 0xff));
+                    /* Check if task is already marked as pending (bit 6 set) */
+    if ((*control_byte_ptr & 0x40) == 0) {
+                    /* Save and set status register to disable interrupts */
+      saved_sr = set_status_register(0x2700);
+                    /* Mark the task as pending (set bit 6) */
+      *control_byte_ptr = *control_byte_ptr | 0x40;
+                    /* Set corresponding bit in pending task bitmap */
+      sys_pending_tasks_bitfield = 1 << (task_struct & 0x3f) | sys_pending_tasks_bitfield;
+                    /* Restore status register */
+      set_status_register((ushort)CONCAT31(extraout_var,saved_sr));
+      return 0;
+    }
+                    /* Task is already pending */
+    return_code = 2;
+    uVar1 = 2;
+  }
+  else {
+                    /* Invalid task ID */
+    return_code = 1;
+    uVar1 = 1;
+  }
+  syserror(task_struct,uVar1);
+  return return_code;
+}
+

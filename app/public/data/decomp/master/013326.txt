@@ -1,0 +1,51 @@
+
+void asc_a_calc(void)
+
+{
+  int iVar1;
+  int iVar2;
+  uint uVar3;
+  
+  if ((ASC_A_ST & 1) == 0) {
+    iVar1 = (int)ASC_AX_DPR;
+    iVar2 = iVar1 * 5;
+    if (SCARRY4(iVar1,iVar1 * 4) != iVar2 < 0) {
+      iVar2 = iVar2 + 0xf;
+    }
+    uVar3 = iVar2 >> 4 & 0xffff;
+    if ((short)(iVar2 >> 4) < -0x7f) {
+      uVar3 = 0xffffff81;
+    }
+    if (0x7f < (short)uVar3) {
+      uVar3 = 0x7f;
+    }
+    ASC_AX_ROH = (char)uVar3;
+  }
+  else {
+    ASC_AX_ROH = (char)D_V;
+  }
+  if ((ASC_A_ST & 2) == 0) {
+    iVar1 = (int)ASC_AY_DPR;
+    iVar2 = iVar1 * 0x7b;
+    if (iVar1 * 0x7c < iVar1) {
+      iVar2 = iVar2 + 0xff;
+    }
+    uVar3 = iVar2 >> 8 & 0xffff;
+    if ((short)((uint)iVar2 >> 8) < -0x7f) {
+      uVar3 = 0xffffff81;
+    }
+    if (0x7f < (short)uVar3) {
+      uVar3 = 0x7f;
+    }
+    ASC_AY_ROH = (char)uVar3;
+  }
+  else {
+    ASC_AY_ROH = A_QUER_BER;
+  }
+  asc_ax_filter = PT1_Filter_SS((short)ASC_AX_ROH << 8,asc_ax_filter,K_ASC_A_TAU);
+  asc_ay_filter = PT1_Filter_SS((short)ASC_AY_ROH << 8,asc_ay_filter,K_ASC_A_TAU);
+  ASC_AX = (char)((ushort)asc_ax_filter >> 8);
+  ASC_AY = (char)((ushort)asc_ay_filter >> 8);
+  return;
+}
+

@@ -1,0 +1,39 @@
+
+void ipk_service_tx_slots_2ms(void)
+
+{
+  undefined1 *puVar1;
+  char cVar2;
+  uint uVar3;
+  char *pcVar4;
+  undefined *puVar5;
+  
+  pcVar4 = &DAT_00ffe56c;
+  uVar3 = (uint)DAT_00010816;
+  puVar5 = PTR_DAT_0001080e;
+  do {
+    if ((int)uVar3 < 1) {
+      return;
+    }
+    if (*pcVar4 == '\x02') {
+      puVar1 = *(undefined1 **)(pcVar4 + 2);
+      if ((puVar5[0x13] == '\x02') || ((char)puVar5[0x13] < '\0')) {
+        *puVar1 = puVar5[0x13];
+        puVar1[1] = puVar5[0x14];
+      }
+      else {
+        cVar2 = pcVar4[1] + -1;
+        pcVar4[1] = cVar2;
+        if (cVar2 != '\0') goto LAB_00040866;
+        *puVar1 = 0x82;
+      }
+      puVar5[0x12] = 0;
+      *pcVar4 = '\0';
+    }
+LAB_00040866:
+    uVar3 = uVar3 - 1;
+    pcVar4 = pcVar4 + 6;
+    puVar5 = puVar5 + 0x16;
+  } while( true );
+}
+

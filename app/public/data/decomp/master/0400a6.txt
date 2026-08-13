@@ -1,0 +1,34 @@
+
+void sys_task_dispatcher(void)
+
+{
+  uint current_task_position;
+  uint current_task_mask;
+  byte *current_task_status_byte;
+  
+                    /* Loop while there are tasks pending and not currently executing. */
+  while (sys_executing_tasks_bitfield < (sys_pending_tasks_bitfield & ~sys_executing_tasks_bitfield)
+        ) {
+                    /* Pick the highest-priority pending task (MSB = most significant bit set). */
+    current_task_position = Find_Position_of_MSB(sys_pending_tasks_bitfield);
+                    /* Create a bitmask for that task’s bit. */
+    current_task_mask = 1 << (current_task_position & 0x3f);
+                    /* Mark task as executing */
+    sys_executing_tasks_bitfield = current_task_mask | sys_executing_tasks_bitfield;
+                    /* Remove it from pending list */
+    sys_pending_tasks_bitfield = ~current_task_mask & sys_pending_tasks_bitfield;
+    current_task_status_byte = (byte *)(sys_task_control_bytes + (current_task_position & 0xff));
+                    /* Clear bit 6 (likely: "ready") */
+    *current_task_status_byte = *current_task_status_byte & 0xbf;
+                    /* Set bit 7 (likely: "running") */
+    *current_task_status_byte = *current_task_status_byte | 0x80;
+                    /* execute the task */
+    (**(code **)(&sys_task_pointer_table)[current_task_position & 0xff])();
+                    /* Mark task as done */
+    sys_executing_tasks_bitfield = ~current_task_mask & sys_executing_tasks_bitfield;
+                    /* Clear bit 7 ("running") */
+    *current_task_status_byte = *current_task_status_byte & 0x7f;
+  }
+  return;
+}
+

@@ -1,0 +1,12 @@
+
+void mil_reset(void)
+
+{
+  DAT_00ff8148 = 0;
+  MIL_ST_S = 0;
+  DAT_00ff8146 = K_MIL_PERIODE;
+  MIL_ST = K_MIL_CONTROL & 0xc0;
+  obd_init();
+  return;
+}
+

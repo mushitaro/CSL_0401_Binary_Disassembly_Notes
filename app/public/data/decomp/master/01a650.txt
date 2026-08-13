@@ -1,0 +1,29 @@
+
+void p_saug_ad_ring_buffer_update(void)
+
+{
+  word wVar1;
+  ushort uVar2;
+  undefined4 uVar3;
+  
+                    /* Specific to 0401
+                       
+                       every ms loop_counter is incremented
+                       
+                       This function runs every ms */
+  p_saug_ad_ring_buffer.IOFlag[(short)(ushort)p_saug_ad_loop_counter] =
+       p_saug_ad_ring_buffer.IOFlag[(short)(ushort)p_saug_ad_loop_counter] + 1;
+  uVar2 = p_saug_ad;
+  p_saug_ad_ring_buffer.kadADSample[(short)(ushort)p_saug_ad_loop_counter] =
+       (uint)uVar2 + p_saug_ad_ring_buffer.kadADSample[(short)(ushort)p_saug_ad_loop_counter];
+                    /* 0401 doesn't run this code by default because of what d202 is set to */
+  if ((k_rf_hfm_cfg & 1) != 0) {
+    wVar1 = ask_ad;
+    uVar3 = hfm_ml_u_calc(wVar1);
+    p_saug_ad_ring_buffer.UnusedBuffer[(short)(ushort)p_saug_ad_loop_counter] =
+         (int)(short)uVar3 +
+         p_saug_ad_ring_buffer.UnusedBuffer[(short)(ushort)p_saug_ad_loop_counter];
+  }
+  return;
+}
+

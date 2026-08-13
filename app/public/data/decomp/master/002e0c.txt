@@ -1,0 +1,29 @@
+
+void aif_cpu_selector_from_log(void)
+
+{
+  uint32_t free_slot_idx;
+  word *pwVar1;
+  word *cursor;
+  
+  free_slot_idx = 0;
+  cursor = AIF_Flash_Counter;
+  do {
+    pwVar1 = cursor + 1;
+    if (*cursor == 0xffff) break;
+    free_slot_idx = free_slot_idx + 1;
+    cursor = pwVar1;
+  } while (free_slot_idx < 64);
+  aif_cpu_selector = 0xc3;
+  if ((cursor != AIF_Flash_Counter) && (cursor < AIF_Flash_Counter + 0x3f)) {
+    if (cursor[-1] == 0xff) {
+      aif_cpu_selector = 0x3c;
+      return;
+    }
+    if (cursor[-1] == 0xff00) {
+      aif_cpu_selector = 0x66;
+    }
+  }
+  return;
+}
+

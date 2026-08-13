@@ -1,0 +1,504 @@
+
+/* WARNING: Removing unreachable block (ram,0x00039698) */
+/* WARNING: Removing unreachable block (ram,0x0003964e) */
+/* WARNING: Removing unreachable block (ram,0x00039734) */
+/* WARNING: Removing unreachable block (ram,0x0003975e) */
+/* WARNING: Removing unreachable block (ram,0x00039716) */
+/* WARNING: Removing unreachable block (ram,0x000396ec) */
+/* WARNING: Removing unreachable block (ram,0x000396c2) */
+/* WARNING: Removing unreachable block (ram,0x000396ae) */
+/* WARNING: Removing unreachable block (ram,0x000396d8) */
+/* WARNING: Removing unreachable block (ram,0x00039702) */
+/* WARNING: Removing unreachable block (ram,0x0003974a) */
+/* WARNING: Removing unreachable block (ram,0x00039774) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void sk_bgnd(void)
+
+{
+  word wVar1;
+  dword dVar2;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  undefined3 extraout_var_01;
+  undefined3 extraout_var_02;
+  undefined3 extraout_var_03;
+  undefined3 extraout_var_04;
+  undefined3 extraout_var_05;
+  undefined3 extraout_var_06;
+  undefined3 extraout_var_07;
+  byte bVar3;
+  short sVar4;
+  ushort uVar5;
+  byte *pbVar6;
+  ushort *puVar7;
+  bool bVar8;
+  MSS54_DTC error;
+  
+  if (DAT_00ffd1a6 < 100) {
+    sVar4 = 0xf;
+    pbVar6 = &DAT_0003962c;
+    do {
+      bVar3 = *pbVar6;
+      if (DAT_00ffd1a6 <= bVar3) break;
+      sVar4 = sVar4 + -1;
+      pbVar6 = pbVar6 + 1;
+    } while (sVar4 != -1);
+    if (DAT_00ffd1a6 == bVar3) {
+                    /* WARNING: Switch is manually overridden */
+      switch(sVar4) {
+      case 0:
+        DAT_00ffd1a6 = 0;
+        DAT_00ffd1e2 = 0;
+        if ((((SK_RAM_ST == 0xf00f) && (SK_ROM_ST == 0xf00f)) && (SK_SIM_ST == 0xf00f)) &&
+           ((SK_ADC_ST == 0xf00f && (0x7f < DAT_00ffd1e0)))) {
+          if (CPU_Identifier == 'M') {
+            error = DTC_96_MEMORY_FAULT;
+          }
+          else {
+            error = DTC_9D_MEMORY_FAULT;
+          }
+          ed_report(error,0);
+        }
+        DAT_00ffd1e0 = 0;
+        return;
+      case 1:
+        psRam00ffd1ac = psRam00ffd1ac + 0x40;
+        psRam00ffd1b0 = psRam00ffd1b0 + 0x40;
+        if (_DAT_00ffd1b4 < psRam00ffd1b0) {
+          psRam00ffd1b0 = _DAT_00ffd1b4;
+        }
+        uRam00ffd1aa = FUN_000014d6((uint)psRam00ffd1ac,(uint)psRam00ffd1b0);
+        if (psRam00ffd1b0 < _DAT_00ffd1b4) {
+          return;
+        }
+        DAT_00ffd1a6 = 5;
+        return;
+      case 2:
+        psRam00ffd1ac = (short *)PTR_K_VERS_UP_M_00003e10;
+        _DAT_00ffd1b4 = (short *)(*(int *)PTR_PTR_00003e18 + -1);
+        psRam00ffd1b0 = (short *)(PTR_K_VERS_UP_M_00003e10 + 0x7f);
+        uRam00ffd1aa = FUN_000014d6((uint)PTR_K_VERS_UP_M_00003e10,(uint)psRam00ffd1b0);
+        DAT_00ffd1a6 = 0x28;
+        return;
+      case 3:
+        uRam00ffd1aa = 0xf00f;
+        wVar1 = SIM_SYNCR;
+        if ((wVar1 & 0xff00) != 0xd700) {
+          uRam00ffd1aa = 1;
+        }
+        bVar3 = SIM_SYPCR;
+        if ((bVar3 & 0xf3) != 0xb1) {
+          uRam00ffd1aa = 2;
+        }
+        wVar1 = SIM_PICR;
+        if (wVar1 != 0x411) {
+          uRam00ffd1aa = 3;
+        }
+        dVar2 = SRAM_RAMBAH;
+        if (dVar2 != 0xffe000) {
+          uRam00ffd1aa = 4;
+        }
+        wVar1 = SIM_CSBAR5;
+        if (wVar1 != 0xff80) {
+          uRam00ffd1aa = 5;
+        }
+        wVar1 = SIM_CSOR5;
+        if (wVar1 != 0x7870) {
+          uRam00ffd1aa = 6;
+        }
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_07,bVar3);
+        if (uRam00ffd1aa == 0xf00f) {
+          SK_SIM_ST = 0xf00f;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80f0 = 0xf00f;
+          }
+          else {
+            _DAT_00ff80f8 = 0xf00f;
+          }
+        }
+        else {
+          SK_SIM_ST = uRam00ffd1aa | 0x8000;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80f0 = 0x8000;
+            ed_report(DTC_96_MEMORY_FAULT,8);
+          }
+          else {
+            _DAT_00ff80f8 = 0x8000;
+            ed_report(DTC_9D_MEMORY_FAULT,8);
+          }
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 99;
+        return;
+      case 4:
+        uRam00ffd1aa = 0xf00f;
+        if (0x19 < QADC_ERR_COUNT) {
+          uRam00ffd1aa = 1;
+        }
+        uVar5 = DAT_00fff2d0;
+        if ((uVar5 < 0x380) || (uVar5 = DAT_00fff2d0, 0x480 < uVar5)) {
+          uRam00ffd1aa = 2;
+        }
+        uVar5 = DAT_00fff2d2;
+        if (0x80 < uVar5) {
+          uRam00ffd1aa = 3;
+        }
+        uVar5 = DAT_00fff2d4;
+        if ((uVar5 < 0x180) || (uVar5 = DAT_00fff2d4, 0x280 < uVar5)) {
+          uRam00ffd1aa = 4;
+        }
+        wVar1 = QADC_QADCMCR;
+        if (wVar1 != 0xe) {
+          uRam00ffd1aa = 5;
+        }
+        wVar1 = QADC_DDRQA;
+        wVar1 = QADC_DDRQA;
+        if (wVar1 != 0) {
+          uRam00ffd1aa = 6;
+        }
+        if (CPU_Identifier == 'M') {
+          wVar1 = QADC_QACR0;
+          if (wVar1 != 0x115) {
+            uRam00ffd1aa = 7;
+          }
+          wVar1 = QADC_QACR1;
+          if ((wVar1 & 0xdfff) != 0x100) {
+            uRam00ffd1aa = 8;
+          }
+          wVar1 = QADC_QACR2;
+          bVar8 = wVar1 == 0x1183;
+        }
+        else {
+          wVar1 = QADC_QACR0;
+          if (wVar1 != 0x115) {
+            uRam00ffd1aa = 7;
+          }
+          wVar1 = QADC_QACR1;
+          if ((wVar1 & 0xdfff) != 0x100) {
+            uRam00ffd1aa = 8;
+          }
+          wVar1 = QADC_QACR2;
+          bVar8 = wVar1 == 0x1186;
+        }
+        if (!bVar8) {
+          uRam00ffd1aa = 9;
+        }
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_06,bVar3);
+        if (uRam00ffd1aa == 0xf00f) {
+          SK_ADC_ST = 0xf00f;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80ee = 0xf00f;
+          }
+          else {
+            _DAT_00ff80f6 = 0xf00f;
+          }
+        }
+        else {
+          SK_ADC_ST = uRam00ffd1aa | (ushort)QADC_ERR_COUNT << 4 | 0x4000;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80ee = 0x4000;
+            ed_report(DTC_96_MEMORY_FAULT,4);
+          }
+          else {
+            _DAT_00ff80f6 = 0x4000;
+            ed_report(DTC_9D_MEMORY_FAULT,4);
+          }
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 0xc;
+        return;
+      case 5:
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_05,bVar3);
+        if (uRam00ffd1aa == -0xff1) {
+          SK_RAM_ST = 0xf00f;
+          if (CPU_Identifier == 'M') {
+            DAT_00ff80ea = 0xf00f;
+          }
+          else {
+            DAT_00ff80f2 = 0xf00f;
+          }
+        }
+        else {
+          SK_RAM_ST = 0x2000;
+          if (CPU_Identifier == 'M') {
+            DAT_00ff80ea = 0x2000;
+            ed_report(DTC_96_MEMORY_FAULT,1);
+          }
+          else {
+            DAT_00ff80f2 = 0x2000;
+            ed_report(DTC_9D_MEMORY_FAULT,1);
+          }
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 0xb;
+        return;
+      case 6:
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_04,bVar3);
+        break;
+      case 7:
+        sRam00ffd1a8 = 0;
+        uRam00ffd1aa = 0xf00f;
+        psRam00ffd1ac = &DAT_00ffe000;
+        psRam00ffd1b0 = (short *)&DAT_00ffefff;
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_03,bVar3);
+        for (uVar5 = 0; uVar5 < 0x10; uVar5 = uVar5 + 1) {
+          sRam00ffd1a8 = *psRam00ffd1ac;
+          *psRam00ffd1ac = 0;
+          if (*psRam00ffd1ac != 0) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -1;
+          if (*psRam00ffd1ac != -1) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = 0x55aa;
+          if (*psRam00ffd1ac != 0x55aa) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -0x55ab;
+          if (*psRam00ffd1ac != -0x55ab) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = sRam00ffd1a8;
+          psRam00ffd1ac = psRam00ffd1ac + 1;
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 9;
+        return;
+      case 8:
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_02,bVar3);
+        for (uVar5 = 0; uVar5 < 0x10; uVar5 = uVar5 + 1) {
+          sRam00ffd1a8 = *psRam00ffd1ac;
+          *psRam00ffd1ac = 0;
+          if (*psRam00ffd1ac != 0) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -1;
+          if (*psRam00ffd1ac != -1) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = 0x55aa;
+          if (*psRam00ffd1ac != 0x55aa) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -0x55ab;
+          if (*psRam00ffd1ac != -0x55ab) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = sRam00ffd1a8;
+          psRam00ffd1ac = psRam00ffd1ac + 1;
+          if (psRam00ffd1b0 <= psRam00ffd1ac) break;
+        }
+        set_status_register(_DAT_00ffd1b8);
+        if (psRam00ffd1ac < psRam00ffd1b0) {
+          return;
+        }
+        DAT_00ffd1a6 = 8;
+        return;
+      case 9:
+        sRam00ffd1a8 = 0;
+        uRam00ffd1aa = 0xf00f;
+        psRam00ffd1ac = &DAT_00ffd200;
+        psRam00ffd1b0 = (short *)&DAT_00ffddff;
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_01,bVar3);
+        for (uVar5 = 0; uVar5 < 0x10; uVar5 = uVar5 + 1) {
+          sRam00ffd1a8 = *psRam00ffd1ac;
+          *psRam00ffd1ac = 0;
+          if (*psRam00ffd1ac != 0) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -1;
+          if (*psRam00ffd1ac != -1) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = 0x55aa;
+          if (*psRam00ffd1ac != 0x55aa) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = -0x55ab;
+          if (*psRam00ffd1ac != -0x55ab) {
+            uRam00ffd1aa = 0;
+          }
+          *psRam00ffd1ac = sRam00ffd1a8;
+          psRam00ffd1ac = psRam00ffd1ac + 1;
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 7;
+        return;
+      case 10:
+        bVar3 = set_status_register(0x2700);
+        _DAT_00ffd1b8 = (ushort)CONCAT31(extraout_var_00,bVar3);
+        if (CPU_Identifier == 'M') {
+          DAT_00ff813c = sRam00ffd1a8;
+          DAT_00ff8140 = uRam00ffd1aa;
+          DAT_00ff8144 = 1;
+        }
+        else {
+          DAT_00ff813e = sRam00ffd1a8;
+          DAT_00ff8142 = uRam00ffd1aa;
+          DAT_00ff8145 = 1;
+        }
+        if ((**(short **)PTR_PTR_00003e28 == sRam00ffd1a8) &&
+           (**(short **)PTR_PTR_00003e18 == uRam00ffd1aa)) {
+          SK_ROM_ST = 0xf00f;
+          _SK_ROX_ST = 0xf00f;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80ec = 0xf00f;
+          }
+          else {
+            _DAT_00ff80f4 = 0xf00f;
+          }
+        }
+        else if ((cfg_m_status & 0x80) == 0) {
+          _SK_ROX_ST = 0x3000;
+        }
+        else {
+          SK_ROM_ST = 0x3000;
+          if (CPU_Identifier == 'M') {
+            _DAT_00ff80ec = 0x3000;
+            ed_report(DTC_96_MEMORY_FAULT,2);
+          }
+          else {
+            _DAT_00ff80f4 = 0x3000;
+            ed_report(DTC_9D_MEMORY_FAULT,2);
+          }
+        }
+        set_status_register(_DAT_00ffd1b8);
+        DAT_00ffd1a6 = 6;
+        return;
+      case 0xb:
+        psRam00ffd1ac = psRam00ffd1ac + 0x40;
+        psRam00ffd1b0 = psRam00ffd1b0 + 0x40;
+        if (_DAT_00ffd1b4 < psRam00ffd1b0) {
+          psRam00ffd1b0 = _DAT_00ffd1b4;
+        }
+        uRam00ffd1aa = FUN_000014d6((uint)psRam00ffd1ac,(uint)psRam00ffd1b0);
+        if (psRam00ffd1b0 < _DAT_00ffd1b4) {
+          return;
+        }
+        DAT_00ffd1a6 = 0x1e;
+        return;
+      case 0xc:
+        uRam00ffd1aa = 0;
+        psRam00ffd1ac = (short *)PTR_K_START_SGANG_00003e00;
+        _DAT_00ffd1b4 = (short *)DAT_00003e04;
+        psRam00ffd1b0 = (short *)(PTR_K_START_SGANG_00003e00 + 0x7f);
+        uRam00ffd1aa = FUN_000014d6((uint)PTR_K_START_SGANG_00003e00,(uint)psRam00ffd1b0);
+        DAT_00ffd1a6 = 4;
+        return;
+      case 0xd:
+        psRam00ffd1ac = psRam00ffd1ac + 0x40;
+        psRam00ffd1b0 = psRam00ffd1b0 + 0x40;
+        if (_DAT_00ffd1b4 < psRam00ffd1b0) {
+          psRam00ffd1b0 = _DAT_00ffd1b4;
+        }
+        sRam00ffd1a8 = FUN_000014d6((uint)psRam00ffd1ac,(uint)psRam00ffd1b0);
+        if (psRam00ffd1b0 < _DAT_00ffd1b4) {
+          return;
+        }
+        DAT_00ffd1a6 = 3;
+        return;
+      case 0xe:
+        sRam00ffd1a8 = 0;
+        psRam00ffd1ac = (short *)PTR_PTR_00003e20;
+        _DAT_00ffd1b4 = (short *)(*(int *)PTR_PTR_00003e28 + -1);
+        psRam00ffd1b0 = (short *)(PTR_PTR_00003e20 + 0x7f);
+        sRam00ffd1a8 = FUN_000014d6((uint)PTR_PTR_00003e20,(uint)psRam00ffd1b0);
+        DAT_00ffd1a6 = 2;
+        return;
+      case 0xf:
+        sVar4 = -0xff1;
+        puVar7 = &DAT_00ffd1a0;
+        for (uVar5 = 0; uVar5 < 0x20; uVar5 = uVar5 + 1) {
+          *puVar7 = 0;
+          *puVar7 = *puVar7 ^ 0xffff;
+          if (*puVar7 != 0xffff) {
+            sVar4 = 0;
+          }
+          *puVar7 = *puVar7 & 0x55aa;
+          if (*puVar7 != 0x55aa) {
+            sVar4 = 0;
+          }
+          *puVar7 = *puVar7 ^ 0xffff;
+          if (*puVar7 != 0xaa55) {
+            sVar4 = 0;
+          }
+          puVar7 = puVar7 + 1;
+        }
+        bVar3 = set_status_register(0x2700);
+        if (CPU_Identifier == 'M') {
+          DAT_00ff80ea = 0xaa55;
+        }
+        else {
+          DAT_00ff80f2 = 0xaa55;
+        }
+        if (sVar4 == -0xff1) {
+          SK_RAM_ST = 0xf00f;
+          if (CPU_Identifier == 'M') {
+            DAT_00ff80ea = 0xf00f;
+          }
+          else {
+            DAT_00ff80f2 = 0xf00f;
+          }
+          for (uVar5 = 7; uVar5 < 0x1a; uVar5 = uVar5 + 1) {
+            *(undefined1 *)((int)&DAT_00ffd1a0 + (int)(short)uVar5) = 0;
+          }
+          DAT_00ffd1a6 = 1;
+        }
+        else {
+          DAT_00ffd1a6 = 0;
+          SK_RAM_ST = 0x1000;
+          if (CPU_Identifier == 'M') {
+            DAT_00ff80ea = 0x1000;
+            ed_report(DTC_96_MEMORY_FAULT,1);
+          }
+          else {
+            DAT_00ff80f2 = 0x1000;
+            ed_report(DTC_9D_MEMORY_FAULT,1);
+          }
+        }
+        set_status_register((ushort)CONCAT31(extraout_var,bVar3));
+        return;
+      }
+      for (uVar5 = 0; uVar5 < 0x10; uVar5 = uVar5 + 1) {
+        sRam00ffd1a8 = *psRam00ffd1ac;
+        *psRam00ffd1ac = 0;
+        if (*psRam00ffd1ac != 0) {
+          uRam00ffd1aa = 0;
+        }
+        *psRam00ffd1ac = -1;
+        if (*psRam00ffd1ac != -1) {
+          uRam00ffd1aa = 0;
+        }
+        *psRam00ffd1ac = 0x55aa;
+        if (*psRam00ffd1ac != 0x55aa) {
+          uRam00ffd1aa = 0;
+        }
+        *psRam00ffd1ac = -0x55ab;
+        if (*psRam00ffd1ac != -0x55ab) {
+          uRam00ffd1aa = 0;
+        }
+        *psRam00ffd1ac = sRam00ffd1a8;
+        psRam00ffd1ac = psRam00ffd1ac + 1;
+        if (psRam00ffd1b0 <= psRam00ffd1ac) break;
+      }
+      set_status_register(_DAT_00ffd1b8);
+      if (psRam00ffd1ac < psRam00ffd1b0) {
+        return;
+      }
+      DAT_00ffd1a6 = 10;
+      return;
+    }
+  }
+  DAT_00ffd1a6 = 0;
+  return;
+}
+

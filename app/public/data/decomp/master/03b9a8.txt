@@ -1,0 +1,35 @@
+
+void can_rx_messages(void)
+
+{
+  CAN_TEL_ST = CAN_TEL_EMPF | CAN_TEL_ST;
+  if (DAT_00ff81af != 0) {
+    DAT_00ff81af = DAT_00ff81af + -1;
+  }
+  if ((UB < K_CAN_UBMIN) || ((ZUSTAND_MOTOR & KI.15 aus) != 0)) {
+    CAN_ED_TSPERR = K_CAN_ED_TSPERR;
+  }
+  if (CAN_ED_TSPERR == 0) {
+                    /* This seems to be where the various "Recieve" CANBUS ARBID functions are
+                       called */
+    can_a_rx(4);
+    can_a_rx(5);
+    can_a_rx(6);
+    can_a_rx(9);
+    can_a_rx(7);
+    can_a_rx(8);
+    if ((cfg_m_getriebetyp & 0x30) == 0x30) {
+      can_a_rx(3);
+    }
+                    /* This is additional in 0401, is it CSL specific? */
+    if ((cfg_m_baureihe & 0xf8) == 8) {
+      can_a_rx(10);
+      return;
+    }
+  }
+  else {
+    CAN_ED_TSPERR = CAN_ED_TSPERR + -1;
+  }
+  return;
+}
+

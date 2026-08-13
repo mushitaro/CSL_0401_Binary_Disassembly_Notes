@@ -1,0 +1,24 @@
+
+void ti_ptkorr_factor(void)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  short sVar3;
+  ushort uVar4;
+  
+  if (((ZUSTAND_MOTOR & TL) != 0) && (N < K_TI_PT_KORR_NMAX)) {
+    uVar1 = klu_bint(&KL_TI_PT_KORR.sizeX,(byte)(RF_PT_KORR >> 5));
+    uVar4 = (ushort)uVar1 & 0xff;
+    uVar2 = Map_Interpolation_US_US_SB(&KF_TI_PT_KORR_N_RF.sizeX,N,RF);
+    sVar3 = (short)((int)(short)(char)uVar2 * (int)(short)uVar4 >> 4);
+    if (sVar3 < -0x400) {
+      sVar3 = -0x400;
+    }
+    TI_F_PT_KORR = sVar3 + 0x400;
+    return;
+  }
+  TI_F_PT_KORR = 0x400;
+  return;
+}
+

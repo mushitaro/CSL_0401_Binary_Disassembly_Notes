@@ -1,0 +1,54 @@
+
+void lls_diag(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  undefined4 uVar5;
+  short sVar6;
+  byte errortype;
+  byte errortype_00;
+  
+  if (((DAT_00ff8245 & 0x10) != 0) && ((BYTE_00ff8246 & 0x10) != 0)) {
+    bVar1 = DAT_00ff8245 & 0xf;
+    errortype = DAT_00ff8245 & 0xf;
+    bVar2 = BYTE_00ff8246 & 0xf;
+    errortype_00 = BYTE_00ff8246 & 0xf;
+    DAT_00ff8245 = 0;
+    BYTE_00ff8246 = 0;
+    if ((((ZUSTAND_MOTOR & Start) != 0) || ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) &&
+       ((K_ED_UBMIN_M < UB && ((LLS_ST & 1) == 0)))) {
+      uVar3 = FUN_00025ffa(errortype_00);
+      if ((bVar2 != 0) || ((LLS_S_ED & 0x20) != 0)) {
+        uVar4 = ed_report(DTC_02_ICV_CLOSE,errortype_00);
+        LLS_S_ED = (byte)uVar4;
+      }
+      uVar4 = FUN_00025ffa(errortype);
+      if ((bVar1 != 0) || ((LLS_O_ED & 0x20) != 0)) {
+        uVar5 = ed_report(DTC_1D_ICV_NC,errortype);
+        LLS_O_ED = (byte)uVar5;
+      }
+      sVar6 = (ushort)(byte)uVar4 + (ushort)(byte)uVar4 * 4;
+      if ((((LLS_S_ED & 0x20) == 0) && ((LLS_O_ED & 0x20) == 0)) &&
+         (((LLS_ST & 2) == 0 || ((LLS_M_ED & 2) == 0)))) {
+        LLS_ST = LLS_ST & 3;
+      }
+      else {
+        if ((&DAT_0003d65c)[(short)((ushort)(byte)uVar3 + sVar6)] != 0) {
+          LLS_ST = (&DAT_0003d65c)[(short)((ushort)(byte)uVar3 + sVar6)] | LLS_ST & 3 | 0x80;
+          bVar1 = (&DAT_0003d676)[(short)(sVar6 + (ushort)(byte)uVar3)];
+LAB_00026166:
+          LLS_ML_NOTLUFT = (ushort)bVar1 * 0x28;
+          return;
+        }
+        if (((LLS_ST & 2) != 0) && (bVar1 = DAT_0003d67c, (LLS_M_ED & 2) != 0)) goto LAB_00026166;
+        LLS_ST = LLS_ST & 0xbf;
+      }
+      LLS_ML_NOTLUFT = ML_SOLL_MAX_LLS;
+    }
+  }
+  return;
+}
+

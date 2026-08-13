@@ -1,0 +1,16 @@
+
+void can_a_tx(byte slot_index)
+
+{
+  struct_rx_tx_frame tx_frame_struct;
+  
+  if ((can_a_tx_status & 0x80) == 0) {
+    tx_frame_struct.slot_cfg_table_entry_ptr = (undefined *)(can_a_slot_cfg_table + slot_index);
+    tx_frame_struct.slot_index = slot_index;
+    tx_frame_struct.slot_id = slot_index + 1;
+    tx_frame_struct.slot_state_table_entry_ptr = &can_slot_status_table[slot_index].recv_count;
+    (*(code *)can_a_slot_cfg_table[slot_index].message_handler)(&tx_frame_struct);
+  }
+  return;
+}
+

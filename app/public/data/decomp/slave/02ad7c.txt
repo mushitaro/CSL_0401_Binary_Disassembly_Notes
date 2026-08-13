@@ -1,0 +1,30 @@
+
+uint ti_diag_tr_update(byte *param_1,uint param_2)
+
+{
+  undefined3 uVar1;
+  uint in_D0;
+  byte errortype;
+  
+  if (((ZUSTAND_MOTOR & Start) != 0) ||
+     (in_D0 = CONCAT31((int3)(in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c,
+     (ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    uVar1 = (undefined3)(in_D0 >> 8);
+    in_D0 = CONCAT31(uVar1,UB);
+    if ((K_ED_UBMIN_S < UB) && (((UB_ED & FILTER) == 0 && ((*param_1 & 0x10) != 0)))) {
+      if ((*param_1 & 8) == 0) {
+        if ((*param_1 & 0xe0) == 0) {
+          return CONCAT31(uVar1,*param_1) & 0xffffffe0;
+        }
+        errortype = 0;
+      }
+      else {
+        errortype = 8;
+      }
+      in_D0 = ed_report(param_2,errortype);
+      *param_1 = (byte)in_D0;
+    }
+  }
+  return in_D0;
+}
+

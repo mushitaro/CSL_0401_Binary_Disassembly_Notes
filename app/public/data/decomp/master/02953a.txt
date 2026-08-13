@@ -1,0 +1,35 @@
+
+void kd_calc(void)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  
+  uVar1 = kd_cfg_calc();
+  KD_CFG = (char)uVar1;
+  if (KD_CFG != 0) {
+    uVar1 = klu_bint(&KL_KD_FILT_STAT.sizeX,N40);
+    KD_FILT_S = (undefined1)uVar1;
+    uVar1 = klu_bint(&KL_KD_FILT_DYN.sizeX,N40);
+    KD_FILT_D = (undefined1)uVar1;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_1.sizeX,N,RF);
+    KD_KFAKT[0] = (word)uVar2;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_2.sizeX,N,RF);
+    KD_KFAKT[1] = (word)uVar2;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_3.sizeX,N,RF);
+    KD_KFAKT[2] = (word)uVar2;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_4.sizeX,N,RF);
+    KD_KFAKT[3] = (word)uVar2;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_5.sizeX,N,RF);
+    KD_KFAKT[4] = (word)uVar2;
+    uVar2 = kfu_wint(&KF_KD_KFAKT_6.sizeX,N,RF);
+    KD_KFAKT[6] = 0xa00;
+    KD_KFAKT[7] = 0xa00;
+    KD_KFAKT[5] = (word)uVar2;
+    uVar1 = klu_bint(&KL_KD_FAKT_STARK.sizeX,N40);
+    KD_FAKT_STARK = (undefined1)uVar1;
+    KD_KWICHT_D = K_KD_KWICHT_DYN;
+  }
+  return;
+}
+

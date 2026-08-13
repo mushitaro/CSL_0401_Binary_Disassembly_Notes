@@ -1,0 +1,15 @@
+
+void can_b_tx_get_status(void)
+
+{
+  byte bVar1;
+  undefined1 extraout_var;
+  byte bVar2;
+  
+  bVar2 = set_status_register(0x2200);
+  bVar1 = can_b_control_message_table.control_block.un4;
+  set_status_register(CONCAT11(extraout_var,bVar2));
+  can_b_tx_status = can_b_tx_status & 0x3f | bVar1 & 0xc0;
+  return;
+}
+

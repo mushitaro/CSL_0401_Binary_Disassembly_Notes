@@ -1,0 +1,46 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* this runs in the segment task */
+
+void p_saug_calc(void)
+
+{
+  undefined4 p_saug_adjustment_temp;
+  KF_20x10_2byte_2byte_2byte *table;
+  ushort yValue;
+  ushort K_P_UMG_ERSATZ_local;
+  
+                    /* 0401 Specific
+                       Set uVar1 equal to K_P_UMG_ERSATZ (955mbar) */
+  K_P_UMG_ERSATZ_local = K_P_UMG_ERSATZ;
+                    /* p_umg_kad_error is set once when ZUSTAND_MOTOR is in Follow-up and
+                       p_kad_filter is refreshed in the segment task and the 10ms task. */
+  p_saug = PT1_Filter_US(p_saug_error + p_saug_no_filter,p_saug,k_p_saug_tau);
+  if (K_P_UMG_ERSATZ_local < p_saug) {
+                    /* if we end up with a value greater than P_UMG_ERSATZ (955mbar) then our
+                       difference between ersatz and our current MAP reading is set to zero */
+    p_kvd_ersatz = 0;
+  }
+  else {
+                    /* Otherwise set it to be ambient ERSATZ minus manifold absolute pressure */
+    p_kvd_ersatz = K_P_UMG_ERSATZ_local - p_saug;
+  }
+  if (k_p_saug_m_cfg == 0) {
+    table = &kf_p_saug_m_kad;
+    yValue = p_saug;
+  }
+  else {
+    table = &kf_p_saug_m_kvd;
+    yValue = p_kvd_ersatz;
+  }
+  p_saug_adjustment_temp = kfu_wint(&table->sizeX,N,yValue);
+  p_saug_m_offset = (short)p_saug_adjustment_temp;
+  p_saug_m = p_saug - (short)p_saug_adjustment_temp;
+                    /* The below is not a correct interpretation of the assembly code */
+  if (K_P_UMG_ERSATZ_local != 0) {
+    _DAT_00ffeeae = (undefined2)(((uint)K_P_UMG_ERSATZ_local * 0x6400) / (uint)K_P_UMG_ERSATZ_local)
+    ;
+  }
+  return;
+}
+

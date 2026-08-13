@@ -1,0 +1,10 @@
+
+void tz_kath_init(void)
+
+{
+  TZ_KATH_GEWICHTUNG = 0;
+  TZ_KATH_ETA_ROH = 0;
+  TZ_KATH_ETA_OFFSET = 0;
+  return;
+}
+

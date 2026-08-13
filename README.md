@@ -3,6 +3,35 @@ CSL '0401' Binary Disassembly Notes
 ## Welcome
 Welcome to this project which seeks to progress the understanding of the CSL '0401' program binary.
 
+## Parameter Relation Tree Viewer / パラメータ関連ツリービューア
+
+A browser viewer that joins the XDF, the Funktionsrahmen and the Ghidra project
+into one searchable relation tree: pick a calibration parameter and see which
+code reads it, what that code computes, and which factory document describes it.
+No Ghidra or Java needed to use it.
+
+XDF・Funktionsrahmen・Ghidra の3資料を突き合わせ、パラメータを起点に「これを変えると
+何に効くか / これは何から決まるか」を辿れるビューアです。利用するだけなら Ghidra も
+Java も不要です。
+
+```bash
+cd app && npm ci && npm run dev
+```
+
+See **[docs/PARAMETER_TREE.md](docs/PARAMETER_TREE.md)** (日本語 / English) for how the
+sources are joined, what the coverage actually is, and how to regenerate the data.
+
+## Load Detection and the Base Map / 負荷検出とベースマップ
+
+Why the standard (non-CSL) M3 has no VE table, what plays that role instead, and how
+to compare a standard M3 against a CSL from datalogs — including which channels are
+genuinely comparable and where the full-load boundary has to split the data.
+
+標準（非CSL）M3 に VE テーブルが無い理由、その役割を何が担っているか、そして両者を
+データログで比較するときに何が共通指標になるか（全負荷閾値での分割を含む）。
+
+See **[docs/LOAD_PATH.md](docs/LOAD_PATH.md)** (日本語 / English).
+
 ## How to Contribute
 To contribute to this project please use the "Issues" feature to report discoveries of new information and bugs (issues identified with existing information). If you have general questions or would like to discuss particular items in general please use the "Discussions" feature.
 

@@ -1,0 +1,14 @@
+
+void can_a_tx_ed(bool error_free)
+
+{
+  undefined4 uVar1;
+  
+  if (!error_free) {
+    uVar1 = ed_report(DTC_56_DME_CAN_SIGNAL,1);
+    CAN_ED = (undefined1)uVar1;
+    CAN_ERRORCOUNT = CAN_ERRORCOUNT + 1;
+  }
+  return;
+}
+

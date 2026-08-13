@@ -1,0 +1,20 @@
+
+uint32_t flash_memcmp(uint8_t *p1,uint8_t *p2,uint32_t len)
+
+{
+  uint8_t uVar1;
+  uint8_t uVar2;
+  
+  do {
+    uVar1 = *p2;
+    p2 = p2 + 1;
+    uVar2 = *p1;
+    p1 = p1 + 1;
+    if (uVar2 != uVar1) {
+      return 1;
+    }
+    len = len - 1;
+  } while (len != 0);
+  return 0;
+}
+

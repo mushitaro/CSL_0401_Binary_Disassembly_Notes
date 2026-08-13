@@ -1,0 +1,14 @@
+
+void starter_init(void)
+
+{
+  byte bVar1;
+  
+  START_GND_ED = 0;
+  START_STATUS = 0;
+  DAT_00ffe908 = 0;
+  bVar1 = SIM_PORTC;
+  SIM_PORTC = bVar1 | 0x40;
+  return;
+}
+

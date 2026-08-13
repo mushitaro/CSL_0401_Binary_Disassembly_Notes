@@ -1,0 +1,10 @@
+
+void d_wdk_word_calc(void)
+
+{
+  D_WDK_WORD = WDK_WORD - wdk_word_2;
+  wdk_word_2 = wdk_word_1;
+  wdk_word_1 = WDK_WORD;
+  return;
+}
+

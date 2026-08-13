@@ -1,0 +1,47 @@
+
+void ti_diag_ev_update(uint cyl,byte *status,uint dtc)
+
+{
+  undefined4 uVar1;
+  byte errortype;
+  
+  if ((((((ZUSTAND_MOTOR & Start) == 0) && ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) ||
+       ((TI_ST_START & 8) == 0)) || (((DAT_00ffe836 & 0x20) == 0 || (UB <= K_ED_UBMIN_S)))) ||
+     (((UB_ED & FILTER) != 0 ||
+      (((*status & 0x10) == 0 || (((uint)TI_EV_DS2 & 1 << ((cyl & 0xff) - 1 & 0x3f)) != 0)))))) {
+    *status = *status & 0xe0;
+  }
+  else {
+    if ((*status & 0xf) == 0) {
+      if ((*status & 0xe0) == 0) goto LAB_0002ad50;
+      errortype = 0;
+    }
+    else if ((*status & 1) == 0) {
+      if ((*status & 2) == 0) {
+        if ((*status & 4) == 0) {
+          if ((*status & 8) == 0) goto LAB_0002ad50;
+          errortype = 8;
+        }
+        else {
+          errortype = 4;
+        }
+      }
+      else {
+        errortype = 2;
+      }
+    }
+    else {
+      errortype = 1;
+    }
+    uVar1 = ed_report(dtc,errortype);
+    *status = (byte)uVar1;
+  }
+LAB_0002ad50:
+  if ((*status & 0x40) != 0) {
+    TI_ED_EV_SUMME = '\x01' << ((char)cyl - 1U & 0x3f) | TI_ED_EV_SUMME;
+    return;
+  }
+  TI_ED_EV_SUMME = ~('\x01' << ((char)cyl - 1U & 0x3f)) & TI_ED_EV_SUMME;
+  return;
+}
+

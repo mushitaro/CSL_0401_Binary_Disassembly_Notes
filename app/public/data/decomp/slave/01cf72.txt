@@ -1,0 +1,50 @@
+
+/* WARNING: Removing unreachable block (ram,0x0001d06c) */
+/* WARNING: Removing unreachable block (ram,0x0001cfde) */
+
+void sa_we_segm(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  byte bVar3;
+  
+  if ((((SA_WE_ST & 0x20) == 0) || ((DYN_ST & 1) == 0)) && ((DAT_00ffdbb3 & 0x20) == 0)) {
+    if (((SA_WE_ST & 0x20) == 0) || ((DYN_ST & 1) != 0)) {
+      TI_WE_IGN = 0;
+      TI_F_WE = -0x80;
+    }
+    else {
+      TI_WE_IGN = TI_WE_IGN + 1;
+      uVar1 = klu_bint(&KL_TI_WE_IGN_S.sizeX,TI_WE_IGN);
+      uVar2 = klu_wint(&KL_TI_WE_OFF_S.sizeX,TI_OFF_TIME._2_2_);
+      bVar3 = (byte)((int)((uVar1 & 0xff) * (uVar2 & 0xffff)) >> 10);
+      if (0x7f < bVar3) {
+        bVar3 = 0x7f;
+      }
+      TI_F_WE = bVar3 + 0x80;
+                    /* 1801 has extra logic here for the SMG and non-SMG variants of these tables */
+      if (TI_F_WE == -0x80) goto LAB_0001d01e;
+    }
+  }
+  else {
+    TI_WE_IGN = TI_WE_IGN + 1;
+    uVar1 = klu_bint(&KL_TI_WE_IGN_H_SMG.sizeX,TI_WE_IGN);
+    uVar2 = klu_wint(&KL_TI_WE_OFF_H_SMG.sizeX,TI_OFF_TIME._2_2_);
+    bVar3 = (byte)((int)((uVar1 & 0xff) * (uVar2 & 0xffff)) >> 10);
+    if (0x7f < bVar3) {
+      bVar3 = 0x7f;
+    }
+    if ((((SA_WE_ST & 0x20) != 0) || ((DAT_00ffdbb3 & 0x20) != 0)) &&
+       (TI_F_WE = bVar3 + 0x80, (byte)(bVar3 + 0x80) == -0x80)) {
+      DAT_00ffdbb3 = DAT_00ffdbb3 & 0xdf;
+LAB_0001d01e:
+      TI_F_WE = 0x80;
+      SA_WE_ST = SA_WE_ST & 0xdf;
+      TI_OFF_TIME = 0;
+      return;
+    }
+  }
+  return;
+}
+

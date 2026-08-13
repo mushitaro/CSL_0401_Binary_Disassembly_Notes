@@ -1,0 +1,18 @@
+
+void fgr_aqu_v_calc(void)
+
+{
+  uint uVar1;
+  byte xValue;
+  
+  if (V < 0x100) {
+    xValue = (byte)V;
+  }
+  else {
+    xValue = 0xff;
+  }
+  uVar1 = klu_bint(&KL_FGR_AQU_V.sizeX,xValue);
+  fgr_aqu_v = (char)uVar1;
+  return;
+}
+

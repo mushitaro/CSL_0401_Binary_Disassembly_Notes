@@ -1,0 +1,35 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint32_t flash_program_word_and_verify(uint16_t *target,uint16_t word,uintptr_t orig_addr)
+
+{
+  uint32_t uVar1;
+  ushort uVar2;
+  
+  *target = 0xf0;
+  uVar1 = 2;
+  _DAT_00005554 = 0x55;
+  _DAT_0000aaaa = 0xa0;
+  *target = word;
+  do {
+    if (((word ^ *target) & 0x80) == 0) goto LAB_000034d8;
+  } while ((*target & 0x20) == 0);
+  if (((word ^ *target) & 0x80) == 0) {
+LAB_000034d8:
+    uVar2 = *target;
+    if ((orig_addr & 1) == 0) {
+      word = word >> 8;
+      uVar2 = uVar2 >> 8;
+    }
+    if ((char)word == (char)uVar2) {
+      uVar1 = 0;
+    }
+  }
+  else {
+    uVar1 = 6;
+    *target = 0xf0;
+  }
+  return uVar1;
+}
+

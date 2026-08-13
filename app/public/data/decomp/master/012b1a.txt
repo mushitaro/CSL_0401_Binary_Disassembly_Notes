@@ -1,0 +1,118 @@
+
+void task_bgnd(void)
+
+{
+  while ((ZUSTAND_MOTOR & Nachlauf) == 0) {
+    SIM_SWSR = 0x55;
+    s_kraftschluss_calc();
+    FUN_0002c0e0();
+    FUN_0001198a();
+    swe_vdiff_calc();
+    edk_switch_reset();
+    if (cfg_m_egas != 0) {
+      llr_qvs_roh_calc();
+    }
+    FUN_000265ea();
+    md_bgnd_calc();
+    FUN_00026fb6();
+    FUN_000253d6();
+    fgr_aqu_v_calc();
+    SIM_SWSR = 0x55;
+    FUN_0002aaae();
+    FUN_0002b3cc();
+    FUN_0002adb4();
+    FUN_0002c080();
+    edk_ht_max_calc();
+    FUN_00028d92();
+    kd_calc();
+    FUN_00029ca0();
+    FUN_0002a880();
+    if (((CAN_TEL_EMPF & 0x80) != 0) && ((DAT_00ffed74 & 1) == 0)) {
+      FUN_0001c3dc();
+      FUN_0001cd14();
+    }
+    starter_diag();
+    starter_request_controller();
+    FUN_0001e3bc();
+    FUN_0002c92c();
+    p_umg_hoehe_calc();
+    kkos_diag();
+    kkos_supervisor();
+    kkos_b_diag();
+    SIM_SWSR = 0x55;
+    FUN_0001e90e();
+    FUN_0001e9ba();
+    FUN_0001eb88();
+    FUN_0001ed90();
+    FUN_0001eecc('\x01');
+    FUN_0001f168();
+    slp_diag();
+    FUN_0001e588();
+    FUN_0001e6f0();
+    FUN_0001e61a();
+    FUN_0001fafc();
+    FUN_0001f70e();
+    FUN_0001fa88();
+    FUN_0001fdaa();
+    FUN_0001fca4();
+    FUN_0001fd52();
+    FUN_0001f396();
+    FUN_0001f4f2();
+    FUN_0001f200();
+    FUN_0001f312();
+    belu_st_calc();
+    FUN_0001ff76();
+    FUN_000200d8();
+    gang_calc();
+    noise_st_calc();
+    FUN_0002120c();
+    tog_calc();
+    rf_pt_korr_calc();
+    rf_korr();
+    tpu_segm_reset_if_engine_off();
+    tpu_segm_release_kl15off_inhibit();
+    FUN_00001bfe();
+    if (((bootloader_diag_state._0_1_ & 0x80) != 0) && (DAT_00ffe96e == 0)) {
+      DAT_00ffe96e = 1;
+    }
+    if (((ZUSTAND_MOTOR & KI.15 aus) != 0) || (SYS_TIMERTICS_COUNTER < 10000)) {
+      DAT_00ffe96e = 0;
+    }
+    if (DAT_00ffe96e == 1) {
+      FUN_00001aea();
+    }
+    SIM_SWSR = 0x55;
+    if (DAT_00ffe6c0 != '\0') {
+      FUN_000236a2();
+    }
+    if (edksi_st == '\x04') {
+      FUN_00019480();
+    }
+    db_tbgnd_calc();
+    db_stack_max_calc();
+    edk_diag_reset();
+    oek_ed_reset();
+    FUN_000228b4();
+    servo_mode_calc();
+    if ((CFG_RAM_SG_TYP & 2) != 0) {
+      FUN_0003d156();
+    }
+    sk_bgnd();
+    if (((V_ST & 0x40) == 0) && (0x280 < V_ASC)) {
+      CFG_ROLLENBETRIEB = 0;
+    }
+    FUN_00034766();
+    FUN_00035bd2();
+  }
+                    /* Once Zustand_Motor = Nachlauf (which is a state it gets stuck in) the
+                       background task drops and runs the below two functions, then drops to the
+                       do_while loop. */
+  SIM_SWSR = 0x55;
+  SIM_SWSR = 0xaa;
+  fst_calc();
+  FUN_00011cd0();
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+

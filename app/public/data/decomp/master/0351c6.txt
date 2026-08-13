@@ -1,0 +1,12 @@
+
+void obd_full_reinit(void)
+
+{
+  obd_freeze_frame_reset();
+  obd_clear_cycle_counters();
+  obd_monitor_phase0();
+  obd_reset_phases_1_to_3();
+  obd_reset_monitor_activity_flags();
+  return;
+}
+

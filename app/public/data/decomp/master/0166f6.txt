@@ -1,0 +1,184 @@
+
+/* WARNING: Removing unreachable block (ram,0x00016756) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void MD_Torque_Interventions_Ignition_Angle_and_TL_Coordination_of_Limits_FUN_000166bc(void)
+
+{
+  undefined2 extraout_D0u;
+  uint uVar1;
+  undefined4 uVar2;
+  ushort uVar4;
+  uint uVar3;
+  short sVar5;
+  ushort uVar6;
+  
+  pcntrl_m = pcntrl_m | 0x100;
+  uVar1 = kfu_wint(&KF_MD_MAX_MD_IND_OPT.sizeX,RF * 10,N);
+  MD_IND_OPT = (undefined2)uVar1;
+  _MD_IND_OPT_KORR_DPR = (undefined2)((int)((uint)MD_ETA_LAMBDA * (uVar1 & 0xffff)) >> 7);
+  if (((SK_MM_CONTR & 2) == 0) && ((DAT_00ffda33 & 2) == 0)) {
+    if ((MD_FW_REL < MD_IND_FGR >> 6) && (DAT_00ffeb62 == '\x01')) {
+      MD_WUNSCH_REL = MD_IND_FGR >> 6;
+      MD_ST = MD_ST | 4;
+    }
+    else {
+      if (DAT_00ffeb62 == '\0') {
+        DAT_00ffeb60 = MD_FW_REL << 6;
+      }
+      MD_WUNSCH_REL = MD_FW_REL;
+      MD_ST = MD_ST & 0xfb;
+    }
+  }
+  else {
+    MD_WUNSCH_REL = 0;
+  }
+  _md_wunsch_rel_dpr = MD_WUNSCH_REL;
+  if (MD_IND_MIN < MD_IND_MAX) {
+    _MD_FW_DPR = (ushort)((int)((uint)MD_WUNSCH_REL * ((uint)MD_IND_MAX - (uint)MD_IND_MIN)) / 1000)
+    ;
+  }
+  else {
+    _MD_FW_DPR = 0;
+    DAT_00ffd936 = 0x21;
+  }
+  D_MD_REL = MD_WUNSCH_REL - DAT_00ffd8ac;
+  DAT_00ffd8ac = DAT_00ffd8aa;
+  DAT_00ffd8aa = MD_WUNSCH_REL;
+  MD_FW = _MD_FW_DPR;
+  MD_IND_OPT_KORR = _MD_IND_OPT_KORR_DPR;
+  uVar2 = FUN_00017400(MD_IND_MIN_GES);
+  MD_SAWE_FILTER = (short)uVar2;
+  uVar2 = FUN_00017052(MD_FW);
+  _DAT_00ff816a = (short)uVar2;
+  MD_IND_WUNSCH = _DAT_00ff816a + MD_SAWE_FILTER;
+  sVar5 = MD_LLRI;
+  if ((int)(uint)K_MD_SK_LLR_MAX < (int)MD_LLRI) {
+    sVar5 = 0;
+    DAT_00ffd936 = 0x24;
+  }
+  DAT_00ffd8c0 = MD_IND_WUNSCH + sVar5;
+  if ((short)DAT_00ffd8c0 < 0) {
+    DAT_00ffd8c0 = 0;
+  }
+  MD_FW_FILTER = _DAT_00ff816a;
+  uVar2 = Torque_Limitation(DAT_00ffd8c0);
+  _DAT_00ff8166 = (ushort)uVar2;
+  uVar4 = _DAT_00ff8166;
+  if ((cfg_m_getriebetyp == 0x40) && (DAT_00ffd957 != '\0')) {
+    uVar4 = DAT_00ffd958;
+  }
+  uVar6 = uVar4;
+  if ((cfg_m_getriebetyp & 0x30) == 0x30) {
+    if ((EGS_STATUS & 1) == 0) {
+      EGS_TIMER = 0;
+    }
+    else {
+      uVar6 = EGS_MD_IND_GS;
+      if ((((EGS_STATUS & 2) == 0) && (uVar6 = uVar4, EGS_MD_IND_GS < uVar4)) &&
+         (EGS_TIMER < K_EGS_T_MAX_TZ)) {
+        EGS_TIMER = EGS_TIMER + 1;
+        uVar6 = EGS_MD_IND_GS;
+      }
+    }
+  }
+  MD_IND_WUNSCH_BEGR = _DAT_00ff8166;
+  uVar4 = FUN_00016f02(uVar6);
+  _MD_TZ_RED = MD_LLRP + MD_LLR_TZ + uVar4;
+  if (_MD_TZ_RED < 0) {
+    _MD_TZ_RED = 0;
+  }
+  uVar4 = MD_IND_WUNSCH_BEGR;
+  if ((MD_RES != 0) && (sk_stufe_egas_sk_prog_level_ == '\0')) {
+    uVar4 = MD_RES + MD_IND_WUNSCH_BEGR;
+    uVar1 = ((uint)MD_ETA_ZW_MIN - (uint)MD_ETA_ZW_VE) + 0xffff;
+    if (0xffff < uVar1) {
+      uVar1 = 0xffff;
+    }
+    if (uVar1 < K_MD_SK_ETA_MIN) {
+      uVar1 = (uint)K_MD_SK_ETA_MIN;
+    }
+    uVar1 = ((uint)MD_IND_WUNSCH_BEGR << 0x10) / uVar1;
+    if (0xffff < uVar1) {
+      uVar1 = 0xffff;
+    }
+    if (uVar1 < uVar4) {
+      uVar4 = (ushort)uVar1;
+    }
+    if (uVar4 < MD_IND_WUNSCH_BEGR) {
+      uVar4 = MD_IND_WUNSCH_BEGR;
+    }
+  }
+  sVar5 = MD_LLRP;
+  if ((int)(uint)K_MD_SK_LLR_MAX < (int)MD_LLRP) {
+    sVar5 = 0;
+    DAT_00ffd936 = 0x26;
+  }
+  MD_IND_WUNSCH_KORR = uVar4 + sVar5;
+  if ((short)MD_IND_WUNSCH_KORR < 0) {
+    MD_IND_WUNSCH_KORR = 0;
+  }
+  uVar4 = MD_IND_WUNSCH_KORR;
+  if ((cfg_m_getriebetyp == 0x40) && (DAT_00ffd957 != '\0')) {
+    uVar4 = DAT_00ffd95a;
+  }
+  if (((cfg_m_getriebetyp & 0x30) == 0x30) && ((EGS_STATUS & 2) != 0)) {
+    if (MD_IND_WUNSCH_KORR < EGS_MD_IND_GS) {
+      uVar4 = MD_IND_WUNSCH_KORR;
+      if (EGS_TIMER <= K_EGS_T_MAX_DK) {
+        EGS_TIMER = EGS_TIMER + 1;
+        uVar4 = EGS_MD_IND_GS;
+      }
+    }
+    else {
+      EGS_TIMER = 0;
+      uVar4 = EGS_MD_IND_GS;
+    }
+  }
+  MD_IND_WUNSCH_RED = FUN_00016b72(uVar4);
+  uVar2 = FUN_00016f3a(CONCAT22(extraout_D0u,MD_IND_WUNSCH_RED));
+  _DAT_00ff816c = (ushort)uVar2;
+  if (K_MD_SK_MAX < _DAT_00ff816c) {
+    _DAT_00ff816c = 0;
+    DAT_00ffd936 = 0x27;
+  }
+  if (MD_IND_MAX < _DAT_00ff816c) {
+    MD_ST = MD_ST | 0x80;
+    _DAT_00ff816c = MD_IND_MAX;
+  }
+  else {
+    MD_ST = MD_ST & 0x7f;
+  }
+  if ((sk_stufe_egas_sk_prog_level_ != '\0') && (MD_IND_WUNSCH_BEGR < _DAT_00ff816c)) {
+    _DAT_00ff816c = MD_IND_WUNSCH_BEGR;
+  }
+  MD_IND_WUNSCH_RED_KORR = _DAT_00ff816c;
+  uVar1 = kfu_wint_custom(&KF_MD_MAX_MD_IND_OPT.sizeX,N,_DAT_00ff816c);
+  uVar3 = kfu_wint(&KF_MD_RF_MIN.sizeX,N,(ushort)TMOT);
+  uVar4 = (ushort)uVar1;
+  if ((KF_MD_MAX_MD_IND_OPT.xAxis[0] < uVar4) && ((ushort)uVar3 < uVar4)) {
+    MD_ST = MD_ST & 0xfd;
+  }
+  else {
+    MD_ST = MD_ST | 2;
+  }
+  if (uVar4 <= (ushort)uVar3) {
+    uVar1 = uVar3;
+  }
+  uVar1 = uVar1 & 0xffff;
+  if (K_MD_RF_CONTROL == '\0') {
+    uVar1 = (uint)K_MD_RF_MCS;
+  }
+  MD_RF_ROH = (ushort)uVar1;
+  MD_RF_SOLL = MD_RF_ROH;
+  if (RF_PT_KORR != 0) {
+    MD_RF_SOLL = (ushort)((uVar1 << 0xc) / (uint)RF_PT_KORR);
+  }
+  if (K_MD_SK_RFMAX < MD_RF_SOLL) {
+    MD_RF_SOLL = 0x14;
+    MD_RF_ROH = 0x14;
+    DAT_00ffd936 = 0x31;
+  }
+  return;
+}
+

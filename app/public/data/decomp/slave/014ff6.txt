@@ -1,0 +1,8 @@
+
+void md_eta_segm(void)
+
+{
+  md_eta_calc();
+  return;
+}
+

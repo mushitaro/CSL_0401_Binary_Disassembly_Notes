@@ -1,0 +1,20 @@
+
+void tdme_init(void)
+
+{
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    TDME_MAX = 0;
+    TDME_MIN = 0xff;
+    TDME_TIME_ZAEHLER = 0;
+    TDME_ZYKLEN = 0;
+  }
+  TDME_RDKS = 0;
+  DAT_00ffed7e = K_TDME_RDKS_ZAEHLER;
+  DAT_00ffed7f = 0;
+  TDME_ANSTIEG = 0;
+  TDME_ABFALL = 0;
+  TDME = 0;
+  tdme_calc();
+  return;
+}
+

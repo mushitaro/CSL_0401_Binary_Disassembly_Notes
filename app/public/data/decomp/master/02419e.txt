@@ -1,0 +1,21 @@
+
+void edk_tr_diag_stat_calc(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  
+  bVar1 = SIM_PORTF0;
+  bVar2 = EDK_TR_DIAG_STAT;
+  if ((bVar1 & 0x40) == 0) {
+    bVar1 = SIM_PORTE0;
+    SIM_PORTE0 = bVar1 & 0xfb;
+    bVar2 = EDK_TR_DIAG_STAT | 1;
+    if ((EDK_TR_DIAG_STAT & 4) != 0) {
+      bVar2 = EDK_TR_DIAG_STAT | 9;
+    }
+  }
+  EDK_TR_DIAG_STAT = bVar2;
+  return;
+}
+

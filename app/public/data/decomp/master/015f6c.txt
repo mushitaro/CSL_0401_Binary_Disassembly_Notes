@@ -1,0 +1,13 @@
+
+void md_init_FUN_00015f6c(void)
+
+{
+  md_sk_init_FUN_000180a4();
+  md_minimum_moment_init_FUN_00017532();
+  md_maximum_moment_init_FUN_00017a84();
+  md_res_init_FUN_00017b72();
+  md_interventions_init_FUN_0001602c();
+  md_ind_init_FUN_00017f0e();
+  return;
+}
+

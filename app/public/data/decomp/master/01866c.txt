@@ -1,0 +1,16 @@
+
+void n_st_calc(void)
+
+{
+  if (((N_ST & 4) != 0) && (K_N_UMSCHALTUNG < N)) {
+    N_SEGMENT = N;
+    n_segment__t_1_ = N;
+    N_ST = N_ST & 0xfb;
+    return;
+  }
+  if (((N_ST & 4) == 0) && ((int)(uint)N < (int)((uint)K_N_UMSCHALTUNG - (uint)K_N_HYST))) {
+    N_ST = N_ST | 4;
+  }
+  return;
+}
+

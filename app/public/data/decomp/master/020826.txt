@@ -1,0 +1,76 @@
+
+uint kkos_diag(void)
+
+{
+  uint3 uVar1;
+  undefined3 uVar2;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  uint in_D0;
+  byte bVar5;
+  undefined4 uVar3;
+  uint uVar4;
+  bool bVar6;
+  
+  if (((ZUSTAND_MOTOR & S) == 0) &&
+     (in_D0 = CONCAT31((int3)(in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c,
+     (ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) goto LAB_0002097e;
+  uVar1 = (uint3)(in_D0 >> 8);
+  in_D0 = CONCAT31(uVar1,UB);
+  if ((UB <= K_ED_UBMIN_M) ||
+     (((((UB_HR_ST & 2) == 0 || ((UB_ED & 0x20) != 0)) || ((KKOS_ST_TREIBER & 0x10) == 0)) ||
+      (((KKOS_ST_TREIBER & 0x80) != 0 || ((KKOS_ST_VERBAUT & 1) == 0)))))) goto LAB_0002097e;
+  in_D0 = (uint)uVar1 << 8;
+  if (((KKOS_ST_TREIBER & 0xf) == 0) || (in_D0 = cfg_m_motortyp & 0xef, in_D0 == 0x20)) {
+    uVar2 = (undefined3)(in_D0 >> 8);
+    in_D0 = CONCAT31(uVar2,KKOS_ST_TREIBER) & 0xffffff03;
+    if ((KKOS_ST_TREIBER & 3) != 0) goto LAB_000208b8;
+    in_D0 = CONCAT31(uVar2,KKOS_ED) & 0xffffffe0;
+    if ((KKOS_ED & 0xe0) == 0) goto LAB_0002097e;
+    in_D0 = CONCAT31(uVar2,KKOS_ED) & 0xffffff60;
+    if ((KKOS_ED & 0x60) == 0) {
+      bVar6 = (KKOS_ST_TREIBER & 0x40) == 0;
+LAB_00020970:
+      if (bVar6) goto LAB_0002097e;
+    }
+    else {
+      uVar4 = ed_report(DTC_30_AC_RELAY,0x80);
+      in_D0 = uVar4 & 0xffffff0f;
+      if ((KKOS_ST_TREIBER & 0x40) == 0) {
+        bVar6 = (uVar4 & 2) == 0;
+        goto LAB_00020970;
+      }
+      if ((uVar4 & 1) == 0) {
+        bVar6 = (uVar4 & 4) == 0;
+        goto LAB_00020970;
+      }
+    }
+    bVar5 = 0;
+  }
+  else {
+LAB_000208b8:
+    if ((KKOS_ST_TREIBER & 2) != 0) {
+      in_D0 = ed_report(DTC_30_AC_RELAY,2);
+      KKOS_ED = (byte)in_D0;
+    }
+    if ((KKOS_ST_TREIBER & 1) != 0) {
+      bVar5 = set_status_register(0x2700);
+      can_0xd_masked_update('\0',1,1);
+      uVar3 = ed_report(DTC_30_AC_RELAY,1);
+      KKOS_ED = (byte)uVar3;
+      if ((KKOS_ST_TREIBER & 0x40) != 0) {
+        can_0xd_masked_update('\0',0,1);
+      }
+      bVar5 = set_status_register((ushort)CONCAT31(extraout_var,bVar5));
+      in_D0 = CONCAT31(extraout_var_00,bVar5);
+    }
+    if (((KKOS_ST_TREIBER & 4) == 0) || ((KKOS_ED & 2) != 0)) goto LAB_0002097e;
+    bVar5 = 4;
+  }
+  in_D0 = ed_report(DTC_30_AC_RELAY,bVar5);
+  KKOS_ED = (byte)in_D0;
+LAB_0002097e:
+  KKOS_ST_TREIBER = KKOS_ST_TREIBER & 0xe0;
+  return in_D0;
+}
+

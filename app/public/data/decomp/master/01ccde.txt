@@ -1,0 +1,13 @@
+
+void tkatm_init(void)
+
+{
+  DAT_00ffed98 = 0;
+  TKATM = TABG;
+  TKATM_OEX = TABG;
+  DAT_00ffed8e = (int)TABG << 0x10;
+  TKATM_EX = 0;
+  DAT_00ffed94 = 0;
+  return;
+}
+

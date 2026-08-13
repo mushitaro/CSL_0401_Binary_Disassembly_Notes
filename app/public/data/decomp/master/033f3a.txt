@@ -1,0 +1,120 @@
+
+void fsp_fault_table_log_entry(byte param_1,byte param_2)
+
+{
+  bool bVar1;
+  int iVar2;
+  undefined2 uVar3;
+  byte bVar4;
+  byte bVar5;
+  byte bVar6;
+  byte *pbVar7;
+  undefined1 *puVar8;
+  undefined1 *puVar9;
+  undefined auStack_54 [80];
+  
+  if (param_1 != 0x70) {
+    fsp_build_timer_snapshot_lut(auStack_54);
+    bVar1 = false;
+    bVar5 = 0;
+    pbVar7 = &DAT_00ffd202;
+    do {
+      if (param_1 == *pbVar7) {
+        bVar1 = true;
+        break;
+      }
+      pbVar7 = pbVar7 + 0x16;
+      bVar5 = bVar5 + 1;
+    } while (bVar5 < 0x20);
+    if (bVar1) {
+      if ((param_2 & 0x40) == 0) {
+        (&DAT_00ffd203)[(uint)bVar5 * 0x16] = param_2;
+      }
+      else {
+        (&DAT_00ffd202)[(uint)bVar5 * 0x16] = param_1;
+        (&DAT_00ffd203)[(uint)bVar5 * 0x16] = param_2;
+        (&DAT_00ffd205)[(uint)bVar5 * 0x16] = k_ed_fil_base[param_1].field11_0xb;
+        bVar6 = (&DAT_00ffd204)[(uint)bVar5 * 0x16];
+        if (2 < bVar6) {
+          bVar6 = 2;
+        }
+        if (K_FSP_CONCEPT == '\0') {
+          bVar6 = 0;
+        }
+        bVar4 = 0;
+        iVar2 = (uint)bVar6 * 6;
+        puVar9 = &DAT_00ffd206 + iVar2 + (uint)bVar5 * 0x16;
+        pbVar7 = &k_ed_fil_base[param_1].k_ed_fil_small_timer;
+        do {
+          *puVar9 = auStack_54[(short)(ushort)*pbVar7];
+          uVar3 = CAN_KM_STAND;
+          bVar4 = bVar4 + 1;
+          puVar9 = puVar9 + 1;
+          pbVar7 = pbVar7 + 1;
+        } while (bVar4 < 4);
+        if (K_FSP_TIMER == '\0') {
+          (&DAT_00ffd20a)[iVar2 + (uint)bVar5 * 0x16] = DAT_00ffd4c4;
+          (&DAT_00ffd20b)[iVar2 + (uint)bVar5 * 0x16] = DAT_00ffd4c5;
+        }
+        else {
+          (&DAT_00ffd20a)[iVar2 + (uint)bVar5 * 0x16] = (char)((ushort)CAN_KM_STAND >> 8);
+          (&DAT_00ffd20b)[iVar2 + (uint)bVar5 * 0x16] = (char)uVar3;
+        }
+        if ((&DAT_00ffd204)[(uint)bVar5 * 0x16] != -1) {
+          (&DAT_00ffd204)[(uint)bVar5 * 0x16] = (&DAT_00ffd204)[(uint)bVar5 * 0x16] + '\x01';
+        }
+      }
+    }
+    else {
+      bVar5 = (byte)DAT_00ffd200;
+      if ((byte)DAT_00ffd200 == 0x20) {
+        bVar5 = 0x1f;
+        DAT_00ffd4ac = 0;
+        DAT_00ffd4ad = 0;
+        DAT_00ffd4af = 0;
+        DAT_00ffd4ae = 0;
+        bVar6 = 0;
+        puVar9 = &DAT_00ffd4b0;
+        do {
+          bVar4 = 0;
+          puVar8 = puVar9;
+          do {
+            *puVar8 = 0;
+            bVar4 = bVar4 + 1;
+            puVar8 = puVar8 + 1;
+          } while (bVar4 < 4);
+          puVar9 = puVar9 + 6;
+          bVar6 = bVar6 + 1;
+        } while (bVar6 < 3);
+      }
+      (&DAT_00ffd202)[(uint)bVar5 * 0x16] = param_1;
+      (&DAT_00ffd203)[(uint)bVar5 * 0x16] = param_2;
+      (&DAT_00ffd204)[(uint)bVar5 * 0x16] = 1;
+      (&DAT_00ffd205)[(uint)bVar5 * 0x16] = k_ed_fil_base[param_1].field11_0xb;
+      bVar6 = 0;
+      puVar9 = &DAT_00ffd206 + (uint)bVar5 * 0x16;
+      pbVar7 = &k_ed_fil_base[param_1].k_ed_fil_small_timer;
+      do {
+        *puVar9 = auStack_54[(short)(ushort)*pbVar7];
+        uVar3 = CAN_KM_STAND;
+        bVar6 = bVar6 + 1;
+        puVar9 = puVar9 + 1;
+        pbVar7 = pbVar7 + 1;
+      } while (bVar6 < 4);
+      if (K_FSP_TIMER == '\0') {
+        (&DAT_00ffd20a)[(uint)bVar5 * 0x16] = DAT_00ffd4c4;
+        (&DAT_00ffd20b)[(uint)bVar5 * 0x16] = DAT_00ffd4c5;
+      }
+      else {
+        (&DAT_00ffd20a)[(uint)bVar5 * 0x16] = (char)((ushort)CAN_KM_STAND >> 8);
+        (&DAT_00ffd20b)[(uint)bVar5 * 0x16] = (char)uVar3;
+      }
+      if ((byte)DAT_00ffd200 < 0x20) {
+        DAT_00ffd200._1_1_ = (byte)DAT_00ffd200 + 1;
+      }
+      fsp_capture_freeze_frame(bVar5,param_1,param_2);
+    }
+  }
+  return;
+}
+

@@ -1,0 +1,21 @@
+
+char starter_diag_arm_request(undefined4 param_1,undefined4 param_2,char param_3)
+
+{
+  char cVar1;
+  
+  cVar1 = '\0';
+  if ((param_3 != '\0') && (param_3 != 'd')) {
+    cVar1 = '\x02';
+  }
+  if ((((SCHALT_S_ST & 8) == 0) || ((cfg_m_motortyp & 0xef) != 0x20)) ||
+     ((K_START_BEGINN < N && ((START_STATUS & 1) == 0)))) {
+    cVar1 = '\x04';
+  }
+  if (cVar1 == '\0') {
+    START_STATUS = START_STATUS | 0x80;
+    DAT_00ffe908 = param_3;
+  }
+  return cVar1;
+}
+

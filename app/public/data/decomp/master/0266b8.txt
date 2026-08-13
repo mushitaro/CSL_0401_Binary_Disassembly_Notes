@@ -1,0 +1,264 @@
+
+void lfr_calc(void)
+
+{
+  enum_ZUSTAND_MOTOR eVar1;
+  uint uVar2;
+  int iVar3;
+  undefined4 uVar4;
+  short sVar6;
+  int iVar5;
+  byte bVar7;
+  byte bVar8;
+  byte bVar9;
+  
+  eVar1 = ZUSTAND_MOTOR;
+  LFR_DN = llr_n_soll_calc();
+  bVar7 = LFR_FLAGS;
+  bVar8 = LFR_ZUSTAND;
+  LFR_N_GRAD = N - LFR_N_PRE;
+  LFR_N_PRE = N;
+  lfra_adapt();
+  if ((eVar1 & (VL|TL|LL)) == 0) {
+LAB_00026996:
+    bVar8 = 1;
+  }
+  else if (((SA_WE_ST & 8) == 0) || ((bVar8 & 0x10) != 0)) {
+    if (bVar8 == 1) {
+      if ((eVar1 & (VL|TL|LL)) != 0) goto LAB_00026756;
+    }
+    else if (bVar8 == 2) {
+      if (((((eVar1 & TL) != 0) || ((eVar1 & VL) != 0)) ||
+          (((eVar1 & LL) != 0 && (S_KRAFTSCHLUSS != '\0')))) ||
+         (((((int)K_LFR_EGAS_ABW < (int)EGAS_IST - (int)EGAS_SOLL && ((SK_EDK_CONTR & 2) == 0)) &&
+           ((DAT_00ffda36 & 2) == 0)) || ((cfg_m_getriebetyp == '@' && (DAT_00ffd957 != '\0')))))) {
+        bVar8 = 4;
+        DAT_00ffea48 = K_LFR_T_FBR;
+        if ((bVar7 & 0xc0) == 0xc0) {
+          if (LFR_MDI < DAT_00ffea44) {
+            DAT_00ffea44 = LFR_MDI;
+          }
+        }
+        else {
+          DAT_00ffea44 = LFR_MDI;
+        }
+        FUN_000261a6();
+      }
+    }
+    else if (bVar8 == 4) {
+      if ((((int)((int)K_LFR_DN_HYS + (uint)LFR_N_N_SOLL) < (int)(uint)N) && ((eVar1 & LL) == 0)) ||
+         (((SCHALT_M_ST & 0x80) != 0 && ((cfg_m_getriebetyp != '@' || (DAT_00ffd957 == '\0')))))) {
+        bVar8 = 0x10;
+      }
+      else if (((((eVar1 & LL) != 0) && (S_KRAFTSCHLUSS == '\0')) &&
+               (((int)EGAS_IST - (int)EGAS_SOLL < (int)K_LFR_EGAS_ABW ||
+                (((SK_EDK_CONTR & 2) != 0 || ((DAT_00ffda36 & 2) != 0)))))) &&
+              ((cfg_m_getriebetyp != '@' || (DAT_00ffd957 == '\0')))) {
+        bVar8 = 2;
+        bVar7 = bVar7 & 0x3f;
+        DAT_00ffea48 = 0;
+      }
+    }
+    else if (bVar8 == 0x10) {
+      if (((((eVar1 & LL) == 0) || (S_KRAFTSCHLUSS != '\0')) || ((SA_WE_ST & 8) != 0)) ||
+         ((((int)K_LFR_EGAS_ABW <= (int)EGAS_IST - (int)EGAS_SOLL && ((SK_EDK_CONTR & 2) == 0)) &&
+          ((DAT_00ffda36 & 2) == 0)))) {
+        if (((int)(uint)N < (int)((int)K_LFR_DN_HYS + (uint)LFR_N_N_SOLL)) &&
+           ((SCHALT_M_ST & 0x80) == 0)) {
+LAB_0002692c:
+          bVar8 = 4;
+        }
+      }
+      else {
+LAB_00026756:
+        bVar8 = 2;
+        bVar7 = bVar7 & 0x3f;
+      }
+    }
+    else {
+      if (bVar8 != 8) goto LAB_00026996;
+      if ((((eVar1 & LL) != 0) && (S_KRAFTSCHLUSS == '\0')) &&
+         (((int)EGAS_IST - (int)EGAS_SOLL < (int)K_LFR_EGAS_ABW ||
+          (((SK_EDK_CONTR & 2) != 0 || ((DAT_00ffda36 & 2) != 0)))))) goto LAB_00026756;
+      if ((int)(uint)N < (int)((int)K_LFR_DN_HYS + (uint)LFR_N_N_SOLL)) goto LAB_0002692c;
+    }
+  }
+  else {
+    bVar8 = 8;
+  }
+  if ((K_LFR_CONTROL & 1) == 0) {
+LAB_00026a3e:
+    LFR_MDP = 0;
+  }
+  else if (((eVar1 & (VL|TL|LL)) == 0) ||
+          ((S_KRAFTSCHLUSS != '\0' && ((S_KRAFTSCHLUSS == '\0' || (K_LFR_V_MAX < V)))))) {
+    LFR_MDP = 0;
+    LFR_MD_TZ = 0;
+  }
+  else {
+    if ((short)LFR_DN < 1) {
+      if ((eVar1 & LL) == 0) {
+        LFR_MD_TZ = 0;
+      }
+      else {
+        uVar2 = klu_wint(&KL_LFR_TZ_NEG.sizeX,-LFR_DN);
+        LFR_MD_TZ = -(short)uVar2;
+      }
+      goto LAB_00026a3e;
+    }
+    uVar2 = klu_wint(&KL_LFR_DQP_POS.sizeX,LFR_DN);
+    LFR_MDP = (short)uVar2;
+    uVar2 = klu_wint(&KL_LFR_TZ_POS.sizeX,LFR_DN);
+    LFR_MD_TZ = (short)uVar2;
+  }
+  if (((K_LFR_CONTROL & 0x10) == 0) || ((MD_RES_LRW_ST & 2) == 0)) {
+    MD_LLR_TZ = 0;
+  }
+  else {
+    iVar3 = (int)LFR_MD_TZ;
+    if (iVar3 < 0) {
+      iVar3 = iVar3 + 7;
+    }
+    MD_LLR_TZ = (undefined2)(iVar3 >> 3);
+  }
+  iVar3 = (int)LFR_MDP;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 7;
+  }
+  MD_LLRP = (undefined2)(iVar3 >> 3);
+  if ((((K_LFR_CONTROL & 2) == 0) || ((LLS_ST & 0x40) != 0)) || ((edk_ds2_st & 2) != 0)) {
+    LFR_MDI = 0;
+    LFR_I_AFR = 0;
+    LFR_ZUSTAND = 1;
+    goto LAB_00026d12;
+  }
+  if (bVar8 == 2) {
+    sVar6 = kls_wint(&KL_LFR_DABR_AFR.sizeX,LFR_DN + 0x8000);
+    LFR_I_AFR = sVar6 + LFR_I_AFR;
+    if (LFR_I_AFR < 0) {
+      LFR_I_AFR = 0;
+    }
+    if (K_LFR_V_MAX < V) {
+      if ((bVar7 & 0x80) == 0) {
+        DAT_00ffea44 = LFR_MDI;
+      }
+      bVar7 = bVar7 | 0x80;
+    }
+    else {
+      bVar7 = bVar7 & 0x7f | 0x40;
+    }
+    if ((((int)(uint)K_LFR_NDIFF_RESET < (int)(short)LFR_DN) && (LFR_MDI < 0)) ||
+       (((int)(short)LFR_DN < (int)-(uint)K_LFR_NDIFF_POS && (0 < LFR_MDI)))) {
+      LFR_MDI = 0;
+      LFR_ZUSTAND = bVar8;
+    }
+    else {
+                    /* In 1801 the below condition references HFM */
+      if (((RF < lfr_reg_rf_min) && (rf_diag_ed_st == '\0')) ||
+         (((MD_ST & 1) != 0 || (((MD_ST & 2) != 0 || (LLS_TV_BEGR != '\0')))))) {
+        bVar7 = bVar7 | 0x10;
+      }
+      else {
+        bVar7 = bVar7 & 0xef;
+      }
+      sVar6 = -LFR_DN;
+      if (sVar6 < -1000) {
+        sVar6 = -1000;
+      }
+      if (1000 < sVar6) {
+        sVar6 = 1000;
+      }
+      uVar4 = kfs_wint(&KF_LFR_DQI.sizeX,sVar6 + 1000,D_N_GEFILTERT + 0x8000);
+      sVar6 = (short)uVar4;
+      if (((bVar7 & 8) != 0) && ((int)-(uint)K_LFR_NDIFF_AUF < (int)(short)LFR_DN)) {
+        bVar7 = bVar7 & 0xf7;
+        uVar2 = klu_wint(&KL_LFR_I_AUF.sizeX,D_N_GEFILTERT + 0x8000);
+        LFR_I_AUF = (short)uVar2;
+        sVar6 = LFR_I_AUF + sVar6;
+      }
+      if (((bVar7 & 0x10) != 0) && (sVar6 < 0)) {
+        sVar6 = 0;
+      }
+      if ((K_LFR_MD_TZ_MIN <= DAT_00ffd8c0) || (LFR_ZUSTAND = bVar8, -1 < sVar6)) {
+        LFR_MDI = LFR_MDI + sVar6;
+        LFR_ZUSTAND = bVar8;
+      }
+    }
+    goto LAB_00026d12;
+  }
+  if (bVar8 == 4) {
+    sVar6 = kls_wint(&KL_LFR_DI_AFR.sizeX,LFR_DN + 0x8000);
+    LFR_I_AFR = sVar6 + LFR_I_AFR;
+    if (LFR_I_AFR < 0) {
+      LFR_I_AFR = 0;
+    }
+    if ((short)LFR_DN < 0) {
+      sVar6 = kls_wint(&KL_LFR_DI_AFR.sizeX,LFR_DN + 0x8000);
+      LFR_MDI = sVar6 + LFR_MDI;
+    }
+    LFR_ZUSTAND = bVar8;
+    if (LFR_MDI < 0) {
+      LFR_MDI = 0;
+    }
+    goto LAB_00026d12;
+  }
+  if (bVar8 == 8) {
+    sVar6 = 0;
+    bVar9 = K_LFR_TAU_IA1;
+LAB_00026ca2:
+    LFR_MDI = PT1_Filter_SS(sVar6,LFR_MDI,bVar9);
+    bVar7 = bVar7 & 0xef;
+    LFR_I_AFR = LFR_I_AFR - K_LFR_DIAFR_ABR;
+    LFR_ZUSTAND = bVar8;
+    if (-1 < LFR_I_AFR) goto LAB_00026d12;
+  }
+  else {
+    if (bVar8 == 0x10) {
+      sVar6 = 0;
+      if ((0 < DAT_00ffea44) && (sVar6 = DAT_00ffea44, K_LFR_UEW_MAX < DAT_00ffea44)) {
+        sVar6 = K_LFR_UEW_MAX;
+      }
+      bVar9 = K_LFR_TAU_IA2_KKS;
+      if (S_KRAFTSCHLUSS != '\0') {
+        bVar9 = K_LFR_TAU_IA2_KS;
+      }
+      goto LAB_00026ca2;
+    }
+    LFR_MDI = 0;
+  }
+  LFR_I_AFR = 0;
+  LFR_ZUSTAND = bVar8;
+LAB_00026d12:
+  sVar6 = K_LFR_MDREG_MIN;
+  if ((LFR_MDI < K_LFR_MDREG_MIN) || (sVar6 = K_LFR_MDREG_MAX, K_LFR_MDREG_MAX < LFR_MDI)) {
+    LFR_MDI = sVar6;
+    LFR_FLAGS = bVar7 | 0x20;
+  }
+  else {
+    LFR_FLAGS = bVar7 & 0xdf;
+  }
+  if (LFR_I_AFR < 0) {
+    LFR_I_AFR = 0;
+  }
+  else if (K_LFR_MDAFR_MAX < LFR_I_AFR) {
+    LFR_I_AFR = K_LFR_MDAFR_MAX;
+  }
+  iVar3 = (int)LFR_I_AFR;
+  if (iVar3 < 0) {
+    iVar3 = iVar3 + 0xf;
+  }
+  iVar5 = (int)LFR_MDI;
+  if (iVar5 < 0) {
+    iVar5 = iVar5 + 0xf;
+  }
+  MD_LLRI = (short)(iVar3 >> 4) + (short)(iVar5 >> 4);
+  if (MD_LLRI < K_LFR_MD_REG_MIN) {
+    MD_LLRI = K_LFR_MD_REG_MIN;
+  }
+  else if (K_LFR_MD_REG_MAX < MD_LLRI) {
+    MD_LLRI = K_LFR_MD_REG_MAX;
+  }
+  FUN_000262ce();
+  return;
+}
+

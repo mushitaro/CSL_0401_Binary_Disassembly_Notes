@@ -1,0 +1,40 @@
+
+void rf_korr(void)
+
+{
+  uint rf_korr_rf_min;
+  undefined4 rf_korr_drrel;
+  
+                    /* If the engine isn’t rotating, load is zero. */
+  if (N == 0) {
+    RF = 0;
+    ML = 0;
+  }
+  rf_korr_rf_min = klu_wint(&kl_rf_korr_rf_min.sizeX,N);
+                    /* tabg_delta is the “gas hotter than model” term. */
+  tabg_delta = rg_tabg_modell - TABG;
+  if ((short)tabg_delta < 0) {
+    tabg_delta = 0;
+  }
+  if (((ushort)rf_korr_rf_min < rf_soll) && (k_rf_korr_v_min < V)) {
+    rf_korr_drrel = kfu_wint(&KF_RF_KORR_DRREL.sizeX,N,tabg_delta);
+    rf_korr = (short)rf_korr_drrel;
+    if (rf_korr != 0x400) {
+      rf_korr_st = 1;
+      return;
+    }
+  }
+  else {
+                    /* If RF falls below the enable threshold, keep the previous correction while
+                       rf_soll >= (enable_min − k_rf_korr_hys) and V >= k_rf_korr_v_min; otherwise
+                       force the factor to 1.0 and clear the active flag. */
+    if (((int)((rf_korr_rf_min & 0xffff) - (uint)k_rf_korr_hys) <= (int)(uint)rf_soll) &&
+       (k_rf_korr_v_min <= V)) {
+      return;
+    }
+    rf_korr = 0x400;
+  }
+  rf_korr_st = 0;
+  return;
+}
+

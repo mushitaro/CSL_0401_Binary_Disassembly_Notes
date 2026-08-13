@@ -1,0 +1,44 @@
+
+char ask_flap_pot_closed_calibration(void)
+
+{
+  undefined3 extraout_var;
+  char cVar1;
+  char cVar2;
+  bool bVar3;
+  
+  cVar2 = '\0';
+  switch(ask_flap_closed_calibration_state) {
+  case '\0':
+    ask_flap_closed_calibration_timer = k_ask_flap_pot_self_test_time;
+    cVar2 = -k_flap_closed_calibration_driver_value;
+    ask_flap_closed_calibration_init();
+    ask_flap_closed_calibration_state = ask_flap_closed_calibration_state + '\x01';
+    break;
+  case '\x01':
+    cVar2 = -k_flap_closed_calibration_driver_value;
+    cVar1 = ask_flap_closed_calibration_timer + -1;
+    bVar3 = ask_flap_closed_calibration_timer == '\0';
+    ask_flap_closed_calibration_timer = cVar1;
+    if (bVar3) {
+      ask_flap_closed_calibration_state = '\x02';
+    }
+    break;
+  case '\x02':
+    cVar2 = '\0';
+    cVar1 = ask_flap_pot_measure_closed_position();
+    if (CONCAT31(extraout_var,cVar1) == 0) {
+      ask_flap_closed_calibration_state = 3;
+    }
+    break;
+  case '\x03':
+    ask_flap_closed_calibration_state = '\0';
+    ask_flap_diag_st = ask_flap_diag_st & 0x7c;
+    ask_flap_driver_timer = k_flap_driver_transition_timer;
+    break;
+  default:
+    ask_flap_closed_calibration_state = '\0';
+  }
+  return cVar2;
+}
+

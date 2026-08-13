@@ -1,0 +1,75 @@
+
+uint kath_zustand_calc(void)
+
+{
+  undefined2 uVar1;
+  uint uVar2;
+  char cVar3;
+  
+  uVar2 = (uint)KATH_ZUSTAND;
+                    /* The following condition references HFM in 1801 */
+  if ((((ZUSTAND_MOTOR & Start) != 0) || ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) &&
+     (((T_UMG < K_KATH_TUMG_MIN ||
+       (((((TMOT_ED & 0x40) != 0 || ((TMOT_ST1 & 0x10) != 0)) || (rf_diag_ed_st != '\0')) ||
+        ((sk_stufe_egas_sk_prog_level_ != '\0' || ((LLS_ST & 0x80) != 0)))))) ||
+      ((TI_ED_EV_SUMME != '\0' || (TZ_ED_STATUS != '\0')))))) {
+    uVar2 = 0;
+    KATH_ST = 0x80;
+    KATH_AKTIVZEIT = 0;
+  }
+  cVar3 = (char)uVar2;
+  if ((((uVar2 & 4) != 0) && ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) &&
+     ((K_KATH_NMAX < N || (((K_KATH_RFMAX < RF || (K_KATH_VMAX < V)) || (K_KATH_PWGMAX < PWG_SOLL)))
+      ))) {
+    KATH_ST = KATH_ST | 0x80;
+  }
+  if (cVar3 == '\x01') {
+    if ((ZUSTAND_MOTOR & Start) != 0) {
+      uVar2 = klu_wint(&KL_KATH_T_AKTIV.sizeX,(ushort)TMOT);
+      KATH_AKTIVZEIT = (ushort)uVar2;
+      KATH_ENDEZEIT = SYS_SEC_COUNTER._2_2_ + KATH_AKTIVZEIT;
+      uVar1 = (undefined2)(uVar2 >> 0x10);
+      uVar2 = CONCAT22(uVar1,KATH_ENDEZEIT);
+      if ((KATH_AKTIVZEIT == 0) || (uVar2 = CONCAT22(uVar1,TKATM), K_KATH_TKAT_ANSPRING <= TKATM)) {
+        cVar3 = '\0';
+        KATH_ST = 0x80;
+      }
+      else {
+        cVar3 = '\x02';
+        KATH_ST = KATH_ST | 0x13;
+      }
+    }
+  }
+  else if (cVar3 == '\x02') {
+    if ((((ZUSTAND_MOTOR & S) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) &&
+       ((ZUSTAND_MOTOR & KI.15 aus) == 0)) {
+      if ((MD_ST & 1) == 0) {
+        cVar3 = '\x04';
+      }
+    }
+    else {
+      KATH_ENDEZEIT = SYS_SEC_COUNTER._2_2_ + KATH_AKTIVZEIT;
+      uVar2 = (uint)KATH_ENDEZEIT;
+    }
+  }
+  else if ((cVar3 == '\x04') &&
+          (uVar2 = (uint)(ZUSTAND_MOTOR & (VL|TL|LL)), (ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    uVar2 = (uint)KATH_ENDEZEIT;
+    if (uVar2 < SYS_SEC_COUNTER) {
+      KATH_ST = 0;
+    }
+    else {
+      if ((KATH_ST & 0x80) == 0) {
+        KATH_AKTIVZEIT = KATH_ENDEZEIT - SYS_SEC_COUNTER._2_2_;
+        KATH_ZUSTAND = cVar3;
+        return (uint)KATH_AKTIVZEIT;
+      }
+      KATH_ST = 0x80;
+    }
+    cVar3 = '\0';
+    KATH_AKTIVZEIT = 0;
+  }
+  KATH_ZUSTAND = cVar3;
+  return uVar2;
+}
+

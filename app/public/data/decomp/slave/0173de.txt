@@ -1,0 +1,102 @@
+
+byte ba_segm(void)
+
+{
+  ushort uVar1;
+  int iVar2;
+  uint uVar3;
+  byte bVar4;
+  short unaff_D2w;
+  short sVar5;
+  ushort uVar6;
+  KF_6x6_2byte_2byte_2byte *table;
+  
+  if (((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || ((MD_ST & 1) != 0)) || ((SK_TI_CONTR & 1) != 0)) ||
+     (((DAT_00ffe6d0 & 1) != 0 || ((SA_WE_ST & 8) != 0)))) {
+    BA_F_TI = 0x400;
+    BA_ST = 0;
+    dam_delta = 0;
+    BA_BERECH = 0;
+    return ZUSTAND_MOTOR & (VL|TL|LL);
+  }
+  if (K_BA_AKTIV_SCHWELLE <= N40) goto LAB_0001767c;
+  if ((short)DAM < 0) {
+    iVar2 = abs((int)(short)DAM);
+    if ((BA_DAM_NEG_SCHWELLE < (ushort)iVar2) && (AQ_REL_DELTA < BA_AQ_DELTA_NEG)) {
+      BA_ST = BA_ST | 2;
+      dam_delta = (ushort)iVar2 - BA_DAM_NEG_SCHWELLE;
+      uVar3 = klu_wint(&KL_BA_DAM_NEG.sizeX,dam_delta);
+      unaff_D2w = -(short)uVar3;
+    }
+  }
+  else if ((BA_DAM_POS_SCHWELLE < DAM) && (BA_AQ_DELTA_POS < AQ_REL_DELTA)) {
+    BA_ST = BA_ST | 1;
+    dam_delta = DAM - BA_DAM_POS_SCHWELLE;
+    uVar3 = klu_wint(&KL_BA_DAM_POS.sizeX,dam_delta);
+    unaff_D2w = (short)uVar3;
+  }
+  else {
+    BA_ST = BA_ST & 0xfc;
+    dam_delta = 0;
+    unaff_D2w = 0;
+  }
+  if ((BA_ST & 3) == 0) goto LAB_0001767c;
+  uVar3 = (uint)BA_TEMP;
+  if ((BA_ST & 1) == 0) {
+    table = &KF_BA_FAKT_RF_N_NEG;
+  }
+  else {
+    table = &KF_BA_FAKT_RF_N;
+  }
+  iVar2 = kfs_wint(&table->sizeX,RF,N);
+  sVar5 = (short)((short)((int)(uVar3 * (int)unaff_D2w) >> 10) * iVar2 >> 10);
+  if ((uint)(SYS_TIMERTICS_COUNTER - DAT_00ffdaa2) <= (uint)K_BA_ZEIT_WIEDEREINSETZEN) {
+    sVar5 = (short)((int)((uint)BA_FAKT_TIME * (int)sVar5) >> 10);
+  }
+  uVar1 = sVar5 + 0x400;
+  uVar6 = K_BA_FAKT_MAX;
+  if (((int)(short)uVar1 <= (int)(uint)K_BA_FAKT_MAX) &&
+     (uVar6 = uVar1, (int)(short)uVar1 < (int)(uint)K_BA_FAKT_MIN)) {
+    uVar6 = K_BA_FAKT_MIN;
+  }
+  if ((BA_ST & 4) == 0) {
+    if ((BA_ST & 8) == 0) {
+      if ((BA_ST & 1) == 0) goto LAB_00017660;
+    }
+    else {
+      if ((BA_ST & 2) != 0) {
+        BA_ST = BA_ST & 0xfd;
+        if (BA_F_TI <= uVar6) goto LAB_0001767c;
+        goto LAB_00017668;
+      }
+      BA_ST = BA_ST & 0xf7;
+    }
+    BA_ST = BA_ST & 0xfe | 4;
+LAB_000175fa:
+    BA_REGEL_COUNT = BA_IGN_POS_TMOT;
+    BA_REGEL_COUNT_RED = BA_IGN_RED_POS_TMOT;
+  }
+  else {
+    if ((BA_ST & 1) != 0) {
+      BA_ST = BA_ST & 0xfe;
+      if (uVar6 <= BA_F_TI) goto LAB_0001767c;
+      goto LAB_000175fa;
+    }
+    BA_ST = BA_ST & 0xfb;
+LAB_00017660:
+    BA_ST = BA_ST & 0xfd | 8;
+LAB_00017668:
+    BA_REGEL_COUNT = BA_IGN_NEG_TMOT;
+    BA_REGEL_COUNT_RED = BA_IGN_RED_NEG_TMOT;
+  }
+  DAT_00ffdab2 = 0;
+  BA_REGEL_COUNT_DECAY = 0;
+  BA_BERECH = uVar6;
+LAB_0001767c:
+  if ((BA_ST & 0xc) == 0) {
+    return 0;
+  }
+  bVar4 = ba_f_ti_calc();
+  return bVar4;
+}
+

@@ -1,0 +1,18 @@
+
+void ti_start_vsp_factors_update(void)
+
+{
+  uint uVar1;
+  
+  if ((START_ST & B_WKS) == 0) {
+    TI_F_NO_ZAEHLER_VSP = 0x400;
+  }
+  else {
+    uVar1 = klu_wint(&KL_TI_NO_VSP.sizeX,NO_ZAEHLER_VSP_S);
+    TI_F_NO_ZAEHLER_VSP = (undefined2)uVar1;
+  }
+  uVar1 = klu_wint(&KL_TI_TMOT_VSP.sizeX,(ushort)TMOT);
+  TI_F_TMOT_VSP = (short)uVar1;
+  return;
+}
+

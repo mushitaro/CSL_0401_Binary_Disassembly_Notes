@@ -1,0 +1,87 @@
+
+void edk_full_load_adaptation(void)
+
+{
+  byte bVar1;
+  char cVar2;
+  bool bVar3;
+  
+  bVar1 = DAT_00ffe682;
+  if ((((((ZUSTAND_MOTOR & KI.15 aus) != 0) && ((EDK_STATUS & 0x80) == 0)) && (N == 0)) ||
+      (((b_diag != '\0' && ((ZUSTAND_MOTOR & S) != 0)) &&
+       (((EDK_STATUS & 0x40) != 0 && (EDK_DS2_ADAPT_STAT == 1)))))) &&
+     ((sk_stufe_egas_sk_prog_level_ == '\0' && (K_EDK_UBMIN < UB)))) {
+    switch(DAT_00ffe685_edk_full_load_adaptation_stage_) {
+    case 0:
+      EDK_SOLL_ADAPT = EGAS_SOLL;
+      DAT_00ffe685_edk_full_load_adaptation_stage_ = 1;
+      return;
+    case 1:
+      if ((short)EDK_SOLL_ADAPT < K_EDK_A100_B1) {
+        EDK_SOLL_ADAPT = K_EDK_A100_INC1 + EDK_SOLL_ADAPT;
+        DAT_00ffe682 = 0;
+        return;
+      }
+      DAT_00ffe682 = DAT_00ffe682 + 1;
+      if (K_EDK_A100_WAIT1 < bVar1) {
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 2;
+        return;
+      }
+      break;
+    case 2:
+      if (EDK_DELTA <= K_EDK_A100_DELTA) {
+        EDK_SOLL_ADAPT = K_EDK_A100_INC2 + EDK_SOLL_ADAPT;
+        return;
+      }
+      DAT_00ffe685_edk_full_load_adaptation_stage_ = 3;
+      DAT_00ffe684 = 0;
+      return;
+    case 3:
+      bVar3 = K_EDK_A100_WAIT2 <= DAT_00ffe684;
+      DAT_00ffe684 = DAT_00ffe684 + 1;
+      if (bVar3) {
+        DAT_00ffe684 = 0;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 4;
+        FUN_0001944c();
+        return;
+      }
+      break;
+    case 4:
+      cVar2 = wdk_a100_adapt();
+      if (cVar2 == '\0') {
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 5;
+        EDK_STATUS = EDK_STATUS & 0xdf;
+        return;
+      }
+      bVar3 = K_EDK_A100_WAIT2 <= DAT_00ffe684;
+      DAT_00ffe684 = DAT_00ffe684 + 1;
+      if (bVar3) {
+        DAT_00ffe684 = 0;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 5;
+        EDK_STATUS = EDK_STATUS | 0x20;
+        return;
+      }
+      break;
+    case 5:
+      EDK_SOLL_ADAPT = EDK_SOLL_ADAPT - K_EDK_A100_DEC3;
+      if ((int)(short)EDK_SOLL_ADAPT <= (int)(uint)MD_FW_REL) {
+        EDK_SOLL_ADAPT = MD_FW_REL;
+        DAT_00ffe685_edk_full_load_adaptation_stage_ = 6;
+        return;
+      }
+      break;
+    case 6:
+      goto switchD_00023f5e_caseD_6;
+    default:
+switchD_00023f5e_caseD_7:
+      EDK_STATUS = EDK_STATUS & 0xbf | 0x80;
+      DAT_00ffe685_edk_full_load_adaptation_stage_ = 0;
+      EDK_SOLL_ADAPT = 0;
+      EDK_DS2_ADAPT_STAT = EDK_DS2_ADAPT_STAT & 0xfe;
+    }
+    return;
+  }
+switchD_00023f5e_caseD_6:
+  goto switchD_00023f5e_caseD_7;
+}
+

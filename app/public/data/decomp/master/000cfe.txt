@@ -1,0 +1,13 @@
+
+void boot_handoff_prepare(void)
+
+{
+  int in_VBR;
+  
+  if (in_VBR != 0) {
+    (*(code *)PTR_sys_cancel_task_0001022c)(3);
+  }
+  DAT_00ffd00a = 0;
+  return;
+}
+

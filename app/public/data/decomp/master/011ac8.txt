@@ -1,0 +1,11 @@
+
+void pcntrl_reset_zustand_calc(void)
+
+{
+  if (K_PCNTRL_MAX_RESET_M <= PCNTRL_RESET_COUNT) {
+    PCNTRL_RESET_ZUSTAND = PCNTRL_RESET_ZUSTAND | 4;
+    ed_report(DTC_A3_RESET_DME,4);
+  }
+  return;
+}
+

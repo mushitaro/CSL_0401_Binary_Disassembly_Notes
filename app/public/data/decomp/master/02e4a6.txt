@@ -1,0 +1,84 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+uint tog_isr_handler(void)
+
+{
+  short sVar1;
+  word wVar2;
+  ushort uVar3;
+  ushort uVar4;
+  undefined4 in_D0;
+  int iVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  
+  wVar2 = CTM4_DASM9SIC;
+  CTM4_DASM9SIC = wVar2 & 0x7fff;
+  if (((ZUSTAND_MOTOR & S) != 0) ||
+     (uVar7 = CONCAT31((int3)((uint)in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c,
+     (ZUSTAND_MOTOR & (VL|TL|LL)) != 0)) {
+    uVar3 = CTM4_DASM9A;
+    uVar4 = CTM4_DASM9B;
+    if (uVar4 < uVar3) {
+      uVar3 = CTM4_DASM9A;
+      uVar4 = CTM4_DASM9B;
+      iVar5 = (uint)uVar3 - (uint)uVar4;
+    }
+    else {
+      sVar1 = CTM4_DASM9B;
+      uVar3 = CTM4_DASM9A;
+      iVar5 = (uint)uVar3 + (uint)(ushort)(-sVar1 - 1);
+    }
+    iVar5 = (iVar5 * 0xc) / 10;
+    uVar3 = CTM4_DASM9B;
+    uVar6 = (int)(((uint)uVar3 - (uint)TOG_FLANKE_POS) * 0xc) / 10;
+    uVar7 = uVar6;
+    if ((0x53 < (ushort)iVar5) && (0x53 < (ushort)uVar6)) {
+      TOG_FLAG = TOG_FLAG & 0xef;
+      TOG_IMP_COUNT = TOG_IMP_COUNT + 1;
+      TOG_IMP_SUM = (short)((uint)(iVar5 << 7) / 10000) + TOG_IMP_SUM;
+      TOG_N_SUM = N40 + TOG_N_SUM;
+      sVar1 = tog_imp_prev._2_2_ - (ushort)iVar5;
+      if (sVar1 < 1) {
+        uVar7 = -(int)sVar1;
+      }
+      else {
+        uVar7 = (uint)sVar1;
+      }
+      if ((int)(uint)k_tog_imp_delta_max < (int)uVar7) {
+        tog_ed_threshold_counter = 0;
+        uVar8 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0x80);
+        uVar7 = uVar8 & 0xffffff0f;
+        if (((byte)uVar8 & 0xf) == 8) {
+          uVar7 = ed_report(DTC_2C_TEMP_OIL_SIGNAL,0);
+          TOG_ED = (byte)uVar7 & 0x60;
+          uVar7 = uVar7 & 0xffffff60;
+        }
+      }
+      else {
+        tog_ed_threshold_counter = tog_ed_threshold_counter + 1;
+      }
+      tog_imp_prev = iVar5;
+      if (9 < TOG_IMP_COUNT) {
+        TOG_IMP = TOG_IMP_SUM / TOG_IMP_COUNT;
+        uVar7 = (uint)TOG_IMP_COUNT;
+        TOG_N = (undefined1)(TOG_N_SUM / uVar7);
+        TOG_IMP_COUNT = 0;
+        TOG_N_SUM = 0;
+        TOG_IMP_SUM = 0;
+        TOG_FLAG = TOG_FLAG | 0xc0;
+        if (uVar6 < 0x189c) {
+          TOG_HEIZ = (ushort)uVar6;
+        }
+      }
+    }
+  }
+  if (((ZUSTAND_MOTOR & KI.15 aus) == 0) && ((ZUSTAND_MOTOR & Nachlauf) == 0)) {
+    TOG_FLANKE_POS = CTM4_DASM9A;
+    _DAT_00ffea82 = CTM4_DASM9B;
+  }
+  return uVar7;
+}
+

@@ -1,0 +1,23 @@
+
+void smg_shift_speed_reg_dispatcher(void)
+
+{
+  smg_shift_reg_prestep_flatten_profile();
+  if ((DAT_00ffdb6c & 0x80) == 0) {
+    switch(DAT_00ffdb3a) {
+    case 1:
+      smg_engine_speed_reg_entry_with_slip_guard(DAT_00ffdc60);
+      break;
+    case 2:
+      smg_engine_speed_regulator_step(DAT_00ffdc60);
+      break;
+    case 3:
+    case 4:
+      smg_dn_regulator_update(DAT_00ffdc60);
+    }
+    return;
+  }
+  smg_start_window_service();
+  return;
+}
+

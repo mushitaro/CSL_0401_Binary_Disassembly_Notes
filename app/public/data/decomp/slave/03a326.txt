@@ -1,0 +1,136 @@
+
+char smg_shift_phase_fsm_update(void)
+
+{
+  undefined4 uVar1;
+  int iVar2;
+  char cVar3;
+  byte bVar4;
+  ushort uVar5;
+  
+  bVar4 = 0;
+  cVar3 = DAT_00ffdb3a;
+  switch(DAT_00ffdb3a) {
+  case '\0':
+    if (((DAT_00ffdc69 & 1) == 0) && (DAT_00ffdc6a != '\0')) {
+      uVar1 = ed_report(DTC_5D_O2_REAR_BANK2_VOLTAGE|DTC_6D_UNKOWN_TABLE_IDX_2E,0);
+      DAT_00ffdc6a = (char)uVar1;
+    }
+    DAT_00ffdc69 = 0;
+    DAT_00ffdc76 = 0;
+    DAT_00ffdc20 = 0;
+    DAT_00ffdb44 = '\0';
+    if ((((int)(uint)K_SMG_MOT_RS_N_SCHW < (int)((uint)N_BEGRENZER - (uint)N)) ||
+        (K_SMG_MOT_RS_S_SCHW < DAT_00ffdb76)) || (ki_scha != '\x0e')) {
+      DAT_00ffdb6c = DAT_00ffdb6c & 0xff7f;
+    }
+    goto LAB_0003a466;
+  case '\x01':
+    if ((((DAT_00ffdb0e == '\0') || (DAT_00ffdb0f == '\x04')) || (DAT_00ffdb0f == '\n')) ||
+       ((DAT_00ffdb0f == '\x03' || (DAT_00ffdb0f == '\t')))) {
+      cVar3 = '\x02';
+    }
+    break;
+  case '\x02':
+    if (((DAT_00ffdb0f == '\0') || (DAT_00ffdb0d == '\0')) &&
+       (((DAT_00ffdb72 & 2) == 0 && ((DAT_00ffdc18 & 1) == 0)))) {
+      cVar3 = '\x03';
+    }
+    break;
+  case '\x03':
+  case '\x04':
+    if ((DAT_00ffdb0f == '\0') &&
+       ((((DAT_00ffdb73 != '\0' && ((DAT_00ffdb6c & 0x200) == 0)) || ((DAT_00ffdb6c & 0x400) != 0))
+        || (5 < DAT_00ffdb6e)))) {
+      cVar3 = '\x04';
+    }
+    if ((DAT_00ffdb0f == '\0') || (DAT_00ffdb0d == '\0')) break;
+    bVar4 = 4;
+LAB_0003a466:
+    cVar3 = '\x01';
+  }
+  if ((DAT_00ffdb6c & 0x10) != 0) {
+    bVar4 = bVar4 | 0x10;
+    switch(cVar3) {
+    case '\x01':
+      if ((smg_can_gewuenschter_gang == smg_can_istgang) && (DAT_00ffdb0f == '\0')) {
+        cVar3 = '\x03';
+      }
+      break;
+    case '\x02':
+      DAT_00ffdc60 = 0;
+      DAT_00ffdc64 = 0;
+      DAT_00ffdc20 = 0;
+      break;
+    case '\x03':
+    case '\x04':
+      cVar3 = '\x01';
+    }
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xffef;
+  }
+  if (((DAT_00ffdb3a == '\x03') || (DAT_00ffdb3a == '\x04')) ||
+     ((V < 10 ||
+      (((uVar5 = K_SMG_____DAT0008a8b8, (DAT_00ffdb6c & 1) == 0 && (DAT_00ffdb3a == '\x02')) &&
+       ((DAT_00ffdb72 & 2) != 0)))))) {
+    uVar5 = K_SMG_____DAT_0008a8ba;
+  }
+  if (uVar5 < DAT_00ffdc20) {
+    bVar4 = bVar4 | 1;
+    uVar1 = ed_report(DTC_5D_O2_REAR_BANK2_VOLTAGE|DTC_6D_UNKOWN_TABLE_IDX_2E,4);
+    DAT_00ffdc6a = (char)uVar1;
+    if ((DAT_00ffdb0f == '\0') && ((DAT_00ffdc18 & 1) == 0)) {
+      cVar3 = '\x03';
+    }
+    if (DAT_00ffdb3a == '\x03') {
+      cVar3 = '\x04';
+    }
+    if ((DAT_00ffdb3a == '\x04') || ((DAT_00ffdc16 & 0x20) != 0)) {
+      cVar3 = '\0';
+    }
+    DAT_00ffdc20 = 0;
+  }
+  DAT_00ffdc20 = DAT_00ffdc20 + 1;
+  DAT_00ffdc69 = bVar4 | DAT_00ffdc69;
+  DAT_00ffdc68 = bVar4;
+  if (((cVar3 == DAT_00ffdb44) || (cVar3 == '\x04')) &&
+     (((DAT_00ffdb6c & 0x200) == 0 || ((DAT_00ffdbb2 != '\x02' || ((DAT_00ffdb72 & 2) != 0)))))) {
+    iVar2 = abs((uint)PWG_SOLL_DPR - (uint)DAT_00ffdb3e);
+    if (((int)(uint)K_SMG_KI_DELTA_PWG < iVar2) &&
+       ((DAT_00ffdb3a != '\x03' || (iVar2 = abs((int)ASC_AY), iVar2 < K_SMG_KI_NEU_AY_MAX)))) {
+      DAT_00ffdb3e = PWG_SOLL_DPR;
+      smg_ki_drive_logic_indicator_update();
+    }
+  }
+  else {
+    DAT_00ffdb4c = DAT_00ffdb6c;
+    uVar5 = DAT_00ffdb6c & 0xfdff;
+    if (((cVar3 == '\x03') && ((DAT_00ffdb83 & 0x40) == 0)) &&
+       ((((DAT_00ffdb6c & 1) != 0 && (0 < DAT_00ffdb30)) ||
+        (((DAT_00ffdb6c & 1) == 0 && (DAT_00ffdb30 < 0)))))) {
+      uVar5 = uVar5 | 0x200;
+    }
+    DAT_00ffdb6c = uVar5;
+    DAT_00ffdc60 = 0;
+    DAT_00ffdc64 = 0;
+    DAT_00ffdc20 = 0;
+    smg_ki_drive_logic_indicator_update();
+    smg_update_ki_regulation_params();
+    DAT_00ffdb3e = PWG_SOLL_DPR;
+  }
+  if ((DAT_00ffdb4c & 1) == (DAT_00ffdb6c & 1)) {
+    DAT_00ffdb6c = DAT_00ffdb6c & 0xfbff;
+  }
+  else {
+    if ((((DAT_00ffdb6c & 0x200) == 0) && (DAT_00ffdb3a == '\x03')) &&
+       (DAT_00ffdb32 < K_SMG_NO_LW_N_SCHW)) {
+      DAT_00ffdb6c = DAT_00ffdb6c | 0x400;
+    }
+    else {
+      DAT_00ffdb6c = DAT_00ffdb6c | 0x200;
+    }
+    smg_rev_target_offset_limits_update();
+  }
+  DAT_00ffdb44 = cVar3;
+  return cVar3;
+}
+

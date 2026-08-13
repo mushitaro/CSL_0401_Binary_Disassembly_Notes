@@ -1,0 +1,94 @@
+
+/* Believe this is the background task on the basis funktionsrahmen 5.11 states that lsh ELU Driver
+   Diagnostics runs in the background task */
+
+void task_bgnd(void)
+
+{
+  while ((ZUSTAND_MOTOR & Nachlauf) == 0) {
+    FUN_00022d0c();
+    FUN_00023c8c();
+    FUN_00023cb2();
+    FUN_00023cd8();
+    FUN_00023cfe();
+    FUN_00022f5a();
+    lsh_ELU_Driver_Diagnostics();
+    FUN_000239ca();
+    FUN_00019b90();
+    FUN_00017264();
+    FUN_00017ed2();
+    sa_rpm_thresholds_calc();
+    ti_bgnd();
+    FUN_0002433c();
+    FUN_00025732();
+    FUN_0002d186();
+    FUN_0002d1de();
+    FUN_000250a6();
+    FUN_00016ccc();
+    FUN_0002dffc();
+    FUN_000170e2();
+    FUN_0002df88();
+    FUN_0002e204();
+    FUN_0001715e();
+    FUN_0002e190();
+    FUN_0002d73c();
+    FUN_0002c352();
+    FUN_0002c924();
+    FUN_0002be56();
+    FUN_0002bf8c();
+    FUN_0002c0d8();
+    FUN_0002ae30();
+    FUN_00024b1c();
+    FUN_0002c4a2();
+    FUN_0002ca70();
+    FUN_0002c5ee();
+    FUN_0002cbbc();
+    FUN_0002c596();
+    FUN_0002cb64();
+    FUN_0002ce0a();
+    FUN_0002ccf4();
+    FUN_0002ce5e();
+    FUN_0002c83e();
+    FUN_0002c726();
+    FUN_0002c892();
+    FUN_0002769e();
+    FUN_00011848();
+    FUN_0001182a();
+    FUN_00010e3e();
+    FUN_00014fdc();
+    ll_sync_state_1_initialisation();
+    CSL_Flap_Get_Open_RPM_FUN_00016080();
+    FUN_00023eb4();
+    FUN_00028f04();
+    FUN_000143c6();
+    FUN_0001993c();
+    FUN_00014aaa();
+    FUN_00041128();
+    FUN_00012d74();
+    FUN_00001bfe();
+    FUN_00015c52();
+    FUN_000006f4();
+    db_tbgnd_calc();
+    FUN_00032170();
+    FUN_00032202();
+    FUN_00036864();
+    FUN_000344b6();
+    if ((K_TI_EINFAHR_KM <= CAN_KM_STAND) && (CAN_KM_STAND < 0xfffe)) {
+      TI_EINFAHR_ST = 0xff;
+    }
+    if ((CFG_RAM_SG_TYP & 2) != 0) {
+      FUN_0003ebc8();
+    }
+    if (cfg_s_getriebetyp == '@') {
+      smg_adaptation_gate_and_breakaway_threshold_update();
+      FUN_0003e538();
+    }
+    DAT_00fffa27 = 0x55;
+  }
+  DAT_00fffa27 = 0xaa;
+  FUN_000128c0();
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+

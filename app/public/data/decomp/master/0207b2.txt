@@ -1,0 +1,21 @@
+
+void kkos_b_diag(void)
+
+{
+  if ((KKOS_ST_TREIBER & 0x80) != 0) {
+    if (b_diag != '\0') {
+      if (DAT_00ffe90e == 'd') {
+        KKOS_ST_TREIBER = KKOS_ST_TREIBER | 0x40;
+        can_0xd_masked_update('\0',0,1);
+        return;
+      }
+      can_0xd_masked_update('\0',1,1);
+      KKOS_ST_TREIBER = KKOS_ST_TREIBER & 0xbf;
+      return;
+    }
+    can_0xd_masked_update('\0',1,1);
+    KKOS_ST_TREIBER = 0x20;
+  }
+  return;
+}
+

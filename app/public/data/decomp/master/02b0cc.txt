@@ -1,0 +1,48 @@
+
+short dyn_dynamic_lead_FUN_0002b0cc(void)
+
+{
+  bool bVar1;
+  short sVar2;
+  
+  bVar1 = false;
+  if ((DYN_KR_ST & 2) != 0) {
+    bVar1 = DYN_KR_TZ < TZ_ZWB_DYN_KR;
+    if (bVar1) {
+      TZ_ZWB_DYN_KR = DYN_KR_TZ;
+      TZ_DYN_KR_SEGM = K_TZ_DYN_KR_SEGM;
+    }
+    DYN_KR_ST = DYN_KR_ST & 0xfd;
+  }
+  if (TZ_DYN_KR_SEGM != '\0') {
+    TZ_DYN_KR_SEGM = TZ_DYN_KR_SEGM + -1;
+    bVar1 = true;
+  }
+  if (((TZ_ZWB_DYN_KR != 0) && (!bVar1)) &&
+     (TZ_ZWB_DYN_KR = K_TZ_ZWB_DYN_KR + TZ_ZWB_DYN_KR, 0 < TZ_ZWB_DYN_KR)) {
+    TZ_ZWB_DYN_KR = 0;
+  }
+  bVar1 = false;
+  if ((DYN_DBGR_ST & 2) != 0) {
+    bVar1 = DYN_DBGR_TZ < TZ_ZWB_DYN_DBGR;
+    if (bVar1) {
+      TZ_ZWB_DYN_DBGR = DYN_DBGR_TZ;
+      TZ_DYN_DBGR_SEGM = K_TZ_DYN_DBGR_SEGM;
+    }
+    DYN_DBGR_ST = DYN_DBGR_ST & 0xfd;
+  }
+  if (TZ_DYN_DBGR_SEGM != '\0') {
+    TZ_DYN_DBGR_SEGM = TZ_DYN_DBGR_SEGM + -1;
+    bVar1 = true;
+  }
+  if (((TZ_ZWB_DYN_DBGR != 0) && (!bVar1)) &&
+     (TZ_ZWB_DYN_DBGR = K_TZ_ZWB_DYN_DBGR + TZ_ZWB_DYN_DBGR, 0 < TZ_ZWB_DYN_DBGR)) {
+    TZ_ZWB_DYN_DBGR = 0;
+  }
+  sVar2 = TZ_ZWB_DYN_DBGR;
+  if (TZ_ZWB_DYN_KR < TZ_ZWB_DYN_DBGR) {
+    sVar2 = TZ_ZWB_DYN_KR;
+  }
+  return sVar2;
+}
+

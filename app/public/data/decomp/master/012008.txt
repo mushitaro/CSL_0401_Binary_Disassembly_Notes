@@ -1,0 +1,18 @@
+
+int IIR_Filter_SS(short param_1,short param_2,ushort param_3)
+
+{
+  int iVar1;
+  ushort uVar2;
+  
+  if (param_3 != 0) {
+    iVar1 = (int)param_1 - (int)param_2;
+    uVar2 = (ushort)(iVar1 / (int)(uint)param_3);
+    if ((iVar1 / (int)(uint)param_3 == 0) && (uVar2 = (ushort)(0 < iVar1), iVar1 < 0)) {
+      uVar2 = 0xffff;
+    }
+    param_1 = param_2 + uVar2;
+  }
+  return (int)param_1;
+}
+

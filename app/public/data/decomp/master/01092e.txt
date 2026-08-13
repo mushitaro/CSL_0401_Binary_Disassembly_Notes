@@ -1,0 +1,17 @@
+
+undefined8 tpu_isr_segm(void)
+
+{
+  undefined4 in_D0;
+  undefined4 in_D1;
+  
+  sys_active_interrupts = sys_active_interrupts + 1;
+  sys_isr_count = sys_isr_count + 1;
+  tpu_segm_isr_handler();
+  sys_active_interrupts = sys_active_interrupts - 1;
+  if (sys_active_interrupts == 0) {
+    sys_dispatch_tasks();
+  }
+  return CONCAT44(in_D0,in_D1);
+}
+

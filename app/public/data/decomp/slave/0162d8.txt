@@ -1,0 +1,51 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+ushort ask_init(void)
+
+{
+  ushort uVar1;
+  
+  tpu_disable_channel(10);
+  _DAT_00ffffa0 = 0;
+  _DAT_00ffffa2 = 0;
+  _DAT_00ffffa8 = 0;
+  _DAT_00ffffaa = 0;
+  _DAT_00ffffa6 = k_ask_flap_driver_periode;
+  _DAT_00ffffa4 = k_ask_flap_driver_periode;
+  tpu_set_channel_function(10,0xb);
+  tpu_set_channel_service_queue(10,1);
+  tpu_host_service_request(10,2);
+  tpu_set_channel_priority(10,1);
+  DAT_00fffa11 = DAT_00fffa11 & 0xbf;
+  DAT_00fffa41 = DAT_00fffa41 & 0xbf;
+  ask_zustand_dpr = 0;
+  ask_st = 0;
+  ask_flap_diag_st = 0;
+  ask_flap_driver_timer = k_flap_driver_transition_timer;
+  ask_diag_cycle_cnt = 0;
+  DAT_00ffdc98 = 0;
+  ask_flap_driver_decel_offset = 0;
+  ask_roh_min = 0xffff;
+  ask_roh_max = 0;
+  ask_roh_sum = 0;
+  ask_filter_gain = k_ask_filter_gain;
+  ask_roh = 0;
+  ask_zustand_hys_cnt = k_ask_zustand_hys;
+  ask_ed_ub_time = 100;
+  if ((EE_ERROR_MASK & 0x1101) == 0) {
+    DAT_00ffdc9b = 0;
+  }
+  ask_flap_driver_block_timer = 0;
+  uVar1 = EE_ERROR_MASK & 0x1101;
+  if ((((EE_ERROR_MASK & 0x1101) != 0) ||
+      (uVar1 = ask_flap_pot_learned_close_pos,
+      ask_flap_pot_learned_close_pos <= k_flap_pot_close_pos_min)) ||
+     (k_flap_pot_close_pos_max <= ask_flap_pot_learned_close_pos)) {
+    ask_flap_pot_learned_close_pos = k_flap_pot_close_pos_max;
+    ask_flap_diag_st = 1;
+    DAT_00ffdc9b = DAT_00ffdc9b | 0x10;
+  }
+  return uVar1;
+}
+

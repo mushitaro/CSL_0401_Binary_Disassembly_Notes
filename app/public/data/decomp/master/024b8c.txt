@@ -1,0 +1,50 @@
+
+undefined4 sk_tr_run_test_task(undefined1 param_1)
+
+{
+  int iVar1;
+  
+  switch(param_1) {
+  case 0:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 1:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 2:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 3:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 4:
+  case 5:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 6:
+  case 7:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 8:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 9:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 10:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 0xb:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 0xc:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  case 0xd:
+    iVar1 = sk_tr_indirect_call_wrapper();
+    return iVar1;
+  default:
+    return 0xff;
+  }
+}
+

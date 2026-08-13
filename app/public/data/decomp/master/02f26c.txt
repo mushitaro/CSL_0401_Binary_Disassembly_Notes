@@ -1,0 +1,44 @@
+
+void can_b_reinit(char init_mode)
+
+{
+  undefined4 *puVar1;
+  char cVar2;
+  undefined1 *puVar3;
+  undefined *puVar4;
+  
+  puVar3 = &DAT_00ffdb2c;
+  if (init_mode != 0) {
+    DAT_00ffdb2a = 1;
+    puVar4 = &DAT_00041aa0;
+    cVar2 = '\x02';
+    do {
+      puVar3[1] = 0;
+      puVar3[2] = puVar4[0x17];
+      puVar1 = *(undefined4 **)(puVar4 + 0xc);
+      *puVar1 = *(undefined4 *)(puVar4 + 8);
+      *(undefined *)(puVar1 + 1) = puVar4[0x10];
+      *(undefined1 *)((int)puVar1 + 5) = 2;
+      *(undefined2 *)((int)puVar1 + 6) = *(undefined2 *)(puVar4 + 0x14);
+      *(undefined2 *)(puVar1 + 2) = *(undefined2 *)(puVar4 + 0x12);
+      puVar3 = puVar3 + 6;
+      puVar4 = puVar4 + 0x1a;
+      cVar2 = cVar2 + -1;
+    } while (cVar2 != '\0');
+    return;
+  }
+  cVar2 = '\x02';
+  do {
+    (&DAT_00ff0f20)[(uint)(byte)puVar3[2] * 0x10] = 0x7f;
+    can_slot_status_table[(short)(ushort)(byte)puVar3[2]].transfer_flags =
+         can_slot_status_table[(short)(ushort)(byte)puVar3[2]].transfer_flags & 0xfd;
+    if ((DAT_00ffdb2a & 0x20) != 0) {
+      puVar3[1] = 0;
+    }
+    puVar3 = puVar3 + 6;
+    cVar2 = cVar2 + -1;
+  } while (cVar2 != '\0');
+  DAT_00ffdb2a = DAT_00ffdb2a & 0xdf;
+  return;
+}
+

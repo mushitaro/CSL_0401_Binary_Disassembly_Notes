@@ -1,0 +1,60 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* This may be the angle task
+   also some suggestion it's 10ms task as ti_tau_nas is supposedly calculated on the 10ms task */
+
+void task_10ms(void)
+
+{
+  int iVar1;
+  
+  FUN_00017092();
+  FUN_00011238();
+  FUN_0002a7fc();
+  FUN_00010eec();
+  sa_we_st_calc();
+  FUN_00014fe4();
+  FUN_0001ca1c();
+  FUN_0001adb8();
+  FUN_0002329c();
+  FUN_00023586();
+  FUN_0001e530();
+  FUN_0001e5b8();
+  FUN_0001e87c();
+  FUN_0002aed6();
+  FUN_0002b2ea();
+  FUN_0002b6fe();
+  FUN_0002ba8a();
+  FUN_0001ebea();
+  FUN_0001d6a2();
+  FUN_0001dc42();
+  FUN_000207d2();
+  FUN_00022286();
+  FUN_000263da();
+  FUN_00027114();
+  FUN_000275ac();
+  ldp_calc();
+  FUN_00024848();
+  FUN_00025aa0();
+  FUN_00024750();
+  FUN_00025a28();
+  ask_filter_calc();
+  ti_engine_running();
+  FUN_00028814();
+  FUN_0003e030();
+  if (cfg_s_getriebetyp == 0x40) {
+    smg_10ms();
+    FUN_00029364();
+    can_smg_watchdog();
+    FUN_0003c60e();
+    iVar1 = (int)smg_ax_berg;
+    if (iVar1 < 0) {
+      iVar1 = iVar1 + 0xff;
+    }
+    _smg_ax_berg_dpr = (undefined2)((uint)iVar1 >> 8);
+  }
+  smg_dwf_update();
+  DAT_00fffa27 = 0xaa;
+  return;
+}
+

@@ -1,0 +1,19 @@
+
+void bootloader_increment_timer_tics(void)
+
+{
+  SYS_TIMERTICS_COUNTER = SYS_TIMERTICS_COUNTER + 1;
+  if (SYS_TIMERTICS_COUNTER % 1000 == 0) {
+    SYS_SEC_COUNTER = SYS_SEC_COUNTER + 1;
+  }
+  if (CPU_Identifier == 'S') {
+    FUN_0000130e();
+  }
+  if (CPU_Identifier == 'S') {
+    FUN_0000050c();
+  }
+  FUN_00001bfe();
+  SIM_SWSR = 0xaa;
+  return;
+}
+

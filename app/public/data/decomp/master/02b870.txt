@@ -1,0 +1,55 @@
+
+void tz_auss_intermittent_generator(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  ushort uVar3;
+  byte bVar5;
+  int iVar4;
+  bool bVar6;
+  
+  bVar6 = TZ_AUSS_ZYKLUS == '\0';
+  TZ_AUSS_ZYKLUS = TZ_AUSS_ZYKLUS - 1;
+  if (bVar6) {
+    TZ_AUSS_ZYKLUS = K_TZ_AUSS_BEREICH;
+    TZ_AUSS_ANZ = K_TZ_AUSS_ANZ;
+    TZ_AUSS_SEQ_ZAEHLER = TZ_AUSS_SEQ_ZAEHLER + 1;
+    if (zyl_count <= TZ_AUSS_SEQ_ZAEHLER) {
+      TZ_AUSS_SEQ_ZAEHLER = 0;
+    }
+  }
+  if (TZ_AUSS_ANZ == '\0') {
+    TZ_AUSS_MUSTER = DAT_00ffe62e;
+    return;
+  }
+  bVar5 = K_TZ_AUSS_ZYL;
+  if (K_TZ_AUSS_CFG != '5') {
+    if (K_TZ_AUSS_CFG != ':') {
+      if (K_TZ_AUSS_CFG == '?') {
+        uVar2 = DAT_00fffffe;
+        uVar3 = DAT_00fffffe;
+        uVar1 = (uint)uVar3 + SYS_TIMERTICS_COUNTER * uVar2;
+        if (K_TZ_AUSS_BEREICH == 0) {
+          iVar4 = 0;
+        }
+        else {
+          iVar4 = (uint)K_TZ_AUSS_BEREICH * (uVar1 / K_TZ_AUSS_BEREICH);
+        }
+        uVar1 = uVar1 - iVar4;
+        if (uVar1 < zyl_count) {
+          TZ_AUSS_MUSTER = ~('\x01' << (uVar1 & 0x3f));
+          goto LAB_0002b94a;
+        }
+      }
+      TZ_AUSS_MUSTER = DAT_00ffe62e;
+      goto LAB_0002b94a;
+    }
+    bVar5 = ~('\x01' << (TZ_AUSS_SEQ_ZAEHLER & 0x3f));
+  }
+  TZ_AUSS_MUSTER = DAT_00ffe62e & bVar5;
+LAB_0002b94a:
+  TZ_AUSS_ANZ = TZ_AUSS_ANZ + -1;
+  return;
+}
+

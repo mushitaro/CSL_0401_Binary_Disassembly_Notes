@@ -1,0 +1,38 @@
+
+void smg_racestart_target_update(void)
+
+{
+  ushort uVar3;
+  int iVar1;
+  undefined4 uVar2;
+  ushort uVar4;
+  short sVar5;
+  
+  if (0x96 < DAT_00ffdb08) {
+    smg_start_baseline_demand_update();
+    return;
+  }
+  DAT_00ffdbb2 = 4;
+  DAT_00ffdbe2 = 0;
+  uVar3 = (ushort)K_SMG_MOT_RS_T_HI;
+  uVar4 = (ushort)K_SMG_MOT_RS_T_LO;
+  iVar1 = abs((uint)N - (uint)DAT_00ffdbd8);
+  if (((200 < iVar1) || (DAT_00ffdc60 == 0)) || ((ushort)(uVar3 + uVar4) < DAT_00ffe638)) {
+    DAT_00ffe638 = 0;
+  }
+  sVar5 = 0;
+  if ((K_SMG_MOT_RS_T_LO < DAT_00ffe638) && (DAT_00ffe638 < (ushort)(uVar3 + uVar4))) {
+    sVar5 = K_SMG_MOT_RS_N_OFF;
+  }
+  DAT_00ffe638 = DAT_00ffe638 + 1;
+  uVar2 = smg_engine_speed_controller_step(sVar5 + DAT_00ffdb1e,DAT_00ffdc60);
+  DAT_00ffdbb6 = (short)uVar2;
+  if (DAT_00ffdb5a < (short)uVar2) {
+    DAT_00ffdbc2 = 0;
+    DAT_00ffdbb6 = DAT_00ffdb5a;
+  }
+  DAT_00ffdbb8 = DAT_00ffdbb6;
+  smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,K_SMG_ETA_RES_RS);
+  return;
+}
+

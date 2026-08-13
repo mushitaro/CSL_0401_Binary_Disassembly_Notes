@@ -1,0 +1,22 @@
+
+/* appears to be can message for knock sensor bank 1 */
+
+void can_tx_700(struct_rx_tx_frame *tx_frame_struct)
+
+{
+  byte bVar1;
+  byte *pbVar2;
+  byte abStack_c [8];
+  
+  bVar1 = 0;
+  pbVar2 = abStack_c;
+  do {
+    *pbVar2 = 0;
+    bVar1 = bVar1 + 1;
+    pbVar2 = pbVar2 + 1;
+  } while (bVar1 < 8);
+  FUN_0002a99c(abStack_c);
+  can_a_tx_frame_data(abStack_c,tx_frame_struct);
+  return;
+}
+

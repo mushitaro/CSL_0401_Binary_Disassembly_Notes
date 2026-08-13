@@ -1,0 +1,42 @@
+
+void can_b_tx_frame_data(byte *payload_data,struct_rx_tx_frame *tx_frame_struct)
+
+{
+  uint uVar1;
+  byte bVar2;
+  int iVar3;
+  byte *pbVar4;
+  
+  uVar1 = (uint)tx_frame_struct->slot_id;
+  can_b_control_message_table.message_block[uVar1 - 1].slot_control_2 = 0xfa;
+  iVar3 = 8;
+  pbVar4 = can_b_control_message_table.message_block[uVar1 - 1].data_payload;
+  do {
+    *pbVar4 = *payload_data;
+    iVar3 = iVar3 + -1;
+    pbVar4 = pbVar4 + 1;
+    payload_data = payload_data + 1;
+  } while (0 < iVar3);
+  bVar2 = tx_frame_struct->slot_state_table_entry_ptr[2];
+  if ((bVar2 & 2) != 0) {
+    if ((bVar2 & 4) == 0) {
+      bVar2 = 0xef;
+    }
+    else {
+      bVar2 = 0xdf;
+    }
+    can_b_control_message_table.message_block[uVar1 - 1].slot_control_2 = bVar2 & 0xf7;
+    can_b_control_message_table.message_block[uVar1 - 1].slot_control_1 = 0xbf;
+    return;
+  }
+  can_b_control_message_table.message_block[uVar1 - 1].slot_control_1 = 0x7f;
+  if ((bVar2 & 4) == 0) {
+    bVar2 = 0xef;
+  }
+  else {
+    bVar2 = 0xdf;
+  }
+  can_b_control_message_table.message_block[uVar1 - 1].slot_control_2 = bVar2 & 0xf7;
+  return;
+}
+

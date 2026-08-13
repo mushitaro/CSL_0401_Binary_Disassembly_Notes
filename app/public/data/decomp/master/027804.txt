@@ -1,0 +1,19 @@
+
+void km_disable_tpu_channels(void)
+
+{
+  word wVar1;
+  
+  tpu_set_channel_priority(10,0);
+  wVar1 = TPU_CIER;
+  TPU_CIER = wVar1 & 0xfbff;
+  KM_ST = KM_ST & 0xf9;
+  if (K_KM_FEN_VIRT_ENABLE < 2) {
+    tpu_set_channel_priority(11,0);
+    wVar1 = TPU_CIER;
+    TPU_CIER = wVar1 & 0xf7ff;
+    KM_FEN_VIRT = 0;
+  }
+  return;
+}
+

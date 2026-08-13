@@ -1,0 +1,92 @@
+
+char sk_tr_computer_core_tests(undefined4 param_1,undefined4 param_2,byte *param_3)
+
+{
+  char cVar1;
+  char cVar2;
+  byte *pbVar3;
+  byte local_14 [4];
+  byte local_10;
+  byte local_f;
+  byte local_e;
+  byte local_d;
+  char local_c;
+  char local_5;
+  
+  DAT_00ffda3c = 1;
+  cVar1 = '\x10';
+  pbVar3 = local_14;
+  do {
+    *pbVar3 = *param_3;
+    cVar1 = cVar1 + -1;
+    pbVar3 = pbVar3 + 1;
+    param_3 = param_3 + 1;
+  } while ('\0' < cVar1);
+  cVar1 = '\0';
+  cVar2 = '\x0f';
+  pbVar3 = local_14;
+  do {
+    cVar1 = *pbVar3 + cVar1;
+    cVar2 = cVar2 + -1;
+    pbVar3 = pbVar3 + 1;
+  } while ('\0' < cVar2);
+  if (cVar1 == local_5) {
+    if (DAT_00ffda39 == '\0') {
+      if (DAT_00ffda32 < local_14[0]) {
+        DAT_00ffda32 = local_14[0];
+      }
+      if (sk_stufe_egas_sk_prog_level_ < local_14[0]) {
+        sk_stufe_egas_sk_prog_level_ = local_14[0];
+      }
+      if (DAT_00ffda34 < local_14[1]) {
+        DAT_00ffda34 = local_14[1];
+      }
+      if (DAT_00ffda35 < local_14[2]) {
+        DAT_00ffda35 = local_14[2];
+      }
+      if (DAT_00ffda37 < local_14[3]) {
+        DAT_00ffda37 = local_14[3];
+      }
+      if (DAT_00ffda33 < local_10) {
+        DAT_00ffda33 = local_10;
+      }
+      if (DAT_00ffda36 < local_f) {
+        DAT_00ffda36 = local_f;
+      }
+      if (PCNTRL_RESET_COUNT < local_e) {
+        PCNTRL_RESET_COUNT = local_e;
+      }
+    }
+    else {
+      DAT_00ffda39 = DAT_00ffda39 + -1;
+    }
+    cVar1 = sk_tr_run_computer_core_test((int)local_14);
+    if (DAT_00ffda43 != '\0') {
+      if ((local_c == DAT_00ffda40) && ((uint)local_d == DAT_00ffda41 + 1)) {
+        DAT_00ffda42 = 0;
+        DAT_00ffda43 = '\0';
+      }
+      else {
+        DAT_00ffda45 = DAT_00ffda45 + '\x01';
+        if (DAT_00ffda42 < K_SK_TR_MANIPULATION) {
+          DAT_00ffda42 = DAT_00ffda42 + 1;
+        }
+      }
+    }
+    if ((K_SK_TR_TEST != 0) &&
+       ((DAT_00ffda44 = DAT_00ffda44 + 1, K_SK_TR_TEST <= DAT_00ffda44 || (DAT_00ffda43 != '\0'))))
+    {
+      cVar1 = cVar1 + '\x01';
+      DAT_00ffda43 = '\x01';
+      DAT_00ffda40 = local_c;
+      DAT_00ffda41 = local_d;
+      DAT_00ffda44 = 0;
+    }
+  }
+  else {
+    DAT_00ffda45 = DAT_00ffda45 + '\x01';
+    cVar1 = -1;
+  }
+  return cVar1;
+}
+

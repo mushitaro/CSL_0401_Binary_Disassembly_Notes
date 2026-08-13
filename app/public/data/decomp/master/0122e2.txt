@@ -1,0 +1,9 @@
+
+void tpu_segm_channel_reset(void)
+
+{
+  tpu_disable_channel(1);
+  tpu_segm_channel_init();
+  return;
+}
+

@@ -1,0 +1,14 @@
+
+void can_tx_messages(void)
+
+{
+  can_a_tx(0);
+  can_a_tx(1);
+  can_a_tx(2);
+  if (((cfg_m_getriebetyp == 0x40) && ((cfg_m_baureihe & 0xf8) == 0x20)) &&
+     ((DAT_00ffd953 & 1) == 1)) {
+    can_a_tx(3);
+  }
+  return;
+}
+

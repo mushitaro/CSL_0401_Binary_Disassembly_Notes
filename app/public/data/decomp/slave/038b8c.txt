@@ -1,0 +1,71 @@
+
+void smg_start_window_step(ushort param_1)
+
+{
+  short sVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  undefined4 uVar5;
+  ushort uVar6;
+  byte bVar7;
+  
+  bVar7 = 0x80;
+  if (param_1 == 0) {
+    DAT_00ffdbbe = DAT_00ffdbb6;
+    DAT_00ffdbe2 = K_SMG_MOT_NL_T_MAX;
+    DAT_00ffdbc2 = 0;
+    DAT_00ffdbd8 = N;
+    DAT_00ffdb4a = N;
+    DAT_00ffe632 = 0;
+  }
+  uVar6 = (ushort)(((uint)param_1 << 7) / (uint)DAT_00ffdc62);
+  if (0x80 < uVar6) {
+    uVar6 = 0x80;
+  }
+  uVar2 = klu_bint((&PTR_KL_SMG_MOT_M_AB_SR_00038536)[(short)(DAT_00ffdb4c & 3)],(byte)uVar6);
+  DAT_00ffdbb4 = (ushort)uVar2 & 0xff;
+  iVar3 = (uint)DAT_00ffdbb4 * (int)DAT_00ffdbbe;
+  iVar4 = iVar3 + 0x40;
+  if (iVar3 < -0x40) {
+    iVar4 = iVar3 + 0xbf;
+  }
+  DAT_00ffdbb6 = (short)(iVar4 >> 7);
+  if ((((DAT_00ffdb4c & 1) != 0) && (DAT_00ffdb5a < DAT_00ffdbb6)) &&
+     (DAT_00ffdbb6 = DAT_00ffdb5a, DAT_00ffdb5a < 0)) {
+    DAT_00ffdbb6 = 0;
+  }
+  if ((((DAT_00ffdb01 & 8) == 0) && (DAT_00ffdc16 == 0)) &&
+     (((DAT_00ffdb48 & 0x10) != 0 || (DAT_00ffe632 != 0)))) {
+    uVar6 = smg_target_rpm_planner(0);
+    sVar1 = DAT_00ffe632;
+    if ((((DAT_00ffdb6c & 1) == 0) || ((DAT_00ffdb6c & 2) == 0)) &&
+       (((DAT_00ffdb08 <= N || (uVar6 <= DAT_00ffdb08)) &&
+        ((((DAT_00ffdb08 <= uVar6 || (N <= DAT_00ffdb08)) && (K_SMG_N_NULL <= DAT_00ffdb32)) &&
+         (DAT_00ffdbb2 != '\x04')))))) {
+      DAT_00ffdb4a = N;
+      DAT_00ffe632 = DAT_00ffe632 + 1;
+      smg_engine_speed_regulator_step(sVar1);
+      return;
+    }
+    DAT_00ffdbb2 = 4;
+    if (((DAT_00ffdb6c & 1) != 0) && (DAT_00ffdb4a < (ushort)(DAT_00ffdb08 + K_SMG_N_NULL))) {
+      DAT_00ffdb4a = DAT_00ffdb08 + K_SMG_N_NULL;
+    }
+    DAT_00ffe632 = DAT_00ffe632 + 1;
+    uVar5 = smg_engine_speed_controller_step(DAT_00ffdb4a,sVar1);
+    DAT_00ffdbb6 = (short)uVar5;
+  }
+  else {
+    DAT_00ffdb4a = N;
+    DAT_00ffdbd8 = N;
+    DAT_00ffdbb2 = 1;
+    if (K_SMG_____DAT_0008a8a2 < DAT_00ffdc62) {
+      bVar7 = 0x81;
+    }
+  }
+  DAT_00ffdbb8 = DAT_00ffdbb6;
+  smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb6,bVar7);
+  return;
+}
+

@@ -1,0 +1,94 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void wdk_init(void)
+
+{
+  byte bVar1;
+  
+  DAT_00ffecda = 0;
+  WDK_AUSWAHL = 1;
+  WDK_A0_PREDRIVE_ZAEHLER = K_WDK_A0_ANZAHL;
+  WDK2_A0_PREDRIVE_ZAEHLER = K_WDK_A0_ANZAHL;
+  WDK_A100_ZAEHLER = K_WDK_A100_ANZAHL;
+  WDK1_RF_IO_RING = 0xffff;
+  WDK2_RF_IO_RING = 0xffff;
+  WDK1_RF_IO = 0x10;
+  WDK2_RF_IO = 0x10;
+  WDK_RF_NIO = 0;
+  WDK_RF_IO_DELTA = 0;
+  WDK_RF_ED_CNT = 0;
+  WDK1_SPRING_DELTA = 0;
+  WDK2_SPRING_DELTA = 0;
+  WDK_SPRING_NIO = 0;
+  DAT_00ffecc8 = 0;
+  DAT_00ffecca = 0;
+  WDK_WELLE_NIO = 0;
+  WDK1_A0_MIN = 0xffff;
+  WDK2_A0_MIN = 0;
+  WDK1_A0_MAX = 0;
+  WDK2_A0_MAX = 0xffff;
+  DAT_00ffece0 = 0;
+  DAT_00ffece2 = 0;
+  WDK1_A100_MIN = 0xffff;
+  WDK2_A100_MIN = 0;
+  WDK1_A100_MAX = 0;
+  WDK2_A100_MAX = 0xffff;
+  DAT_00ffece4 = 0;
+  DAT_00ffece6 = 0;
+  DAT_00ffecd4 = 0;
+  DAT_00ffecd8 = 0;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    WDK_MAX_DIFF_ADAPT = 0;
+    WDK_ADAPT = 0;
+  }
+  if (((((EE_ERROR_MASK & 0x1101) != 0) || (WDK1_A0 <= K_WDK1_A0_MIN)) || (K_WDK1_A0_MAX <= WDK1_A0)
+      ) || ((K_WDK2_A0_MIN <= WDK2_A0 || (WDK2_A0 <= K_WDK2_A0_MAX)))) {
+    WDK1_A0 = K_WDK1_A0_MIN;
+    WDK2_A0 = K_WDK2_A0_MIN;
+    WDK_ADAPT = WDK_ADAPT | 0x30;
+  }
+  if ((((EE_ERROR_MASK & 0x1101) != 0) || (WDK1_NORM <= K_WDK1_NORM_MIN)) ||
+     ((K_WDK1_NORM_MAX <= WDK1_NORM ||
+      ((WDK2_NORM <= K_WDK2_NORM_MIN || (K_WDK2_NORM_MAX <= WDK2_NORM)))))) {
+    WDK1_NORM = K_WDK1_NORM_MAX;
+    WDK2_NORM = K_WDK2_NORM_MAX;
+    WDK_ADAPT = WDK_ADAPT | 1;
+  }
+  DAT_00ffecd0 = WDK1_A0;
+  DAT_00ffecd2 = WDK2_A0;
+  DAT_00ffeccc = WDK1_A0 << 6;
+  DAT_00ffecce = WDK2_A0 << 6;
+  WDK1_A0_ZAEHLER = K_WDK_A0_ZAEHLER;
+  WDK2_A0_ZAEHLER = K_WDK_A0_ZAEHLER;
+  wdk_word_2 = 0;
+  wdk_word_1 = 0;
+  WDK_SEGM = 0;
+  WDK_WORD = 0;
+  D_WDK_WORD = 0;
+  bVar1 = RESET_STATUS;
+  if ((bVar1 & 0x3f) == 0) {
+    if ((WDK_MODE_DPR == 0) || (5 < WDK_MODE_DPR)) {
+      WDK_MODE = 0;
+    }
+    else {
+      WDK_MODE = WDK_MODE_DPR;
+    }
+  }
+  WDK_ZUSTAND = 0;
+  WDK_ZUSTAND_DPR = 0;
+  DAT_00ffecd9 = 0;
+  WDK1_ABS = WDK1_A0;
+  _WDK1_ABS_DPR = WDK1_A0;
+  WDK2_ABS = WDK2_A0;
+  _WDK2_ABS_DPR = WDK2_A0;
+  WDK1 = 0;
+  WDK1_DPR = 0;
+  WDK2 = 0;
+  _WDK2_DPR = 0;
+  WDK = 0;
+  WDK_MODE_DPR = WDK_MODE;
+  FUN_00018e7c();
+  return;
+}
+

@@ -1,0 +1,35 @@
+
+void load_zyl_consts_to_ram(void)
+
+{
+  char cVar1;
+  word *pwVar2;
+  byte *pbVar3;
+  byte *pbVar4;
+  word *pwVar5;
+  undefined2 *local_c;
+  undefined2 *local_8;
+  
+  local_8 = &DAT_0003cd1a;
+  local_c = &DAT_00ffe50e;
+  zyl_count = 6;
+  cVar1 = 10;
+  pwVar2 = &WORD_0003cd2e;
+  pbVar3 = zyl_firing_order_table;
+  pbVar4 = const_firing_order;
+  pwVar5 = &DAT_00ffe522;
+  do {
+    *local_c = *local_8;
+    *pwVar5 = *pwVar2;
+    *pbVar3 = *pbVar4;
+    cVar1 = cVar1 + -1;
+    pwVar2 = pwVar2 + 1;
+    pbVar3 = pbVar3 + 1;
+    pbVar4 = pbVar4 + 1;
+    pwVar5 = pwVar5 + 1;
+    local_c = local_c + 1;
+    local_8 = local_8 + 1;
+  } while (cVar1 != '\0');
+  return;
+}
+

@@ -1,0 +1,77 @@
+
+uint tmot_calc(void)
+
+{
+  uint uVar1;
+  ushort uVar4;
+  int iVar2;
+  uint uVar3;
+  
+  uVar4 = tmot_ad;
+  uVar1 = klu_wint(&KL_TMOT_NTC.sizeX,uVar4);
+  TMOT_ROH = (ushort)uVar1;
+  uVar4 = FUN_0001b8f4(TMOT_ROH);
+  tmot_filter = PT1_Filter_US(uVar4,tmot_filter,K_TMOT_TAU);
+  uVar1 = (uint)uVar4;
+  iVar2 = uVar1 + 0x40;
+  if (SCARRY4(uVar1,0x40)) {
+    iVar2 = uVar1 + 0xbf;
+  }
+                    /* This section is additional to 1801 */
+  tmot_m = (short)(iVar2 >> 7) * 10 + -480;
+  uVar1 = (uint)tmot_filter;
+  iVar2 = uVar1 + 0x40;
+  if (SCARRY4(uVar1,0x40)) {
+    iVar2 = uVar1 + 0xbf;
+  }
+  uVar1 = iVar2 >> 7;
+  TMOT = (byte)uVar1;
+  if (((TMOT_ED & 0x40) == 0) && ((TMOT_ST1 & 0x10) == 0)) {
+    uVar3 = (tmot_filter + 0x30) / 0x60;
+    tmot_can = (undefined1)uVar3;
+    if (0xfe < (ushort)uVar3) {
+      tmot_can = 0xfe;
+    }
+  }
+  else {
+    tmot_can = 0xff;
+    uVar3 = uVar1;
+  }
+  if ((ZUSTAND_MOTOR & S) != 0) {
+    if ((TMOT < K_TMOT_STA) ||
+       (uVar3 = CONCAT31((int3)(uVar3 >> 8),TMOT_ABSTELL), TMOT_ABSTELL < K_TMOT_STA)) {
+      uVar3 = (uint)K_TMOT_STA - (uint)K_TMOT_STA_HYS;
+      if ((int)(uVar1 & 0xff) < (int)uVar3) {
+        TMOT_STA = '\0';
+      }
+    }
+    else {
+      TMOT_STA = '\x01';
+    }
+  }
+  if (((ZUSTAND_MOTOR & Start) != 0) &&
+     (uVar3 = CONCAT31((int3)(uVar3 >> 8),TMOT_ABSTELL), TMOT_ABSTELL < K_TMOT_STA)) {
+    TMOT_STA = '\x02';
+  }
+  uVar3 = CONCAT31((int3)(uVar3 >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+  if ((ZUSTAND_MOTOR & (VL|TL|LL)) != 0) {
+    if (TMOT_STA == '\x02') {
+      uVar3 = (uint)K_TMOT_STA_TIME << 10;
+      if (SYS_TIMERTICS_COUNTER - n_start_exit_time <= uVar3) goto LAB_0001b7f2;
+    }
+    else {
+      if (K_TMOT_STA <= TMOT) {
+        TMOT_STA = '\x01';
+      }
+      uVar3 = (uint)K_TMOT_STA - (uint)K_TMOT_STA_HYS;
+      if ((int)uVar3 <= (int)(uVar1 & 0xff)) goto LAB_0001b7f2;
+    }
+    TMOT_STA = '\0';
+  }
+LAB_0001b7f2:
+  if ((ZUSTAND_MOTOR & KI.15 aus) != 0) {
+    TMOT_STA = '\0';
+  }
+  return uVar3;
+}
+

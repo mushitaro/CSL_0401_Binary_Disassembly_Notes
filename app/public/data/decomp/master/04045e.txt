@@ -1,0 +1,46 @@
+
+uint qsm_submit_transfer(int *qsm_transfer_descriptor)
+
+{
+  undefined1 extraout_var;
+  byte bVar1;
+  uint uVar2;
+  int iVar3;
+  struct_qsm_transfer_queue_item *psVar4;
+  
+  bVar1 = set_status_register(0x2700);
+  if ((qsm_transfer_busy & 0x80) == 0) {
+    qsm_transfer_busy = qsm_transfer_busy | 0x80;
+    *(byte *)(qsm_transfer_descriptor + 3) = *(byte *)(qsm_transfer_descriptor + 3) | 0x80;
+    set_status_register(CONCAT11(extraout_var,bVar1));
+    qsm_start_transfer(qsm_transfer_descriptor);
+    uVar2 = 0;
+  }
+  else {
+    iVar3 = 4;
+    psVar4 = &qsm_transfer_queue;
+    if (qsm_queue_count != '\0') {
+      iVar3 = 4;
+      do {
+        if (psVar4->descriptor == (int *)0x0) break;
+        psVar4 = psVar4 + 1;
+        iVar3 = iVar3 + -1;
+      } while (0 < iVar3);
+    }
+    if (iVar3 == 0) {
+      DAT_00ffe5e0 = DAT_00ffe5e0 + 1;
+      DAT_00ffe5df = DAT_00ffe5df | 0x80;
+      uVar2 = 0xffffffff;
+    }
+    else {
+      psVar4->descriptor = qsm_transfer_descriptor;
+      psVar4->priority = *(byte *)(qsm_transfer_descriptor[1] + 0xd);
+      *(byte *)(qsm_transfer_descriptor + 3) = *(byte *)(qsm_transfer_descriptor + 3) | 0x80;
+      qsm_queue_count = qsm_queue_count + 1;
+      uVar2 = 0;
+    }
+    set_status_register(CONCAT11(extraout_var,bVar1));
+  }
+  return uVar2;
+}
+

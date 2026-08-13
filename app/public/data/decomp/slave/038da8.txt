@@ -1,0 +1,92 @@
+
+void smg_engine_speed_regulator_step(short param_1)
+
+{
+  byte bVar1;
+  ushort uVar5;
+  undefined4 uVar2;
+  short sVar6;
+  int iVar3;
+  int iVar4;
+  short sVar7;
+  ushort uVar8;
+  short sVar9;
+  
+  DAT_00ffdbb2 = 2;
+  uVar5 = smg_target_rpm_planner(param_1);
+  if ((((DAT_00ffdb00 & 8) == 0) ||
+      (((DAT_00ffdb6c & 1) != 0 &&
+       ((DAT_00ffdbde < N || ((1 < DAT_00ffdc19 && (DAT_00ffdb5a < 0x2ee)))))))) ||
+     (((DAT_00ffdb6c & 1) == 0 && (N < DAT_00ffdbde)))) {
+    DAT_00ffdb72 = DAT_00ffdb72 & 0xfd;
+  }
+  else {
+    DAT_00ffdb72 = DAT_00ffdb72 | 2;
+  }
+  uVar8 = N_BEGRENZER;
+  if ((((DAT_00ffdb6c & 1) == 0) && ((SCHALT_M_ST & 0x80) != 0)) && (DAT_00ffdc19 == 0)) {
+    uVar8 = K_SMG_____DAT_0008a853 + N_BEGRENZER;
+  }
+  if ((uVar8 <= n_zie) || (uVar8 <= DAT_00ffdb08)) {
+    DAT_00ffdb72 = DAT_00ffdb72 | 2;
+  }
+  abs((int)(short)uVar5 - (uint)N);
+  uVar2 = smg_engine_speed_controller_step(uVar5,param_1);
+  sVar6 = (short)uVar2;
+  sVar9 = -8000;
+  sVar7 = 8000;
+  bVar1 = DAT_00ffdbb3 & 0xf7;
+  if (((DAT_00ffdb00 & 8) == 0) || ((DAT_00ffdbb3 & 4) != 0)) {
+    sVar7 = DAT_00ffdb5a;
+    DAT_00ffdbb3 = bVar1;
+    if (DAT_00ffdb5a <= sVar6) {
+      DAT_00ffdbb3 = bVar1 | 8;
+    }
+  }
+  else if (((DAT_00ffdb6c & 0x200) == 0) && ((DAT_00ffdb3a == '\x03' || (DAT_00ffdb3a == '\x04'))))
+  {
+    sVar7 = K_SMG_MOT_N_REG_M_MAX -
+            (short)((int)((uint)K_SMG_MOT_N_REG_M_MAX * (uint)DAT_00ffdc60) /
+                   (int)(uint)K_SMG_MOT_N_REG_T_MAX);
+    if (sVar7 < 0) {
+      sVar7 = 0;
+    }
+    DAT_00ffdbb3 = bVar1;
+    if ((DAT_00ffdb4c & 1) == 0) {
+      sVar9 = -sVar7;
+    }
+  }
+  else {
+    DAT_00ffdbb3 = bVar1;
+    if (V < K_SMG_____DAT_0008a883) {
+      uVar2 = kfu_bint(&KF_SMG_____DAT_0008aeb4.sizeX,(byte)(DAT_00ffdb54 / 10),
+                       DAT_00ffdb12__SMGCAN_PROGRAMMINFO_);
+      sVar7 = ((ushort)uVar2 & 0xff) * 100;
+    }
+  }
+  DAT_00ffdbec = sVar9;
+  if (sVar6 < DAT_00ffdbec) {
+    sVar6 = DAT_00ffdbec;
+  }
+  DAT_00ffdbb6 = sVar6;
+  if (sVar7 < sVar6) {
+    DAT_00ffdbb6 = sVar7;
+  }
+  iVar3 = (int)(short)(ushort)DAT_00ffdb96 * (int)DAT_00ffdb5a;
+  iVar4 = iVar3 + 0x40;
+  if (iVar3 < -0x40) {
+    iVar4 = iVar3 + 0xbf;
+  }
+  DAT_00ffdbb8 = (short)(iVar4 >> 7);
+  if (DAT_00ffdbb8 < DAT_00ffdbb6) {
+    DAT_00ffdbb8 = DAT_00ffdbb6;
+  }
+  bVar1 = DAT_00ffdbe4;
+  if (DAT_00ffdb3a == '\x02') {
+    bVar1 = K_SMG_ETA_RES_SCHA;
+  }
+  DAT_00ffdbea = sVar7;
+  smg_eta_from_torque_limits_update(DAT_00ffdbb6,DAT_00ffdbb8,bVar1);
+  return;
+}
+

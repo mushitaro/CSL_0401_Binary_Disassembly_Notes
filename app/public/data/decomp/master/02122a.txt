@@ -1,0 +1,26 @@
+
+void tan_m_adj_init(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+                    /* Only in 0401
+                        */
+  uVar1 = (uint)TMOT_ROH;
+  iVar2 = uVar1 + 0x40;
+  if (SCARRY4(uVar1,0x40)) {
+    iVar2 = uVar1 + 0xbf;
+  }
+  tmot_m = (short)(iVar2 >> 7) * 10 + -480;
+  tmot_m__n_1_ = tmot_m * 100;
+  if ((EE_ERROR_MASK & 0x1101) != 0) {
+    tan_m_adj__t_1_ = (ushort)TAN * 10 + -480;
+  }
+  tan_m_adj = (ushort)TAN * 10 + -480;
+  tan_m_init_timer = k_tanm_init_delay;
+  tan_m_adj_state = 0;
+  tan_m_adj_correction_sum = 0;
+  return;
+}
+

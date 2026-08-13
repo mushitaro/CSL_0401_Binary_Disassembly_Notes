@@ -1,0 +1,44 @@
+
+int tz_sa_calc(void)
+
+{
+  short sVar2;
+  int iVar1;
+  short sVar3;
+  
+  if (K_TZ_SA_CONTROL == '\0') {
+    TZ_SA_FLAG = 0;
+LAB_0002ada0:
+    TZ_SA_DELTA = 0;
+  }
+  else {
+    if ((((SA_WE_ST & 2) == 0) && ((SA_WE_ST & 8) == 0)) || ((MD_ST & 2) == 0)) {
+      TZ_SA_FLAG = 0;
+      if ((TZ_SA_DELTA == 0) || (DAT_00ffe63c != '\0')) goto LAB_0002ada2;
+      sVar2 = K_TZ_ZWB_WE_HARD;
+      if ((DYN_ST & 1) == 0) {
+        sVar2 = kls_wint(&KL_TZ_ZWB_WE_SOFT.sizeX,N);
+      }
+      iVar1 = (int)sVar2 + (int)TZ_SA_DELTA;
+      if (iVar1 != 0 && SCARRY4((int)sVar2,(int)TZ_SA_DELTA) == iVar1 < 0) goto LAB_0002ada0;
+    }
+    else {
+      sVar3 = (TZ_MIN - TZ_ETA_BASIS) * 0x10;
+      sVar2 = kls_wint(&KL_TZ_ZWB_SA.sizeX,N);
+      if ((int)sVar2 + (int)TZ_SA_DELTA <= (int)sVar3) {
+        TZ_SA_FLAG = 1;
+        DAT_00ffe63c = K_TZ_WE_SEGM;
+        TZ_SA_DELTA = sVar3;
+        goto LAB_0002ada2;
+      }
+    }
+    TZ_SA_DELTA = sVar2 + TZ_SA_DELTA;
+  }
+LAB_0002ada2:
+  iVar1 = (int)TZ_SA_DELTA;
+  if (iVar1 < 0) {
+    iVar1 = iVar1 + 0xf;
+  }
+  return iVar1 >> 4;
+}
+

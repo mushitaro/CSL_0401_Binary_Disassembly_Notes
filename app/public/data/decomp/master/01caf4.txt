@@ -1,0 +1,70 @@
+
+uint tkatm_calc(void)
+
+{
+  short sVar1;
+  undefined4 in_D0;
+  uint uVar2;
+  int iVar3;
+  KL_6_2byte_2byte *curve;
+  
+  uVar2 = CONCAT31((int3)((uint)in_D0 >> 8),ZUSTAND_MOTOR) & 0xffffff1c;
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    if (((DAT_00ffed98 & 1) != 0) &&
+       ((T_RELATIV_ST == '\0' &&
+        (uVar2 = CONCAT22((short)((uint)in_D0 >> 0x10),CAN_TEL_EMPF) & 0xffff0080,
+        (CAN_TEL_EMPF & 0x80) != 0)))) {
+      uVar2 = klu_wint(&KL_TKATM_STAND.sizeX,T_RELATIV - T_MOTOR_AUS);
+      DAT_00ffed8e = (TAN - 0x30) * 0x10000 +
+                     (uVar2 & 0xffff) * ((int)(short)DAT_00ffed92 - (TAN - 0x30)) * 0x40;
+      iVar3 = DAT_00ffed8e + 0x8000;
+      if (DAT_00ffed8e < -0x8000) {
+        iVar3 = DAT_00ffed8e + 0x17fff;
+      }
+      uVar2 = iVar3 >> 0x10;
+      TKATM_OEX = (short)((uint)iVar3 >> 0x10);
+      DAT_00ffed94 = 0;
+      TKATM_EX = 0;
+      TKATM = TKATM_OEX;
+    }
+    return uVar2;
+  }
+  sVar1 = TABG - TKATM_OEX;
+  if (TKATM_OEX < TABG) {
+    curve = &KL_TKATM_AUFHEIZ;
+  }
+  else {
+    if (TKATM_OEX <= TABG) goto LAB_0001cb78;
+    curve = &KL_TKATM_ABKUEHL;
+  }
+  uVar2 = klu_wint(&curve->sizeX,ML);
+  DAT_00ffed8e = (int)sVar1 * uVar2 + DAT_00ffed8e;
+LAB_0001cb78:
+  TKATM_OEX = (short)((uint)(DAT_00ffed8e + 0x8000) >> 0x10);
+  if (DAT_00ffed8e < -0x8000) {
+    TKATM_OEX = (short)((uint)(DAT_00ffed8e + 0x17fff) >> 0x10);
+  }
+  if ((K_TKATM_ANSPRING < TKATM_OEX) && (TKATM_EX < K_TKATM_EXOTHERM_MAX)) {
+    if (DAT_00ffed94 + K_TKATM_EXO_DELT_AUF < (uint)K_TKATM_EXOTHERM_MAX * 0x10000) {
+      DAT_00ffed94 = K_TKATM_EXO_DELT_AUF + DAT_00ffed94;
+    }
+    else {
+      DAT_00ffed94 = (uint)K_TKATM_EXO_DELT_AUF << 0x10;
+    }
+    TKATM_EX = (byte)(DAT_00ffed94 + 0x8000 >> 0x10);
+  }
+  if (((int)TKATM_OEX < (int)((int)K_TKATM_ANSPRING - (uint)K_TKATM_AUS_HYS)) && (TKATM_EX != 0)) {
+    if (DAT_00ffed94 == K_TKATM_EXO_DELT_AB) {
+      DAT_00ffed94 = 0;
+      TKATM_EX = 0;
+    }
+    else {
+      DAT_00ffed94 = DAT_00ffed94 - K_TKATM_EXO_DELT_AB;
+      TKATM_EX = (byte)(DAT_00ffed94 + 0x8000 >> 0x10);
+    }
+  }
+  TKATM = TKATM_OEX + (ushort)TKATM_EX;
+  DAT_00ffed92 = TKATM;
+  return (uint)TKATM;
+}
+

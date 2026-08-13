@@ -1,0 +1,63 @@
+
+short llr_n_soll_calc(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  if (((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || ((LFR_FLAGS & 1) != 0)) {
+    uVar2 = klu_wint(&KL_LFR_NSOLL_START.sizeX,(ushort)TMOT);
+    LFR_N_N_STAT = (ushort)uVar2;
+  }
+  else {
+    uVar1 = klu_wint(&KL_LFR_NSOLL_GRUND.sizeX,(ushort)TMOT);
+    uVar2 = uVar1 & 0xffff;
+    if (DAT_00ffea12 != '\0') {
+      if (((uint)K_LFR_T_SEIT_START < (SYS_TIMERTICS_COUNTER - n_start_exit_time) * 10 >> 10) ||
+         ((ZUSTAND_MOTOR & (VL|TL|LL)) == 0)) {
+        DAT_00ffea0e = DAT_00ffea0e + (uint)K_LFR_DELTA_N_ZYKLUS * -0x100;
+        if (DAT_00ffea0e < 1) {
+          DAT_00ffea12 = '\0';
+          DAT_00ffea0e = 0;
+        }
+      }
+      else {
+        uVar2 = klu_wint(&KL_LFR_NSOLL_OFFSET.sizeX,(ushort)TMOT_START);
+        DAT_00ffea0e = uVar2 << 0x10;
+      }
+      LFR_N_N_OFFSET = (short)((uint)DAT_00ffea0e >> 0x10);
+      uVar2 = (uint)(ushort)(LFR_N_N_OFFSET + (short)uVar1);
+    }
+    if (((SCHALTER_CAN & 4) != 0) && ((ushort)uVar2 < K_LFR_NSOLL_AC)) {
+      uVar2 = (uint)K_LFR_NSOLL_AC;
+    }
+    if ((((SK_TI_CONTR & 1) != 0) || ((DAT_00ffda34 & 1) != 0)) && ((ushort)uVar2 < K_LFR_NSOLL_SK))
+    {
+      uVar2 = (uint)K_LFR_NSOLL_SK;
+    }
+    if (((edk_ds2_st & 1) != 0) && ((ushort)uVar2 < k_lfr_nsoll_ds2_min)) {
+      uVar2 = (uint)k_lfr_nsoll_ds2_min;
+    }
+    if (((TOG_FLAG & 4) != 0) && ((TOG_ED & 0x40) == 0)) {
+      uVar1 = klu_wint(&KL_LFR_N_TOG.sizeX,(ushort)TOEL);
+      if ((ushort)uVar2 < (ushort)uVar1) {
+        uVar2 = uVar1 & 0xffff;
+      }
+    }
+    if ((edk_ds2_st & 4) != 0) {
+      uVar2 = (uint)DAT_00ffef10;
+    }
+    LFR_N_N_STAT = (ushort)uVar2;
+    if ((NMAX_SEIT_START < K_LFR_LM_SCHWELLE) &&
+       (uVar2 < (uint)K_LFR_NSOLL_LM_OFFSET + (uint)K_LFR_LM_SCHWELLE)) {
+      LFR_N_N_STAT = K_LFR_NSOLL_LM_OFFSET + K_LFR_LM_SCHWELLE;
+    }
+  }
+  if (NMAX_SEIT_START < N) {
+    NMAX_SEIT_START = N;
+  }
+  LFR_N_N_SOLL = PT1_Filter_US(LFR_N_N_STAT,LFR_N_N_SOLL,LFR_N_TAU_NSOLL);
+  LLR_N_SOLL = LFR_N_N_SOLL;
+  return LFR_N_N_SOLL - N;
+}
+

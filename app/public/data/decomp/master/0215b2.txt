@@ -1,0 +1,19 @@
+
+/* this function runs in the 1 second (background) task. Ah but the function it is part of has a do
+   while loop until the dme is rebooted. what this is is measuring the variance in ambient between
+   P_UMG_FILTER and p_kad_filter so that it can take the offset into account. */
+
+void p_saug_error_calc(void)
+
+{
+  short sVar1;
+  
+                    /* 0401 Specific */
+  sVar1 = P_UMG_FILTER - p_saug_no_filter;
+  if (((((P_UMG_ED & 0x40) == 0) && ((p_saug_st & 2) == 0)) && (k_p_saug_error_min < sVar1)) &&
+     (sVar1 < k_p_saug_error_max)) {
+    p_saug_error = sVar1;
+  }
+  return;
+}
+

@@ -1,0 +1,21 @@
+
+void CSL_Flap_Get_Open_RPM_FUN_00016080(void)
+
+{
+  KL_8_2byte_2byte *pKVar1;
+  word *iVar1;
+  
+  if ((SCHALT_M_ST & 1) == 0) {
+    if ((SCHALT_M_ST & 1) != 0) {
+      return;
+    }
+    pKVar1 = &KL__CSL_Flap_Open_Komfort__0401_DAT0008a228;
+  }
+  else {
+    pKVar1 = &KL__CSL_Flap_Open_Sport__0401_DAT0008a206;
+  }
+  iVar1 = pKVar1->y;
+  ask_n_aktiv = iVar1[(short)(ushort)GANG];
+  return;
+}
+

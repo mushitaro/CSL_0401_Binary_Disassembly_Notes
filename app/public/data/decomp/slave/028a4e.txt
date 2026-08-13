@@ -1,0 +1,17 @@
+
+void ll_bank_init(void)
+
+{
+  LL_NZYL_ANZ = (ushort)K_LL_N_ANZ * (ushort)zyl_count;
+  if (zyl_count == 6) {
+    LL_BANK = 3;
+  }
+  else {
+    LL_BANK = 4;
+  }
+  LL_ADA_ANZ = 0;
+  LLSYNC_ST = 0;
+  LL_CASE = 0;
+  return;
+}
+

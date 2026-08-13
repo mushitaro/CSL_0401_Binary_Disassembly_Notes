@@ -1,0 +1,18 @@
+
+/* Flap Open Event Handler
+   - Drives the actuator in the "open" direction for a calibrated duration (event timer).
+   - When timer expires, stops actuator output and sets the "flap open/actuated" state flag. */
+
+void ask_flap_driver_open(void)
+
+{
+  if (ask_flap_driver_timer != 0) {
+    ask_flap_driver_write(-k_ask_flap_driver_value);
+    ask_flap_driver_timer = ask_flap_driver_timer + -1;
+    return;
+  }
+  ask_flap_driver_write(0);
+  ask_zustand_dpr = ask_zustand_dpr | 1;
+  return;
+}
+

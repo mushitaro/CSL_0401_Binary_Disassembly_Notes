@@ -1,0 +1,57 @@
+
+void obd_monitor_tests(void)
+
+{
+  byte bVar1;
+  short sVar2;
+  
+  if (CPU_Identifier == 'M') {
+    sVar2 = obd_check_monitor(&obd_monitor_sap,4);
+    bVar1 = DAT_0003a28e;
+    if ((sVar2 == 0) && (FF_RDY = FF_RDY & 0xfff7, (OBD_ACT_MASK & 8) == 0)) {
+      OBD_ACT_MASK = OBD_ACT_MASK | 8;
+      FF_RD8 = FF_RD8 + 1;
+    }
+  }
+  else {
+    sVar2 = obd_check_monitor(&obd_monitor_cat_protect,2);
+    if ((sVar2 == 0) && (FF_RDY = FF_RDY & 0xfffe, (OBD_ACT_MASK & 1) == 0)) {
+      OBD_ACT_MASK = OBD_ACT_MASK | 1;
+      FF_RD1 = FF_RD1 + 1;
+    }
+    sVar2 = obd_check_monitor(&obd_monitor_dtml,3);
+    if ((sVar2 == 0) && (DAT_00ffd861 = DAT_00ffd861 | 1, (OBD_ACT_MASK & 2) == 0)) {
+      OBD_ACT_MASK = OBD_ACT_MASK | 2;
+      FF_RD3 = FF_RD3 + 1;
+    }
+    sVar2 = obd_check_monitor(&DAT_0003a296,2);
+    if (sVar2 == 0) {
+      if ((OBD_ACT_MASK & 0x80) == 0) {
+        OBD_ACT_MASK = OBD_ACT_MASK | 0x80;
+        FF_RD9 = FF_RD9 + 1;
+      }
+      if ((DAT_00ffd861 & 1) != 0) {
+        DAT_00ffd861 = DAT_00ffd861 & 0xfe;
+        FF_RDY = FF_RDY & 0xfffb;
+        if ((OBD_ACT_MASK & 4) == 0) {
+          OBD_ACT_MASK = OBD_ACT_MASK | 4;
+          FF_RD2 = FF_RD2 + 1;
+        }
+      }
+    }
+    sVar2 = obd_check_monitor(&obd_monitor_o2,0xe);
+    if ((sVar2 == 0) && (FF_RDY = FF_RDY & 0xffdf, (OBD_ACT_MASK & 0x20) == 0)) {
+      OBD_ACT_MASK = OBD_ACT_MASK | 0x20;
+      FF_RD6 = FF_RD6 + 1;
+    }
+    sVar2 = obd_check_monitor(&obd_monitor_o2_heater,4);
+    bVar1 = DAT_0003a28f;
+    if ((sVar2 == 0) && (FF_RDY = FF_RDY & 0xffbf, (OBD_ACT_MASK & 0x40) == 0)) {
+      OBD_ACT_MASK = OBD_ACT_MASK | 0x40;
+      FF_RD7 = FF_RD7 + 1;
+    }
+  }
+  FF_RDY = bVar1 & FF_RDY;
+  return;
+}
+

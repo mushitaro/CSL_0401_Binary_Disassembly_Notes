@@ -1,0 +1,32 @@
+
+void smg_reset_adaptations(byte param_1)
+
+{
+  byte bVar1;
+  char cVar2;
+  undefined1 *puVar3;
+  
+  bVar1 = DAT_00ffdbfc | param_1;
+  DAT_00ffdbfc = 0;
+  if ((bVar1 == 1) || (bVar1 == 0xff)) {
+    DAT_00ffdc00 = 0;
+    DAT_00ffdc06 = 0;
+    DAT_00ffdc02 = 0;
+  }
+  if ((bVar1 == 3) || (bVar1 == 0xff)) {
+    DAT_00ffdc10 = (undefined2)(((uint)K_SMG_I_HA * 0x6e89) / (uint)K_SMG_R_RAD_DYN);
+    DAT_00ffdc12 = 0;
+    DAT_00ffdc14 = 0;
+  }
+  if (bVar1 == 4) {
+    puVar3 = &DAT_00ffdc3a;
+    cVar2 = '&';
+    while (cVar2 != '\0') {
+      *puVar3 = 0;
+      puVar3 = puVar3 + 1;
+      cVar2 = cVar2 + -1;
+    }
+  }
+  return;
+}
+

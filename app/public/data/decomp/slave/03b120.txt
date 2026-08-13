@@ -1,0 +1,76 @@
+
+/* SMG rev warning light/shift-light controller */
+
+uint smg_dwf_update(void)
+
+{
+  undefined2 extraout_D0u;
+  short sVar2;
+  uint uVar1;
+  uint uVar3;
+  short sVar4;
+  char cVar5;
+  
+  cVar5 = '\0';
+  sVar2 = PT1_Filter_SS(D_N_SEGMENT,DAT_00ffdb6a,K_SMG_TAU_DN_DWF);
+  uVar1 = CONCAT22(extraout_D0u,sVar2);
+  DAT_00ffdb6a = sVar2;
+  if (((((S_KRAFTSCHLUSS == '\0') ||
+        (uVar1 = CONCAT22(extraout_D0u,DAT_00ffdb6c) & 0xffff0001, (DAT_00ffdb6c & 1) == 0)) ||
+       (GANG == 0)) || (5 < GANG)) ||
+     ((((cfg_s_getriebetyp == '@' || ((S_GANG_ED & 0x40) != 0)) ||
+       ((K_SMG_DWF_CFG_HS != '\x01' && ((K_SMG_DWF_CFG_HS != '\x02' || ((SCHALT_M_ST & 1) == 0))))))
+      && ((cfg_s_getriebetyp != '@' ||
+          ((uVar1 = CONCAT22(extraout_D0u,DAT_00ffdb6c) & 0xffff0008, (DAT_00ffdb6c & 8) != 0 ||
+           ((DAT_00ffdb7e <= K_SMG_DWF_N_MIN_RS &&
+            (uVar1 = CONCAT22(extraout_D0u,DAT_00ffdb6c) & 0xffff0080, (DAT_00ffdb6c & 0x80) != 0)))
+           ))))))) {
+    DAT_00ffdc7a = 500;
+    DAT_00ffdc7c = 0;
+  }
+  else {
+    sVar4 = N_BEGRENZER - N;
+    if (sVar4 < 0) {
+      sVar4 = 0;
+    }
+    if (sVar2 < 1) {
+      sVar2 = 1;
+    }
+    uVar3 = ((sVar4 * 100) / (int)sVar2 - (uint)(DAT_00ffdc62 >> 1)) - (uint)K_SMG_____DAT_0008a8c4;
+    if ((int)uVar3 < 0) {
+      uVar3 = 0;
+    }
+    if (500 < (int)uVar3) {
+      uVar3 = 500;
+    }
+    DAT_00ffdc7a = (undefined2)uVar3;
+    if (((((MD_NMAX_ST & 4) == 0) && ((MD_NBEGR_ST & 1) == 0)) && ((VMAX_ST & 2) == 0)) &&
+       (((uint)K_SMG_DWF_T_FLASH <= (uVar3 & 0xffff) &&
+        ((ASC_AX <= K_SMG_DWF_AX_FLASH || (DAT_00ffdc7c == 0)))))) {
+      DAT_00ffdc7c = 0;
+      uVar1 = (uint)CONCAT11((char)(uVar3 >> 8),ASC_AX);
+      if ((K_SMG_DWF_AX_VORWARN < ASC_AX) &&
+         (((uVar1 = (uint)sVar4, (int)uVar1 < (int)(uint)K_SMG_DWF_N_VORWARN ||
+           (uVar1 = uVar3 & 0xffff, uVar1 < K_SMG_DWF_T_VORWARN)) ||
+          ((SMG_DWF_DPR == '\x02' &&
+           ((uVar1 = (uint)K_SMG_DWF_T_VOR_HYS + (uint)K_SMG_DWF_T_VORWARN, (uVar3 & 0xffff) < uVar1
+            || (uVar1 = (uint)K_SMG_DWF_N_VOR_HYS + (uint)K_SMG_DWF_N_VORWARN,
+               (int)sVar4 < (int)uVar1)))))))) {
+        cVar5 = '\x02';
+      }
+    }
+    else {
+      uVar1 = ((uint)K_SMG_DWF_DT_FLASH + (uint)DAT_00ffdc7c) / (uint)K_SMG_DWF_DT_FLASH;
+      cVar5 = (char)uVar1 + '\x02';
+      if (DAT_00ffdc7c < 0xfa) {
+        DAT_00ffdc7c = DAT_00ffdc7c + 1;
+      }
+    }
+  }
+  if ('\a' < cVar5) {
+    cVar5 = '\a';
+  }
+  SMG_DWF_DPR = cVar5;
+  return uVar1;
+}
+

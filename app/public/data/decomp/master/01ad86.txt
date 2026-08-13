@@ -1,0 +1,18 @@
+
+void aq_abs_lls_calc(void)
+
+{
+  uint aq_abs_lls_temp;
+  uint uVar1a;
+  
+  aq_abs_lls_temp = klu_wint(&KL_AQ_ABS_LLS.sizeX,LLS_TV_AQ);
+                    /* appears to be 0401 specific? or at least not in same place as 1801 */
+  AQ_ABS_LLS = (word)aq_abs_lls_temp;
+  uVar1a = klu_wint(&kl_aq_rel_rf_fakt.sizeX,N);
+  aq_rel_rf_fakt = (short)uVar1a;
+  if (aq_rel_rf_fakt == 0) {
+    aq_rel_rf_fakt = 1;
+  }
+  return;
+}
+

@@ -1,0 +1,27 @@
+
+void qsm_cancel_transfer(int param_1)
+
+{
+  undefined1 extraout_var;
+  byte bVar1;
+  int iVar2;
+  int *piVar3;
+  
+  bVar1 = set_status_register(0x2700);
+  if (((DAT_00ffe5e2 & 0x80) != 0) && (param_1 == DAT_00ffe5de)) {
+    DAT_00ffe5e6 = DAT_00ffe5e6 | 0x80;
+  }
+  piVar3 = &DAT_00ffe5e8;
+  iVar2 = 4;
+  do {
+    if (param_1 == *piVar3) {
+      *(undefined1 *)(piVar3 + 1) = 0;
+      *piVar3 = 0;
+    }
+    piVar3 = (int *)((int)piVar3 + 6);
+    iVar2 = iVar2 + -1;
+  } while (0 < iVar2);
+  set_status_register(CONCAT11(extraout_var,bVar1));
+  return;
+}
+

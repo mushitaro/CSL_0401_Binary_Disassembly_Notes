@@ -1,0 +1,9 @@
+
+void p_egbp_init(void)
+
+{
+                    /* 0401 Specific */
+  p_egbp_filter = P_UMG_FILTER;
+  return;
+}
+

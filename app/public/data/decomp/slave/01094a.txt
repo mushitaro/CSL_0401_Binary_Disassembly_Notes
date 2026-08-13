@@ -1,0 +1,12 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void syserror(undefined1 param_1,ushort param_2)
+
+{
+  SYSERRORCOUNT = SYSERRORCOUNT + '\x01';
+  _SYSERRORCODE = param_2 | _SYSERRORCODE;
+  SYSERRORTN = param_1;
+  return;
+}
+

@@ -1,0 +1,21 @@
+name: Pipeline tests
+
+on:
+  push:
+    branches: [claude/mss54hp-csl-dme-tool-x7qcrw]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r tools/requirements.txt
+      # parse_fr's tests read build/funktionsrahmen.json, so regenerate it.
+      - run: PYTHONPATH=tools/pipeline python tools/pipeline/parse_xdf.py
+      - run: PYTHONPATH=tools/pipeline python tools/pipeline/parse_fr.py
+      - run: python -m pytest tools/tests -q

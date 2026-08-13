@@ -1,0 +1,45 @@
+
+void MD_Interface_to_ASC_DSC(void)
+
+{
+  uint uVar1;
+  
+  if (MD_NORM != 0) {
+    uVar1 = (((uint)MD_IND_VERBRAUCHER + (uint)MD_IND_SCHLEPP) * 0x100) / (uint)MD_NORM;
+    MD_REIB = (undefined1)uVar1;
+    if (0xff < (ushort)uVar1) {
+      MD_REIB = 0xff;
+    }
+    uVar1 = ((uint)MD_IND_WUNSCH << 8) / (uint)MD_NORM;
+    MD_IND_IST = (undefined1)uVar1;
+    if (0xff < (ushort)uVar1) {
+      MD_IND_IST = 0xff;
+    }
+    uVar1 = (uint)MD_IND_NE << 8;
+    MD_IND_NE_IST = (undefined1)(uVar1 / MD_NORM);
+    if (0xff < (ushort)(uVar1 / MD_NORM)) {
+      MD_IND_NE_IST = 0xff;
+    }
+    if (((ASC_ST & 2) != 0) || ((ASC_ST & 1) != 0)) {
+      uVar1 = (uint)MD_IND_VE << 8;
+    }
+    MD_IND_LM_IST = (undefined1)(uVar1 / MD_NORM);
+    if (0xff < (ushort)(uVar1 / MD_NORM)) {
+      MD_IND_LM_IST = 0xff;
+    }
+  }
+  MD_ST_EINGRIFF = 0;
+  if ((((ASC_ST & 1) != 0) && ((MD_ST & 0x10) != 0)) || (K_MD_STAT_ASC == '\x01')) {
+    MD_ST_EINGRIFF = 1;
+  }
+  if ((((((MD_ST & 0x20) != 0) && ((ASC_ST & 1) != 0)) ||
+       (((MD_ST & 0x40) != 0 && ((ASC_ST & 2) != 0)))) || (K_MD_STAT_ASC == '\x02')) ||
+     ((1 < sk_stufe_egas_sk_prog_level_ && (K_DSC_TYP == '\0')))) {
+    MD_ST_EINGRIFF = 2;
+  }
+  if ((K_MD_STAT_ASC == '\x03') || ((1 < sk_stufe_egas_sk_prog_level_ && (K_DSC_TYP != '\0')))) {
+    MD_ST_EINGRIFF = 3;
+  }
+  return;
+}
+

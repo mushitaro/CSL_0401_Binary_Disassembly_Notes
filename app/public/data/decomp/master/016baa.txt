@@ -1,0 +1,149 @@
+
+undefined4 Torque_Limitation(ushort param_1)
+
+{
+  byte bVar1;
+  byte bVar2;
+  uint uVar3;
+  short sVar5;
+  uint uVar4;
+  ushort xValue;
+  ushort uVar6;
+  int iVar7;
+  
+  if (MD_MAX_BEGR < param_1) {
+    param_1 = MD_MAX_BEGR;
+  }
+  uVar4 = (uint)param_1;
+  if (((VMAX_ST & 2) != 0) && (MD_IND_VMAX < param_1)) {
+    uVar4 = (uint)MD_IND_VMAX;
+  }
+  if ((TI_EINFAHR_ST == '\0') && (K_MD_MAX_EINFAHR < (ushort)uVar4)) {
+    uVar4 = (uint)K_MD_MAX_EINFAHR;
+  }
+  if ((MD_NMAX_ST != '\0') && (MD_NMAX_BEGR < (ushort)uVar4)) {
+    uVar4 = (uint)MD_NMAX_BEGR;
+  }
+  if (((NOISE_ST & 2) != 0) &&
+     (uVar3 = klu_wint(&KL_MD_BEGR_NOISE.sizeX,V_ANTRIEB), (ushort)uVar3 < (ushort)uVar4)) {
+    uVar4 = uVar3 & 0xffff;
+  }
+  if (((MD_BEGR_AUSS_ST & 4) != 0) && (MD_BEGR_AUSS < (ushort)uVar4)) {
+    uVar4 = (uint)MD_BEGR_AUSS;
+  }
+  if ((sk_stufe_egas_sk_prog_level_ != '\0') && (DAT_00ffd944 < (ushort)uVar4)) {
+    uVar4 = (uint)DAT_00ffd944;
+  }
+  if (((CAN_ED_SMG & 0x40) != 0) && (md_can_ed_smg_max < (ushort)uVar4)) {
+    uVar4 = (uint)md_can_ed_smg_max;
+  }
+  uVar6 = (ushort)uVar4;
+                    /* This following if condition differs from 1801 */
+  if ((K_MD_NBEGR_N_AKTIV < N) && (S_KRAFTSCHLUSS != '\0')) {
+    uVar3 = klu_wint(&KL_MD_NBEGR_N_OFFSET.sizeX,(ushort)MD_NBEGR_ANZAHL);
+    sVar5 = (short)uVar3;
+  }
+  else {
+    sVar5 = 0;
+    MD_NBEGR_ANZAHL = 0;
+  }
+  MD_NBEGR_ABSTAND = (N_BEGRENZER - sVar5) - N;
+  xValue = D_N_GEFILTERT;
+  if ((short)D_N_GEFILTERT < 0) {
+    xValue = 0;
+  }
+  bVar2 = GANG & 7;
+                    /* The below section differs from 1801 */
+  if (((K_MD_NBEGR_HYS < MD_NBEGR_ABSTAND) &&
+      (MD_NBEGR_ST = MD_NBEGR_ST & 0xfe, K_MD_NBEGR_HYS * 4 < (int)MD_NBEGR_ABSTAND)) &&
+     (S_KRAFTSCHLUSS == '\0')) {
+    MD_NBEGR_ST = 0;
+  }
+  if (((MD_NBEGR_ST & 1) == 0) && (MD_NBEGR_ABSTAND < K_MD_NBEGR_ABSTAND)) {
+    if ((short)xValue < 1) {
+      MD_NBEGR_T = 0x7fff;
+    }
+    else {
+      MD_NBEGR_T = (short)(((int)MD_NBEGR_ABSTAND << 8) / (int)(short)xValue);
+    }
+    if (MD_NBEGR_T < K_MD_NBEGR_T) {
+      MD_NBEGR_ST = 3;
+      MD_NBEGR_ANZAHL = MD_NBEGR_ANZAHL + 1;
+      if ((int)MD_NBEGR_I < (int)uVar4) {
+        uVar4 = MD_NBEGR_I & 0xffff;
+      }
+      uVar6 = (ushort)uVar4;
+      MD_NBEGR_I_ZIEL =
+           uVar4 * 0x100 -
+           (int)(short)xValue * ((uint)KL_MD_JFZ_GANG.y[(short)(ushort)bVar2] + (uint)K_MD_J_MOTOR);
+      if ((int)MD_NBEGR_I_ZIEL < (int)((uint)K_MD_NBEGR_MIN * 0x100)) {
+        MD_NBEGR_I_ZIEL = (uint)K_MD_NBEGR_MIN << 8;
+      }
+      if (MD_IND_OPT_KORR <= uVar6) {
+        uVar4 = (uint)MD_IND_OPT_KORR;
+      }
+      MD_NBEGR_I = uVar4 << 8;
+    }
+  }
+  if ((MD_NBEGR_ST & 2) == 0) {
+    MD_NBEGR_I = (uint)K_MD_NBEGR_MAX << 8;
+    uVar4 = (uint)K_MD_NBEGR_MAX << 8;
+    MD_NBEGR_P = 0;
+    MD_NBEGR_I_ZIEL = uVar4;
+  }
+  else {
+    if (MD_NBEGR_ABSTAND < 0) {
+      iVar7 = 0x895ac;
+    }
+    else {
+      iVar7 = 0x8959a;
+    }
+    bVar1 = *(byte *)(iVar7 + (short)(ushort)bVar2);
+    bVar2 = KL_MD_NBEGR_P.y[(short)(ushort)bVar2];
+    if (S_KRAFTSCHLUSS == '\0') {
+      uVar4 = (uint)K_MD_NBEGR_RAMPE;
+    }
+    else {
+      uVar4 = klu_wint(&KL_MD_NBEGR_RAMPE.sizeX,xValue);
+      uVar4 = uVar4 & 0xffff;
+    }
+    MD_NBEGR_RAMPE = uVar4 * 0x100;
+    MD_NBEGR_I_ZIEL = (int)(short)(ushort)bVar1 * (int)MD_NBEGR_ABSTAND + MD_NBEGR_I_ZIEL;
+    if ((int)MD_NBEGR_I_ZIEL < (int)((uint)K_MD_NBEGR_MIN * 0x100)) {
+      MD_NBEGR_I_ZIEL = (uint)K_MD_NBEGR_MIN * 0x100;
+    }
+    if ((int)((uint)K_MD_NBEGR_MAX * 0x100) < (int)MD_NBEGR_I_ZIEL) {
+      MD_NBEGR_ST = 0;
+      MD_NBEGR_I_ZIEL = (uint)K_MD_NBEGR_MAX * 0x100;
+    }
+    if (MD_NBEGR_ABSTAND < 0) {
+      MD_NBEGR_P = (ushort)bVar2 * MD_NBEGR_ABSTAND;
+    }
+    else {
+      MD_NBEGR_P = 0;
+    }
+    if ((int)MD_NBEGR_I_ZIEL < (int)(MD_NBEGR_I + uVar4 * -0x100)) {
+      MD_NBEGR_I = MD_NBEGR_I + uVar4 * -0x100;
+    }
+    else {
+      MD_NBEGR_I = MD_NBEGR_I_ZIEL;
+    }
+    uVar4 = MD_NBEGR_I;
+    if ((int)MD_NBEGR_I < 0) {
+      uVar4 = MD_NBEGR_I + 0xff;
+    }
+    uVar3 = (int)MD_NBEGR_P + ((int)uVar4 >> 8);
+    if ((int)uVar3 < (int)(uint)K_MD_NBEGR_MIN) {
+      uVar3 = (uint)K_MD_NBEGR_MIN;
+    }
+    if ((int)(uint)K_MD_NBEGR_MAX < (int)uVar3) {
+      uVar3 = (uint)K_MD_NBEGR_MAX;
+    }
+    uVar4 = (uint)uVar6;
+    if ((int)uVar3 < (int)uVar4) {
+      uVar6 = (ushort)uVar3;
+    }
+  }
+  return CONCAT22((short)(uVar4 >> 0x10),uVar6);
+}
+

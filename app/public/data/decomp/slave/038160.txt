@@ -1,0 +1,48 @@
+
+void smg_clutch_torque_setpoint_update(undefined1 param_1)
+
+{
+  int iVar1;
+  ushort uVar2;
+  ushort uVar3;
+  
+  switch(param_1) {
+  case 1:
+  case 7:
+    DAT_00ffdb98 = DAT_00ffdbe6;
+    if ((DAT_00ffdb48 & 0x40) == 0) {
+      DAT_00ffdb98 = (short)DAT_00ffdb5e / (short)(ushort)DAT_00ffdc66;
+    }
+    break;
+  case 2:
+  case 3:
+    uVar2 = DAT_00ffdc60;
+    if ((short)DAT_00ffdc60 < 1) {
+      uVar2 = 1;
+    }
+    if ((short)(ushort)DAT_00ffdc66 < (short)uVar2) {
+      uVar2 = (ushort)DAT_00ffdc66;
+    }
+    if ((((ASC_ST & 1) != 0) || ((DAT_00ffdb6c & 0x40) != 0)) ||
+       (uVar3 = DAT_00ffdb18, (int)(short)DAT_00ffdb5e < (int)(uint)DAT_00ffdb18)) {
+      uVar3 = DAT_00ffdb5e;
+    }
+    iVar1 = (int)(short)(ushort)K_SMG_KUPP_DM_SOLL_F *
+            (int)(short)((int)(uint)uVar3 / (int)(short)uVar2);
+    if (iVar1 < 0) {
+      iVar1 = iVar1 + 0x7f;
+    }
+    DAT_00ffdb98 = (ushort)(iVar1 >> 7);
+    break;
+  default:
+    DAT_00ffdb98 = 1000;
+    break;
+  case 6:
+    DAT_00ffdb98 = (ushort)(((uint)K_SMG_KUPP_DM_RAB * (uint)DAT_00ffdb9e) / (uint)DAT_00ffdb9a);
+  }
+  if ((short)DAT_00ffdb98 < (short)(ushort)K_SMG_KUPP_DM_MIN) {
+    DAT_00ffdb98 = (ushort)K_SMG_KUPP_DM_MIN;
+  }
+  return;
+}
+

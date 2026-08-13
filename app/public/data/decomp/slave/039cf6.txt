@@ -1,0 +1,90 @@
+
+ushort smg_target_rpm_planner(short param_1)
+
+{
+  ushort uVar1;
+  short sVar2;
+  int iVar3;
+  uint uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  uVar6 = n_zie;
+  DAT_00ffdbb3 = DAT_00ffdbb3 & 0xfb;
+  uVar5 = n_zie;
+  switch(DAT_00ffdb6c & 3) {
+  case 0:
+    if (param_1 == 0) {
+      uVar5 = K_SMG_N_ZIEL_OFF_SCH;
+      if ((int)(uint)N < (int)(short)n_zie) {
+        iVar3 = (uint)DAT_00ffdbe3 * (((int)(short)n_zie - (uint)K_SMG_N_ZIEL_OFF_SCH) - (uint)N);
+        if (iVar3 < 0) {
+          iVar3 = iVar3 + 0x7f;
+        }
+        uVar5 = (short)(iVar3 >> 7) + K_SMG_N_ZIEL_OFF_SCH;
+      }
+      if (DAT_00ffdc69 == '\0') {
+        DAT_00ffdbdc = n_zie - DAT_00ffdb4a;
+      }
+      else {
+        DAT_00ffdbdc = 8000;
+      }
+      if ((short)uVar5 < (short)DAT_00ffdbdc) {
+        DAT_00ffdbdc = uVar5;
+      }
+    }
+    if (((DAT_00ffdb6c & 0x200) != 0) || ((DAT_00ffdb6c & 6) == 0)) {
+      DAT_00ffdbdc = K_SMG_N_ZIEL_OFF_SCH;
+      uVar6 = n_zie - (K_SMG_N_ZIEL_OFF_SCH - K_SMG_____DAT_0008a850);
+    }
+    uVar5 = n_zie - DAT_00ffdbdc;
+    break;
+  case 1:
+    uVar4 = klu_bint(&KL_SMG_____DAT_0008aadc.sizeX,ki_auf);
+    DAT_00ffdbdc = ((ushort)uVar4 & 0xff) * 5;
+    uVar5 = DAT_00ffdbdc + uVar6;
+    if (n_zie < LLR_N_SOLL) {
+      DAT_00ffdbb3 = DAT_00ffdbb3 | 4;
+      uVar4 = klu_wint(&KL_SMG_____DAT_0008aa52.sizeX,DAT_00ffdb54);
+      uVar5 = LLR_N_SOLL + (short)uVar4;
+      DAT_00ffdbdc = uVar5 - n_zie;
+    }
+    uVar6 = (DAT_00ffdbdc - K_SMG_____DAT_0008a850) + uVar6;
+    break;
+  case 2:
+    DAT_00ffdbdc = K_SMG_N_ZIEL_OFF_SCH;
+    uVar5 = n_zie - K_SMG_N_ZIEL_OFF_SCH;
+    uVar6 = n_zie - (K_SMG_N_ZIEL_OFF_SCH - K_SMG_____DAT_0008a850);
+    break;
+  case 3:
+    if ((param_1 == 0) &&
+       (DAT_00ffdbdc = DAT_00ffdb4a - n_zie,
+       (int)(uint)K_SMG_____DAT_0008a84c < (int)(short)DAT_00ffdbdc)) {
+      DAT_00ffdbdc = K_SMG_____DAT_0008a84c;
+    }
+    if (((DAT_00ffdb6c & 0x200) != 0) || (DAT_00ffdc69 != '\0')) {
+      DAT_00ffdbdc = K_SMG_____DAT_0008a84c;
+      uVar6 = (K_SMG_____DAT_0008a84c - K_SMG_____DAT_0008a850) + n_zie;
+    }
+    uVar5 = DAT_00ffdbdc + n_zie;
+  }
+  sVar2 = DAT_00ffdb1e;
+  if (((DAT_00ffdb00 & 8) == 0) && (uVar5 = DAT_00ffdb4a, V < K_SMG_____DAT_0008a856)) {
+    uVar4 = klu_wint(&KL_SMG_____DAT_0008aa44.sizeX,DAT_00ffdb54);
+    uVar5 = (short)uVar4 + sVar2;
+  }
+  if ((short)uVar6 < (short)(LLR_N_SOLL + 0x46)) {
+    uVar6 = LLR_N_SOLL + 0x46;
+  }
+  uVar1 = (N_BEGRENZER - (ushort)K_SMG_____DAT_0008a852) - 0x32;
+  if ((short)uVar1 < (short)uVar6) {
+    DAT_00ffdb83 = DAT_00ffdb83 | 0x40;
+    uVar6 = uVar1;
+  }
+  else {
+    DAT_00ffdb83 = DAT_00ffdb83 & 0xbf;
+  }
+  DAT_00ffdbde = uVar6;
+  return uVar5;
+}
+

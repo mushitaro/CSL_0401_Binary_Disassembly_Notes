@@ -1,0 +1,14 @@
+
+void evan1_hall_diag_segment_check(void)
+
+{
+  if (TPU_ZOT_ZYL_S == '\x04') {
+    if (DAT_00ffeb58 == '\0') {
+      EVAN1_ED_HALL = EVAN1_ED_HALL | 1;
+    }
+    DAT_00ffeb58 = '\0';
+    EVAN1_ED_HALL = EVAN1_ED_HALL | 0x10;
+  }
+  return;
+}
+

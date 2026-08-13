@@ -1,0 +1,19 @@
+
+void task_1ms(void)
+
+{
+  if ((PSYNC_ST & 0x80) != 0) {
+    if ((SYS_TIMERTICS_COUNTER & 1) != 0) {
+      dpr_sync();
+    }
+    p_saug_ad_ring_buffer_update();
+    ask_ad_dpr = ask_ad;
+    edk_1ms();
+  }
+  if ((SYS_TIMERTICS_COUNTER & 1) != 0) {
+    ipk_rx_dispatch_2ms();
+    ipk_service_tx_slots_2ms();
+  }
+  return;
+}
+

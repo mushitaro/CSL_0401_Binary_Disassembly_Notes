@@ -1,0 +1,64 @@
+
+void ll_sync_state_3_evaluation_bank_2(void)
+
+{
+  short sVar1;
+  bool bVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  byte bVar5;
+  ushort xValue;
+  short sVar6;
+  byte bVar7;
+  ushort *puVar8;
+  short *psVar9;
+  short asStack_10 [6];
+  
+  xValue = 0;
+  bVar7 = 0xff;
+  puVar8 = (ushort *)((int)&LL_ABW_1OF8_ + (int)(short)((ushort)LL_BANK * 2));
+  for (bVar5 = LL_BANK; bVar5 < zyl_count; bVar5 = bVar5 + 1) {
+    if ((short)xValue < (short)*puVar8) {
+      xValue = *puVar8;
+      bVar7 = bVar5;
+    }
+    puVar8 = puVar8 + 1;
+  }
+  if (-1 < (char)bVar7) {
+    uVar3 = kls_wint(&KL_LL_TI_T.sizeX,xValue);
+    sVar6 = (LL_BANK - 1) * (short)uVar3;
+    bVar2 = false;
+    if (sVar6 != 0) {
+      psVar9 = asStack_10 + (short)(ushort)LL_BANK;
+      for (bVar5 = LL_BANK; bVar5 < zyl_count; bVar5 = bVar5 + 1) {
+        if ((uint)bVar5 == (int)(char)bVar7) {
+          uVar4 = FUN_0002aa08(bVar5 + 1);
+          sVar1 = sVar6 + (short)uVar4;
+          *psVar9 = sVar1;
+          if (K_TI_LL_MAX < sVar1) goto LAB_00028e94;
+        }
+        else {
+          uVar4 = FUN_0002aa08(bVar5 + 1);
+          sVar1 = (short)uVar4 - (short)uVar3;
+          *psVar9 = sVar1;
+          if (sVar1 < K_TI_LL_MIN) {
+LAB_00028e94:
+            bVar2 = true;
+          }
+        }
+        psVar9 = psVar9 + 1;
+      }
+      if (!bVar2) {
+        uVar4 = 0;
+        psVar9 = asStack_10 + (short)(ushort)LL_BANK;
+        for (bVar5 = LL_BANK; bVar5 < zyl_count; bVar5 = bVar5 + 1) {
+          uVar4 = CONCAT22((short)((uint)uVar4 >> 0x10),*psVar9);
+          uVar4 = FUN_0002a980(CONCAT31((int3)((uint)uVar4 >> 8),bVar5 + 1),uVar4);
+          psVar9 = psVar9 + 1;
+        }
+      }
+    }
+  }
+  return;
+}
+

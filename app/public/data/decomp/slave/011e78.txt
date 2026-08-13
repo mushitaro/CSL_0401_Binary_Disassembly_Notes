@@ -1,0 +1,9 @@
+
+void tpu_set_channel_priority(byte param_1,byte param_2)
+
+{
+  TPU_CPR = (uint)param_2 << ((uint)param_1 * 2 & 0x3f) |
+            TPU_CPR & ~(3 << ((uint)param_1 * 2 & 0x3f));
+  return;
+}
+

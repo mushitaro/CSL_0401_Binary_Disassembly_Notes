@@ -1,0 +1,105 @@
+
+void ll_sync_state_1_initialisation(void)
+
+{
+  bool bVar1;
+  int iVar2;
+  byte bVar3;
+  undefined4 *puVar4;
+  short *psVar5;
+  int *piVar6;
+  
+  llsync_aktiv_calc();
+  if (((K_LL_SYNC_CONTROL == '\0') || (LLSYNC_AKTIV != '\0')) ||
+     ((uint)(SYS_TIMERTICS_COUNTER - DAT_00ffeb4e) <= (uint)K_LL_SYNC_SPERRZEIT)) {
+    LL_CASE = 0;
+    LLSYNC_ST = 0;
+    return;
+  }
+  if (LL_CASE == '\0') {
+    ll_bank_init();
+    LL_N_ANZ = 0;
+    bVar3 = 0;
+    puVar4 = &LL_T_Z_1OF8_;
+    do {
+      *puVar4 = 0;
+      bVar3 = bVar3 + 1;
+      puVar4 = puVar4 + 1;
+    } while (bVar3 < 8);
+    LLSYNC_ST = LLSYNC_ST | 1;
+    LL_CASE = 2;
+    return;
+  }
+  if (LL_CASE != '\x01') {
+    return;
+  }
+  LL_T_MITTEL = 0;
+  piVar6 = &LL_T_Z_1OF8_;
+  for (bVar3 = 0; bVar3 < LL_BANK; bVar3 = bVar3 + 1) {
+    LL_T_MITTEL = *piVar6 + LL_T_MITTEL;
+    piVar6 = piVar6 + 1;
+  }
+  if (LL_T_MITTEL != 0) {
+    bVar1 = false;
+    LL_T_MITTEL = LL_T_MITTEL / (int)(uint)LL_BANK;
+    psVar5 = &LL_ABW_1OF8_;
+    piVar6 = &LL_T_Z_1OF8_;
+    for (bVar3 = 0; bVar3 < LL_BANK; bVar3 = bVar3 + 1) {
+      iVar2 = ((*piVar6 - LL_T_MITTEL) * 0x10000) / LL_T_MITTEL;
+      if (iVar2 < -0x8000) {
+        iVar2 = -0x8000;
+      }
+      if (0x7fff < iVar2) {
+        iVar2 = 0x7fff;
+      }
+      *psVar5 = (short)iVar2;
+      iVar2 = abs((int)*psVar5);
+      if (K_LL_ABW_MAX < iVar2) {
+        bVar1 = true;
+      }
+      psVar5 = psVar5 + 1;
+      piVar6 = piVar6 + 1;
+    }
+    if (!bVar1) {
+      ll_sync_state_3_evaluation_bank_1();
+    }
+  }
+  if (LL_BANK != zyl_count) {
+    bVar1 = false;
+    LL_T_MITTEL = 0;
+    piVar6 = (int *)((int)&LL_T_Z_1OF8_ + (int)(short)((ushort)LL_BANK << 2));
+    for (bVar3 = LL_BANK; bVar3 < zyl_count; bVar3 = bVar3 + 1) {
+      LL_T_MITTEL = *piVar6 + LL_T_MITTEL;
+      piVar6 = piVar6 + 1;
+    }
+    if (LL_T_MITTEL != 0) {
+      LL_T_MITTEL = LL_T_MITTEL / (int)(uint)LL_BANK;
+      psVar5 = (short *)((int)&LL_ABW_1OF8_ + (int)(short)((ushort)LL_BANK * 2));
+      piVar6 = (int *)((int)&LL_T_Z_1OF8_ + (int)(short)((ushort)LL_BANK << 2));
+      for (bVar3 = LL_BANK; bVar3 < zyl_count; bVar3 = bVar3 + 1) {
+        iVar2 = ((*piVar6 - LL_T_MITTEL) * 0x10000) / LL_T_MITTEL;
+        if (iVar2 < -0x8000) {
+          iVar2 = -0x8000;
+        }
+        if (0x7fff < iVar2) {
+          iVar2 = 0x7fff;
+        }
+        *psVar5 = (short)iVar2;
+        iVar2 = abs((int)*psVar5);
+        if (K_LL_ABW_MAX < iVar2) {
+          bVar1 = true;
+        }
+        psVar5 = psVar5 + 1;
+        piVar6 = piVar6 + 1;
+      }
+      if (!bVar1) {
+        ll_sync_state_3_evaluation_bank_2();
+      }
+    }
+  }
+  LL_CASE = 0;
+  LLSYNC_ST = 0;
+  LL_ADA_ANZ = LL_ADA_ANZ + '\x01';
+  return;
+}
+

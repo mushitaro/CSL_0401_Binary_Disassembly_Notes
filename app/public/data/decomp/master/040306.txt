@@ -1,0 +1,18 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void sys_isr_exception(struct_cpu32_exc_frame_any_t frame)
+
+{
+  _EXC_PC = frame.pc;
+  _EXC_VEKTOR = frame.fmt_vec;
+  if ((frame.fmt_vec & 0xc000) == 0xc000) {
+    _EXC_ADR = frame.fault_addr;
+    _EXC_SSW = frame.ssw;
+  }
+  EXC_COUNTER = EXC_COUNTER + 1;
+  reset();
+  sys_main();
+  return;
+}
+

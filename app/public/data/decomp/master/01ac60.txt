@@ -1,0 +1,14 @@
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void aq_rel_init(void)
+
+{
+                    /* appears to be 0401 specific? or at least not in same place as 1801 */
+  aq_abs_lls_calc();
+  aq_rel_calc();
+  _AQ_REL_DELTA = 0;
+  AQ_REL_OLD = AQ_REL;
+  return;
+}
+

@@ -1,0 +1,35 @@
+
+char ask_flap_pot_measure_closed_position(void)
+
+{
+  ushort uVar1;
+  
+  if (ask_flap_pot_calibration_count != 0) {
+    ask_flap_pot_calibration_count = ask_flap_pot_calibration_count + -1;
+    ask_roh = (ushort)((int)((uint)ask_ad * (uint)UEXT1M_KORREKTUR_DPR + 0x200) >> 10);
+    ask_roh_sum = ask_roh + ask_roh_sum;
+    if (ask_roh < ask_roh_min) {
+      ask_roh_min = ask_roh;
+    }
+    if (ask_roh_max < ask_roh) {
+      ask_roh_max = ask_roh;
+    }
+    if (ask_flap_pot_calibration_count == 0) {
+      if ((((int)(uint)k_ask_flap_pot_closed_variability_max <
+            (int)((uint)ask_roh_max - (uint)ask_roh_min)) ||
+          (uVar1 = (ushort)(((uint)k_ask_flap_pot_calibration_samples + (uint)ask_roh_sum * 2) /
+                           ((uint)k_ask_flap_pot_calibration_samples * 2)),
+          uVar1 <= k_flap_pot_close_pos_min)) || (k_flap_pot_close_pos_max <= uVar1)) {
+        DAT_00ffdc9b = DAT_00ffdc9b | 0x10;
+        ask_flap_driver_block_timer = k_ask_flap_driver_sperre + '\x01';
+      }
+      else {
+        DAT_00ffdc9b = DAT_00ffdc9b & 0xef;
+        ask_flap_driver_block_timer = '\0';
+        ask_flap_pot_learned_close_pos = uVar1;
+      }
+    }
+  }
+  return ask_flap_pot_calibration_count;
+}
+

@@ -1,0 +1,26 @@
+
+void qsm_init_transfer_state(void)
+
+{
+  char cVar1;
+  undefined4 *puVar2;
+  
+  DAT_00ffe5e2 = 0;
+  DAT_00ffe5e3 = 0;
+  DAT_00ffe5e6 = 0;
+  DAT_00ffe5e4 = 0;
+  DAT_00ffe5e5 = 0;
+  DAT_00ffe5de = 0;
+  puVar2 = &DAT_00ffe5e8;
+  cVar1 = '\x04';
+  do {
+    *puVar2 = 0;
+    *(undefined1 *)(puVar2 + 1) = 0;
+    puVar2 = (undefined4 *)((int)puVar2 + 6);
+    cVar1 = cVar1 + -1;
+  } while (cVar1 != '\0');
+  DAT_00fffc1e = 0;
+  DAT_00fffc1f = DAT_00fffc1f & 0xfe;
+  return;
+}
+

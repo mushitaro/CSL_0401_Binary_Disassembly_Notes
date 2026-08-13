@@ -1,0 +1,51 @@
+
+void fr_calc(void)
+
+{
+  ushort uVar2;
+  int iVar1;
+  KL_8_2byte_2byte *curve;
+  
+  FR_RF_DELTA = RF * 10 - MD_RF_ROH;
+                    /* In 1801 the below condition references HFM */
+  if (((((ZUSTAND_MOTOR & (VL|TL|LL)) == 0) || (rf_diag_ed_st != 0)) || ((SK_EDK_CONTR & 2) != 0))
+     || ((DAT_00ffda36 & 2) != 0)) {
+    FR_REG_I = 0;
+  }
+  else {
+    if ((short)FR_RF_DELTA < 0) {
+      uVar2 = -FR_RF_DELTA;
+      curve = &KL_FR_INEG;
+    }
+    else {
+      curve = &KL_FR_IPOS;
+      uVar2 = FR_RF_DELTA;
+    }
+    FR_ANT_I = kls_wint(&curve->sizeX,uVar2);
+    if (((short)FR_RF_DELTA < 0) && ((B_WDK_KEINE_DROSSEL != 0 || (EGAS_BEGR_FLAG != 0)))) {
+      if ((FR_REG_I < 0) && (FR_REG_I = K_FR_DI_ENTDR + FR_REG_I, 0 < FR_REG_I)) {
+        FR_REG_I = 0;
+      }
+    }
+    else {
+      uVar2 = abs_difference(WDK_SOLL,WDK_WORD);
+      if (uVar2 <= K_FR_EDK_DIFF) {
+        iVar1 = (int)FR_ANT_I;
+        if (iVar1 < 0) {
+          iVar1 = iVar1 + 0xf;
+        }
+        FR_REG_I = FR_REG_I + (short)(iVar1 >> 4);
+      }
+    }
+    if (K_FR_IMAX < FR_REG_I) {
+      FR_REG_I = K_FR_IMAX;
+    }
+    if (FR_REG_I < K_FR_IMIN) {
+      FR_REG_I = K_FR_IMIN;
+    }
+  }
+  FR_REGLER = FR_REG_I + -0x8000;
+  fra_adapt();
+  return;
+}
+

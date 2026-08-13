@@ -1,0 +1,108 @@
+
+uint lls_tv_calc(ushort param_1)
+
+{
+  ushort uVar1;
+  int iVar2;
+  uint uVar3;
+  int iVar4;
+  byte bVar6;
+  ushort uVar5;
+  byte bVar7;
+  short sVar8;
+  
+  lls_diag();
+  uVar3 = kfu_wint(&KF_LLS_TV.sizeX,N,param_1);
+  uVar5 = (ushort)uVar3;
+  bVar7 = param_1 <= KF_LLS_TV.yAxis[0];
+  if ((AVAN1_ST & 0x10) != 0) {
+    iVar4 = kfu_wint(&KF_LLS_TV_KATH.sizeX,N,param_1);
+    iVar4 = (int)AVAN1_SOLL_FAKTOR * (iVar4 - (uVar3 & 0xffff));
+    if (iVar4 < 0) {
+      iVar4 = iVar4 + 0x3fff;
+    }
+    uVar5 = (short)(iVar4 >> 0xe) + uVar5;
+    if (param_1 <= KF_LLS_TV_KATH.yAxis[0]) {
+      bVar7 = true;
+    }
+  }
+  if (((ZUSTAND_MOTOR & S) == 0) && ((ZUSTAND_MOTOR & Start) == 0)) {
+    LLS_TV_MIN_START = 0;
+  }
+  else {
+    uVar3 = klu_wint(&KL_LLS_TV_MIN_START.sizeX,N);
+    LLS_TV_MIN_START = (ushort)uVar3;
+    if (uVar5 < LLS_TV_MIN_START) {
+      uVar5 = LLS_TV_MIN_START;
+    }
+  }
+  bVar6 = K_LLS_TAU1;
+  if ((K_LLS_NFILTER <= LFR_DN) && (bVar6 = K_LLS_TAU_START, (ZUSTAND_MOTOR & Start) == 0)) {
+    bVar6 = K_LLS_TAU2;
+  }
+  uVar5 = PT1_Filter_US(uVar5,DAT_00ffef0c,bVar6);
+  if (uVar5 <= K_LLS_TV_MIN) {
+    bVar7 = bVar7 | 2;
+  }
+  DAT_00ffef0c = uVar5;
+  if ((LLS_ST & 0x40) == 0) {
+    LLS_TV_AQ = uVar5;
+    if (K_LLS_TV_DREHPUNKT < uVar5) {
+      uVar1 = uVar5 - K_LLS_TV_DREHPUNKT;
+      uVar3 = klu_bint(&KL_LLS_UB_KORR.sizeX,UB);
+      sVar8 = (short)(uVar1 * uVar3 >> 8);
+    }
+    else {
+      sVar8 = 0;
+    }
+    LLS_TV = sVar8 + uVar5;
+    if (K_LLS_TV_MIN < LLS_TV) {
+      if (K_LLS_TV_MAX < LLS_TV) {
+        LLS_TV = K_LLS_TV_MAX;
+      }
+    }
+    else {
+      bVar7 = bVar7 | 4;
+      LLS_TV = K_LLS_TV_MIN;
+    }
+  }
+  else {
+    LLS_TV = uVar5;
+    if ((LLS_ST & 0x20) != 0) {
+      LLS_TV = K_LLS_TV_NOTLAUF_MAX;
+    }
+    if ((LLS_ST & 0x10) != 0) {
+      LLS_TV = K_LLS_TV_NOTLAUF_MIN;
+    }
+    if ((LLS_ST & 8) != 0) {
+      LLS_TV = K_LLS_TV_NOTLAUF_MIN;
+    }
+    if ((LLS_ST & 4) != 0) {
+      LLS_TV = K_LLS_TV_MAX;
+    }
+    LLS_TV_AQ = K_LLS_TV_AQ_NOTLAUF;
+  }
+  LLS_TV_BEGR = bVar7;
+  if ((edk_ds2_st & 2) != 0) {
+    LLS_TV = DAT_00ffef0e;
+  }
+  iVar2 = (uint)LLS_TV * 5;
+  iVar4 = (uint)LLS_TV * 10;
+  if (SCARRY4(iVar2,iVar2)) {
+    iVar4 = iVar4 + 0xf;
+  }
+  uVar3 = (uint)((iVar4 >> 4) * 500) / 0x18c;
+  Ram00ffffc4 = (short)uVar3;
+  if (((((ZUSTAND_MOTOR & S) != 0) || ((ZUSTAND_MOTOR & KI.15 aus) != 0)) ||
+      ((ZUSTAND_MOTOR & Nachlauf) != 0)) && (((SCHALT_M_ST & 8) == 0 && (edk_ds2_st == 0)))) {
+    LLS_ST = LLS_ST | 1;
+    bVar7 = SIM_PORTC;
+    SIM_PORTC = bVar7 | 0x20;
+    return uVar3;
+  }
+  LLS_ST = LLS_ST & 0xfe;
+  bVar7 = SIM_PORTC;
+  SIM_PORTC = bVar7 & 0xdf;
+  return uVar3;
+}
+

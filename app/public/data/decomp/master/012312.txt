@@ -1,0 +1,20 @@
+
+void tpu_segm_release_kl15off_inhibit(void)
+
+{
+  undefined2 uVar1;
+  short sVar2;
+  
+  if (((ZUSTAND_MOTOR & KI.15 aus) == 0) && ((TPU_ST_M & Kl15 aus) != in Ordnung)) {
+    if ((TPU_ST_M & nicht sync) != in Ordnung) {
+      uVar1 = tpu_last_tooth_timestamp;
+      sVar2 = tpu_last_tooth_timestamp;
+      if (sVar2 != 0) {
+        return;
+      }
+    }
+    TPU_ST_M = TPU_ST_M & ~Kl15 aus;
+  }
+  return;
+}
+

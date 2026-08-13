@@ -1,0 +1,40 @@
+
+void can_rx_a770_b510(struct_rx_tx_frame *rx_frame_struct)
+
+{
+  char cVar1;
+  char *pcVar2;
+  byte local_14;
+  char local_13;
+  undefined1 local_12;
+  byte local_c;
+  undefined1 local_b;
+  
+  can_b_rx_frame_data(&local_c,rx_frame_struct);
+  if ((DAT_00ffdb2a & 0x10) == 0) {
+    cVar1 = 1;
+    for (pcVar2 = "\x01"; (0 < cVar1 && ((int)*pcVar2 != (uint)local_c)); pcVar2 = pcVar2 + -6) {
+      cVar1 = cVar1 + -1;
+    }
+    if (cVar1 < 1) {
+      local_13 = -1;
+      goto LAB_0002f3a6;
+    }
+  }
+  else {
+    cVar1 = 10;
+    for (pcVar2 = "\x03"; (0 < cVar1 && ((int)*pcVar2 != (uint)local_c)); pcVar2 = pcVar2 + -6) {
+      cVar1 = cVar1 + -1;
+    }
+  }
+  local_14 = 0xff;
+  local_13 = 0;
+  local_12 = local_b;
+  (**(code **)(pcVar2 + 2))(&local_c,&local_14);
+LAB_0002f3a6:
+  if (local_13 != -1) {
+    can_b_tx_frame_data(&local_14,&struct_rx_tx_frame_00041a4e);
+  }
+  return;
+}
+

@@ -1,0 +1,14 @@
+
+void md_ind_init_FUN_00017f0e(void)
+
+{
+  MD_NORM_CAN = K_MD_NORM;
+  MD_NORM = (ushort)K_MD_NORM * 0xa0;
+  MD_REIB = 0;
+  MD_IND_IST = 0;
+  MD_IND_NE_IST = 0;
+  MD_IND_LM_IST = 0;
+  MD_ST_EINGRIFF = 0;
+  return;
+}
+

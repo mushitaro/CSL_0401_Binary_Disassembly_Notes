@@ -1,0 +1,37 @@
+
+void can_smg_watchdog(void)
+
+{
+  undefined4 uVar1;
+  byte errortype;
+  
+  FUN_0003d144(0xc);
+  FUN_0003d144(0xd);
+  FUN_0003d144(0xe);
+  CAN_SMG_ST = CAN_SMG_EMPF | CAN_SMG_ST;
+  if (((UB < K_CAN_UBMIN_S) || ((ZUSTAND_MOTOR & KI.15 aus) != 0)) ||
+     ((ZUSTAND_MOTOR & Nachlauf) != 0)) {
+    CAN_ED_TSPERR_S = K_CAN_ED_TSPERR_S;
+  }
+  if (CAN_ED_TSPERR_S != '\0') {
+    CAN_ED_TSPERR_S = CAN_ED_TSPERR_S + -1;
+    return;
+  }
+  if (CAN_SMG_EMPF == 7) {
+    if (CAN_ED_S != '\0') {
+      uVar1 = ed_report(DTC_7B_SMG_CAN_FAIL,0);
+      CAN_ED_S = (char)uVar1;
+    }
+    if (CAN_ED_SMG == '\0') {
+      return;
+    }
+    errortype = 0;
+  }
+  else {
+    errortype = 4;
+  }
+  uVar1 = ed_report(DTC_06_SMG_CAN_TIMEOUT,errortype);
+  CAN_ED_SMG = (char)uVar1;
+  return;
+}
+

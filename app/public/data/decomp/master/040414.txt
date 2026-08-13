@@ -1,0 +1,28 @@
+
+void qsm_init_transfer_state(void)
+
+{
+  byte bVar1;
+  char cVar2;
+  struct_qsm_transfer_queue_item *psVar3;
+  
+  qsm_transfer_busy = 0;
+  DAT_00ffe5df = 0;
+  qsm_transfer_flags = 0;
+  DAT_00ffe5e0 = 0;
+  qsm_queue_count = 0;
+  qsm_active_transfer = 0;
+  psVar3 = &qsm_transfer_queue;
+  cVar2 = 4;
+  do {
+    psVar3->descriptor = (int *)0x0;
+    psVar3->priority = 0;
+    psVar3 = psVar3 + 1;
+    cVar2 = cVar2 + -1;
+  } while (cVar2 != 0);
+  QSM_SPCR3 = 0;
+  bVar1 = QSM_SPSR;
+  QSM_SPSR = bVar1 & 0xfe;
+  return;
+}
+
