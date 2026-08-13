@@ -121,12 +121,12 @@ XDF でも `KF_RF_N_AQ_REL`（X: n, Y: aq_rel [%], Function: DKBA）として 04
 >
 > スレーブ側に同じ規則を当てると消去領域を読むことになるので注意してください。実測での確認：`K_RF_HUBVOLUMEN`（マスター）は @0xD21C = 3201、@0x8D21C = 0xFFFF。逆に `K_LA_T_RF`（スレーブ）は @0x4804 = 0xFFFF、@0x8C804 = 有効値。なお `0x88000 + (アドレス mod 0x8000)` という統一形は **Ghidra の注釈空間に対する規則**であって、マスター側のファイルオフセットには使えません。
 
-| 定数 | アドレス | 実値 | 意味 |
-|---|---|---|---|
-| `k_rf_cfg` | 0xE5E4 | **0x12** | RF は `rf_soll`（Alpha-N, TABG 補正付き）＋ `rf_p_saug_i` |
-| `k_rf_hfm_cfg` | 0xD202 | **0** | HFM 経路オフ |
-| `K_RF_HUBVOLUMEN` | 0xD21C | **3.201 dm³** | 正規化に使う行程容積 |
-| `K_RF_LUFTDICHTE` | 0xD21E | **1.136 kg/m³** | 基準空気密度（960 mbar / 20 ℃ に相当） |
+| パラメータ定義名 | 種別 | XDFアドレス | ファイルオフセット | bank | 現在値 | 単位 | 役割 | 変更方向・量 | リスク | 根拠 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `k_rf_cfg` | constant | 0xE5E4 | 0x0E5E4 | master | 0x12 (raw 18) | cfg byte | RF の算出元を選ぶ。0x12 = `rf_soll`（Alpha-N、TABG 補正）＋ `rf_p_saug_i` | 変更しない | 負荷検出全体が切り替わる。bit2 を立てて HFM 経路にするにはハードウェア変更が要り、0401 では動作しない | code-confirmed (`rf_calc`) |
+| `k_rf_hfm_cfg` | constant | 0xD202 | 0x0D202 | master | 0 (raw 0) | cfg byte | HFM 経路（`ml_hfm1` / `rf_hfm1`）の有効化 | 変更しない | 1 にすると存在しないセンサを読みに行く | code-confirmed (`saug_calc`) |
+| `K_RF_HUBVOLUMEN` | constant | 0xD21C | 0x0D21C | master | 3.201 (raw 3201) | dm**3 | RF 正規化の行程容積。`rf_ml_const` と `RF_TI_CONST` の分母 | 変更しない | RF の目盛りが全域でずれ、燃料・点火・トルクの全マップが同時に意味を変える | code-confirmed (`rf_consts_calc`, `rf_init`) / FR 1.0 p.8, 4.01 p.13-14, 4.05 p.3 |
+| `K_RF_LUFTDICHTE` | constant | 0xD21E | 0x0D21E | master | 1.136 (raw 1136) | Kg/m**3 | RF 正規化の基準空気密度（960 mbar / 20 ℃ 相当） | 変更しない | 同上。大気条件の補正は `RF_PT_KORR` 側の仕事で、ここではない | code-confirmed (`rf_consts_calc`, `rf_init`) / FR 4.05 p.3 |
 
 `rf_calc`（`master/0218d0.txt`）の分岐がそのまま `k_rf_cfg` の意味です。
 
@@ -219,20 +219,23 @@ VL では WDK が飽和して (n, wdk) 面が退化するので、**n 軸の 1 �
 
 運転状態は `zustand_motor_calc`（`master/02c1e2.txt`）が WDK の閾値で決めます。0401 実機値：
 
-**`KF_BZ_WDK_VL`（@0xAC54, X = n, Y = tmot, Z = %）**
+| パラメータ定義名 | 種別 | XDFアドレス | ファイルオフセット | bank | 現在値 | 単位 | 役割 | 変更方向・量 | リスク | 根拠 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `KF_BZ_WDK_VL (Map_Operating States_Throttle Position_Full Load)` | map | 0xAC44 | 0x0AC44 | master | 4x4。35.0 / 55.0 / 63.0 / 65.0 %（n = 1300 / 2000 / 3000 / 4000、tmot 0–60 ℃ で同値） | % | 全負荷 (VL) と判定する WDK 閾値 | 比較の分割にのみ使う。書き換えない | 全負荷増量・DISA 切替・λ 開ループ化の開始点が動く | xref-only（`FUN_0002c0e0` が読むが文が復元されていない） |
+| `KL_BZ_WDK_LL` | curve | 0xAC32 | 0x0AC32 | master | 1.2 %（3500 / 4000 / 5000 / 6000 rpm で一定） | % | アイドル (LL) と部分負荷 (TL) の境界 | 同上 | アイドル制御の介入範囲が動く | xref-only（`FUN_0002c0e0`、文の復元なし） |
+| `K_BZ_WDK_VL_HYST` | constant | 0xAC06 | 0x0AC06 | master | 6.0 (raw 60) | % | VL から抜けるヒステリシス幅 | 同上 | 境界付近でのチャタリング | xref-only（`zustand_motor_calc`） |
+| `K_BZ_WDK_LL_HYST` | constant | 0xAC04 | 0x0AC04 | master | 0.2 (raw 2) | % | LL から抜けるヒステリシス幅 | 同上 | 同上 | xref-only（`zustand_motor_calc`） |
 
-| tmot ＼ n | 1300 | 2000 | 3000 | 4000 |
-|---|---|---|---|---|
-| 0 / 20 / 40 / 60 ℃ | 35.0 % | 55.0 % | 63.0 % | 65.0 % |
+状態遷移そのもの（`zustand_motor_calc`、`master/02c1e2.txt`）:
 
-（この校正では温度依存なし。4000 rpm 以上は 65 % で頭打ち）
+| 境界 | 条件 |
+|---|---|
+| TL → VL | `WDK_WORD > BZ_WDKVL` |
+| VL → TL | `WDK_WORD < BZ_WDKVL − K_BZ_WDK_VL_HYST` |
+| LL → TL | `WDK_WORD ≥ BZ_WDKLL` |
+| TL → LL | `WDK_WORD < BZ_WDKLL − K_BZ_WDK_LL_HYST` |
 
-| 境界 | 条件 | 0401 実値 |
-|---|---|---|
-| TL → VL | `WDK > KF_BZ_WDK_VL(n, tmot)` | 上表 |
-| VL → TL | `WDK < 閾値 − K_BZ_WDK_VL_HYST` | ヒステリシス **6.0 %**（@0xAC06） |
-| LL → TL | `WDK ≥ KL_BZ_WDK_LL(n)` | **1.2 %**（3500–6000 rpm, @0xAC3A） |
-| TL → LL | `WDK < 閾値 − K_BZ_WDK_LL_HYST` | ヒステリシス **0.2 %**（@0xAC04） |
+> **証拠の粒度**：比較そのものは復元された文にそのまま現れる（code-confirmed）。一方、RAM 値 `BZ_WDKVL` / `BZ_WDKLL` が `KF_BZ_WDK_VL(n, tmot)` / `KL_BZ_WDK_LL(n)` の補間結果である、という同定は **xref-only** です。マップを読む `FUN_0002c0e0` は文が復元されておらず、軸（n × tmot → %）と名前からの推定が根拠になります。値そのものは実バイナリで確認済みですが、補間の引数順まで断定はできません。
 
 VL 入りは他条件でも阻止されます：`TI_ST_HELP & 0x10`、`MD_BEGR_AUSS_ST ≠ 0`、`VAN_ED_ST & 0xF0`。
 
@@ -395,12 +398,14 @@ Read from `Full 211323000401PD31_TERRA.bin`:
 >
 > Applying the raw rule to a Slave-side address lands in erased flash. Verified both ways: `K_RF_HUBVOLUMEN` (Master) reads 3201 at 0xD21C and 0xFFFF at 0x8D21C; `K_LA_T_RF` (Slave) reads 0xFFFF at 0x4804 and valid data at 0x8C804. Note that the unified form `0x88000 + (address mod 0x8000)` is a rule for **Ghidra's annotation space**, not for Master-side file offsets.
 
-| Constant | Address | Value | Meaning |
-|---|---|---|---|
-| `k_rf_cfg` | 0xE5E4 | **0x12** | `RF` = `rf_soll` (Alpha-N with TABG correction) + `rf_p_saug_i` |
-| `k_rf_hfm_cfg` | 0xD202 | **0** | HFM path disabled |
-| `K_RF_HUBVOLUMEN` | 0xD21C | **3.201 dm³** | Swept volume used for normalisation |
-| `K_RF_LUFTDICHTE` | 0xD21E | **1.136 kg/m³** | Reference air density (≈ 960 mbar / 20 °C) |
+| Constant | XDF addr | File offset | Bank | Value | Meaning |
+|---|---|---|---|---|---|
+| `k_rf_cfg` | 0xE5E4 | 0x0E5E4 | master | **0x12** | `RF` = `rf_soll` (Alpha-N with TABG correction) + `rf_p_saug_i` |
+| `k_rf_hfm_cfg` | 0xD202 | 0x0D202 | master | **0** | HFM path disabled |
+| `K_RF_HUBVOLUMEN` | 0xD21C | 0x0D21C | master | **3.201 dm³** | Swept volume used for normalisation |
+| `K_RF_LUFTDICHTE` | 0xD21E | 0x0D21E | master | **1.136 kg/m³** | Reference air density (≈ 960 mbar / 20 °C) |
+
+> The Japanese section carries the canonical rows in this repository's parameter-table format, including role, change-direction, risk and evidence grade; `verify_doc.py` checks those. This English table is a reading aid — where the two differ, the Japanese rows are authoritative.
 
 The branch in `rf_calc` (`master/0218d0.txt`) *is* the meaning of `k_rf_cfg`:
 
@@ -493,7 +498,7 @@ At VL the throttle saturates and the (n, wdk) surface degenerates, so reduce to 
 
 The operating state is decided from throttle-angle thresholds in `zustand_motor_calc` (`master/02c1e2.txt`). 0401 actual values:
 
-**`KF_BZ_WDK_VL` (@0xAC54, X = n, Y = tmot, Z = %)**
+**`KF_BZ_WDK_VL`** (XDF 0xAC44 / file 0x0AC44, master, 4x4 over n × tmot → %)
 
 | tmot ＼ n | 1300 | 2000 | 3000 | 4000 |
 |---|---|---|---|---|
@@ -503,10 +508,12 @@ The operating state is decided from throttle-angle thresholds in `zustand_motor_
 
 | Transition | Condition | 0401 value |
 |---|---|---|
-| TL → VL | `WDK > KF_BZ_WDK_VL(n, tmot)` | table above |
-| VL → TL | `WDK < threshold − K_BZ_WDK_VL_HYST` | hysteresis **6.0 %** (@0xAC06) |
-| LL → TL | `WDK ≥ KL_BZ_WDK_LL(n)` | **1.2 %** (3500–6000 rpm, @0xAC3A) |
-| TL → LL | `WDK < threshold − K_BZ_WDK_LL_HYST` | hysteresis **0.2 %** (@0xAC04) |
+| TL → VL | `WDK_WORD > BZ_WDKVL` | table above |
+| VL → TL | `WDK_WORD < BZ_WDKVL − K_BZ_WDK_VL_HYST` | hysteresis **6.0 %** (XDF 0xAC06) |
+| LL → TL | `WDK_WORD ≥ BZ_WDKLL` | **1.2 %** (`KL_BZ_WDK_LL`, XDF 0xAC32, 3500–6000 rpm) |
+| TL → LL | `WDK_WORD < BZ_WDKLL − K_BZ_WDK_LL_HYST` | hysteresis **0.2 %** (XDF 0xAC04) |
+
+> **Evidence grade**: the comparisons themselves appear verbatim in recovered statements (`code-confirmed`). That the RAM values `BZ_WDKVL` / `BZ_WDKLL` are interpolations of `KF_BZ_WDK_VL(n, tmot)` / `KL_BZ_WDK_LL(n)` is **`xref-only`** — the function that reads those tables (`FUN_0002c0e0`) has no recovered statements, so the identification rests on the axes and the names. The values are confirmed against the binary; the interpolation argument order is not.
 
 Entry into VL is also blocked by `TI_ST_HELP & 0x10`, `MD_BEGR_AUSS_ST ≠ 0` and `VAN_ED_ST & 0xF0`.
 
