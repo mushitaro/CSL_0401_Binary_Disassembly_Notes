@@ -74,8 +74,7 @@ def load_i18n(i18n_dir: Path) -> dict[str, dict[str, str]]:
 # links back to them in the repository instead, which also works from a local
 # `npm run dev` and from GitHub Pages alike.
 DEFAULT_DOC_BASE = (
-    "https://github.com/mushitaro/CSL_0401_Binary_Disassembly_Notes/blob/"
-    "claude/mss54hp-csl-dme-tool-x7qcrw"
+    "https://github.com/mushitaro/CSL_0401_Binary_Disassembly_Notes/blob/master"
 )
 
 

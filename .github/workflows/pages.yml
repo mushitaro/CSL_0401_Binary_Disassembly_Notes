@@ -10,7 +10,7 @@ name: Deploy viewer to GitHub Pages
 
 on:
   push:
-    branches: [claude/mss54hp-csl-dme-tool-x7qcrw]
+    branches: [master]
   workflow_dispatch:
 
 permissions:

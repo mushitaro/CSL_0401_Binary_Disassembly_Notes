@@ -2,7 +2,7 @@ name: Pipeline tests
 
 on:
   push:
-    branches: [claude/mss54hp-csl-dme-tool-x7qcrw]
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
