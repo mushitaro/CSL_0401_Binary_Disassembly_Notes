@@ -33,17 +33,26 @@ each source.
 
 ## The address rule
 
-Everything depends on this one conversion, so get it right before anything else:
+Everything depends on this one conversion, and **it is different for each bank**:
 
 ```
-file offset = 0x88000 + (XDF address mod 0x8000)
+master (XDF 0x8000–0xFFFF)   file offset = addr
+slave  (XDF 0x0000–0x7FFF)   file offset = 0x88000 + addr
 ```
 
-The XDF is a 32 KB window shared by two CPUs: **slave `0x0000–0x7FFF`, master
-`0x8000–0xFFFF`**. A slave parameter and a master parameter therefore land on the
-same file offset — `KF_AR_MD` (slave `0x112A`) and `KF_MD_MIN_BRENN` (master
-`0x912A`) both sit at `0x8912A`. That is expected, not a bug, but it means the
-bank must always travel with the address. Quote both forms in every answer.
+The XDF is a 64 KB region covering two CPUs, split down the middle. In the 1 MB
+image the master calibration is where its address says; the slave image starts at
+`0x80000` and its parameter space sits `0x8000` into it, hence `0x88000`. So
+`KF_MD_MIN_BRENN` (master `0x912A`) is at file `0x0912A`, while `KF_AR_MD` (slave
+`0x112A`) is at file `0x8912A`. The bank must always travel with the address —
+quote both forms in every answer.
+
+**Do not use `0x88000 + (addr mod 0x8000)` as a file offset.** That expression is
+the run-time *Mapped Parameter Space* window that Ghidra annotates for both banks:
+correct for matching Ghidra symbols, wrong for reading the file, where it puts
+every master parameter `0x80000` too high — on unrelated slave data. `q.py` and
+`verify_doc.py` both apply the bank-aware rule above, as does
+`tools/pipeline/parse_xdf.py`, which decoded the values in `graph.json`.
 
 ## Tools
 

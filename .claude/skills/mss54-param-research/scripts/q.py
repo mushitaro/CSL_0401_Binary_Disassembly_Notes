@@ -64,9 +64,28 @@ def catname(i):
     return f"{c.get('en')} [{c.get('de')}]" if c else str(i)
 
 
-def fileoff(addr):
-    """The one address rule. Getting this wrong drops coverage from 86.5% to 0.6%."""
-    return None if addr is None else 0x88000 + (addr % 0x8000)
+def fileoff(addr, bank=None):
+    """Where an XDF address really sits in the 1 MB image. Bank decides.
+
+        master   file = addr             (master XDF addresses are 0x8000-0xFFFF)
+        slave    file = 0x88000 + addr   (slave  XDF addresses are 0x0000-0x7FFF)
+
+    Do not confuse this with `0x88000 + (addr mod 0x8000)`. That is the run-time
+    "Mapped Parameter Space" window Ghidra annotates for *both* banks — right for
+    matching Ghidra symbols, wrong for reading bytes out of the file, where it
+    puts every master parameter 0x80000 too high, on unrelated slave data.
+
+    Measured against `Full 211323000401PD31_TERRA.bin`: 922/922 master constants
+    read back at `addr`, 859/859 slave constants at `0x88000 + addr`, and each
+    rule fails for the other bank. Same rule as
+    `tools/pipeline/parse_xdf.py:file_offset`, which decoded these values.
+    """
+    if addr is None:
+        return None
+    b = (bank or "").lower()
+    if b not in ("master", "slave"):
+        b = "slave" if addr < 0x8000 else "master"     # the two ranges never overlap
+    return 0x88000 + addr if b == "slave" else addr
 
 
 # ---------------------------------------------------------------- scaling maths
@@ -124,7 +143,7 @@ def pshort(p):
     elif p.get("kind") == "curve":
         dims = f" [{(axes.get('y') or {}).get('n','?')}]"
     val = f"  = {p.get('value')} (raw {p.get('raw')})" if p.get("kind") == "constant" else ""
-    fo = fileoff(a)
+    fo = fileoff(a, p.get("bank"))
     return (f"{p['name']:38s} {p.get('kind',''):8s} XDF=0x{a:04X} file=0x{fo:05X} "
             f"{p.get('bank',''):6s} {str(p.get('units','')):10s} {str(p.get('math','')):16s}{dims}{val}")
 

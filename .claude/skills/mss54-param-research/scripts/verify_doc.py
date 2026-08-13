@@ -12,7 +12,9 @@ Recognised row shape (the column order the skill's report template uses):
 For each row it checks:
   1. NAME exists as a parameter in graph.json
   2. the XDF address matches that parameter's real address
-  3. the file offset equals 0x88000 + (XDF address mod 0x8000)
+  3. the file offset follows the rule for that row's bank:
+       master  file = addr             (master XDF addresses are 0x8000-0xFFFF)
+       slave   file = 0x88000 + addr   (slave  XDF addresses are 0x0000-0x7FFF)
   4. the bank matches
   5. the kind (constant/curve/map) matches
   6. for constants, the stated current value matches (when a number is parseable)
@@ -63,6 +65,30 @@ KINDS = {"constant", "curve", "map"}
 NUM = re.compile(r"-?\d+(?:\.\d+)?")
 
 
+def file_offset(addr, bank):
+    """Where an XDF address really sits in the 1 MB image. Bank decides.
+
+    The two CPUs share one 32 KB XDF window but not one place in the flash:
+
+        master   file = addr             (master XDF addresses are 0x8000-0xFFFF)
+        slave    file = 0x88000 + addr   (slave  XDF addresses are 0x0000-0x7FFF)
+
+    Do not confuse this with `0x88000 + (addr mod 0x8000)`. That is the run-time
+    "Mapped Parameter Space" window Ghidra annotates for *both* banks: right for
+    matching Ghidra symbols, wrong for reading bytes out of the file. Applied to a
+    master parameter it lands 0x80000 too high, on unrelated slave data.
+
+    Measured against `Full 211323000401PD31_TERRA.bin`: all 922 master constants
+    read back correctly at `addr` (only 28 also happen to match the mapped-window
+    form), and all 859 slave constants at `0x88000 + addr` (only 21 also match at
+    `addr`). `tools/pipeline/parse_xdf.py:file_offset` uses the same rule.
+    """
+    b = (bank or "").lower()
+    if b not in ("master", "slave"):
+        b = "slave" if addr < 0x8000 else "master"     # the two ranges never overlap
+    return 0x88000 + addr if b == "slave" else addr
+
+
 def check(path):
     bad, seen = [], 0
     for ln, line in enumerate(open(path, encoding="utf-8"), 1):
@@ -80,11 +106,15 @@ def check(path):
             bad.append((ln, name, "name does not exist in the XDF data"))
             continue
         node = min(nodes, key=lambda n: abs((n.get("addr") if n.get("addr") is not None else -1) - xa_i))
-        want = 0x88000 + (xa_i % 0x8000)
+        # Grade the offset against the bank the data says, not the bank the row
+        # claims — a wrong bank column would otherwise excuse a wrong offset.
+        eff_bank = node.get("bank") or bank
+        want = file_offset(xa_i, eff_bank)
+        rule = "0x88000 + addr" if want != xa_i else "addr"
         if node.get("addr") != xa_i:
             bad.append((ln, name, f"XDF 0x{xa_i:04X} but the real address is 0x{node.get('addr'):04X}"))
         if fo_i != want:
-            bad.append((ln, name, f"file 0x{fo_i:05X} but 0x88000+(0x{xa_i:04X} mod 0x8000) = 0x{want:05X}"))
+            bad.append((ln, name, f"file 0x{fo_i:05X} but {eff_bank or 'this'} {rule} = 0x{want:05X}"))
         if bank and node.get("bank") and bank.lower() != node["bank"].lower():
             bad.append((ln, name, f"bank '{bank}' but the parameter is '{node['bank']}'"))
         if node.get("kind") and kind != node["kind"]:

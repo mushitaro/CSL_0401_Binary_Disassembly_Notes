@@ -30,7 +30,7 @@ statement saying so.
 **The symptom:** a recommendation that is perfectly researched and completely
 useless, because the parameter cannot influence anything.
 
-**Worked example.** `K_MD_J_MOTOR` (`0x9554` / `0x89554`, master, `Nms2`, `x/268`,
+**Worked example.** `K_MD_J_MOTOR` (`0x9554` / file `0x09554`, master, `Nms2`, `x/268`,
 0.2687) is the ECU's only explicit engine-inertia constant. For a flywheel
 question it is the obvious answer. Funktionsrahmen 1.0 p.27 gives its sole use:
 
@@ -132,7 +132,9 @@ Checklist:
 
 1. Does every claimed name exist verbatim in the XDF data?
 2. Is every XDF address correct for that name?
-3. Is every file offset exactly `0x88000 + (addr mod 0x8000)`?
+3. Is every file offset right **for that bank** — master `addr`, slave
+   `0x88000 + addr`? (`0x88000 + (addr mod 0x8000)` is the Ghidra mapped window,
+   not the file offset; it puts master rows 0x80000 too high.)
 4. Are the current value, scaling, bank and kind right?
 5. Are `code-confirmed` claims actually backed by a recovered statement? Downgrade
    anything that is really `xref-only`.
