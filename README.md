@@ -32,6 +32,33 @@ genuinely comparable and where the full-load boundary has to split the data.
 
 See **[docs/LOAD_PATH.md](docs/LOAD_PATH.md)** (日本語 / English).
 
+## SMG2 and DME Tuning Approach / SMG2 と DME チューニング手法
+
+What the DME actually holds for SMG II — 52 recovered control functions on the slave CPU,
+the KI index that turns Drivelogic into a shift-ramp time in milliseconds, the rev-match PID,
+and the safety-concept constants that must not be moved. Built from a real DME read and
+checked against the CSL reference byte for byte; includes one KI map the XDF does not define.
+
+SMG II の制御が DME のどこにあるか（スレーブ CPU に復元済み関数 52 本）、Drivelogic が
+ミリ秒の変速ランプ時間になるまでの「KI」経路、回転合わせの PID、そして触ってはいけない
+安全コンセプト定数。実車から読んだ DME を CSL リファレンスと全バイト比較した結果と、
+XDF に定義が無い KI マップ 1 面の発見を含みます。
+
+See **[docs/e46m3_smg2_dme_tuning_approach.md](docs/e46m3_smg2_dme_tuning_approach.md)** (日本語).
+
+## Comparing two calibrations / 較正どうしの比較
+
+`tools/compare/xdf_diff.py` decodes all 2,529 XDF parameters out of two images and reports
+what differs in engineering units. It takes either shape — the 64 KB partial a DS2 read
+produces, or a 1 MB full flash — and folds them onto one view, so a car read and a reference
+binary compare directly.
+
+```bash
+python3 tools/compare/xdf_diff.py A.bin B.bin --summary          # differing count per category
+python3 tools/compare/xdf_diff.py A.bin B.bin --cat "^SMG$" --full
+python3 tools/compare/xdf_diff.py --dump A.bin --name "^K_SMG"   # one image, no comparison
+```
+
 ## How to Contribute
 To contribute to this project please use the "Issues" feature to report discoveries of new information and bugs (issues identified with existing information). If you have general questions or would like to discuss particular items in general please use the "Discussions" feature.
 
