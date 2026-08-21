@@ -54,10 +54,20 @@ produces, or a 1 MB full flash — and folds them onto one view, so a car read a
 binary compare directly.
 
 ```bash
+python3 tools/compare/xdf_diff.py --identify A.bin [B.bin ...]   # which program is this? no XDF involved
 python3 tools/compare/xdf_diff.py A.bin B.bin --summary          # differing count per category
 python3 tools/compare/xdf_diff.py A.bin B.bin --cat "^SMG$" --full
 python3 tools/compare/xdf_diff.py --dump A.bin --name "^K_SMG"   # one image, no comparison
 ```
+
+Start with `--identify`. It reads the hardware and program number BMW stamps into the ZIF block
+at `0xBFB8` as plain ASCII — no XDF, no parameter definition, nothing that can be wrong because a
+definition file had an address wrong. Everything else refuses to run on an image whose program
+these definitions do not describe, because that failure is silent otherwise: a standard-M3
+`211323002001JD59` image read with 0401 definitions reports 82% of parameters as "differing",
+returns 4.25 for the first three gear ratios (the real ones descend 4.23 / 2.53 / 1.67) and a
+491.5 mm dynamic tyre radius on a car whose wheels are 307. None of it looks broken enough to
+catch by eye.
 
 ## How to Contribute
 To contribute to this project please use the "Issues" feature to report discoveries of new information and bugs (issues identified with existing information). If you have general questions or would like to discuss particular items in general please use the "Discussions" feature.

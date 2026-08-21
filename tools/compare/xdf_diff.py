@@ -90,6 +90,53 @@ def identify(img: bytes) -> dict:
             "plausible": hw.isdigit() and program.isdigit()}
 
 
+def graph_program(D: dict) -> str | None:
+    """Which program the loaded definitions actually describe.
+
+    Read from the XDF's own text rather than hard-coded, so this stays right if the
+    graph is ever rebuilt from a different definition file. The descriptions carry
+    `Version:211325000401PD11`; the program is the four digits before the suffix.
+    """
+    counts: dict[str, int] = {}
+    for n in D.get("nodes", ()):
+        text = (n.get("desc") or {}).get("en") or ""
+        for m in re.findall(r"Version:(\d{12})", text):
+            counts[m[8:12]] = counts.get(m[8:12], 0) + 1
+    return max(counts, key=counts.get) if counts else None
+
+
+def check_programs(paths: list[str], images: list[bytes], expected: str | None, force: bool) -> None:
+    """Stop before printing numbers that would be confident nonsense.
+
+    Decoding an image with definitions written for a different program does not fail
+    loudly — it silently reads whatever bytes happen to sit at each address, and the
+    result looks like data. Measured on a standard-M3 `211323002001JD59` image read
+    with these 0401 definitions: 82% of parameters "differ", `K_SMG_I_GANG_1/2/3` all
+    come back 4.25 (real ratios descend 4.23/2.53/1.67), and the dynamic tyre radius
+    reads 491.5 mm on a car whose wheels are 307. None of those look broken enough to
+    catch by eye, which is exactly why this refuses rather than warns.
+    """
+    seen = [(os.path.basename(p), identify(img)) for p, img in zip(paths, images)]
+    wrong = [(n, i) for n, i in seen if i["plausible"] and expected and i["program"] != expected]
+    mixed = len({i["program"] for _, i in seen if i["plausible"]}) > 1
+    if not wrong and not mixed:
+        return
+
+    for name, info in seen:
+        tag = "" if not info["plausible"] else (
+            "   <- not the program these definitions describe" if expected and info["program"] != expected else "")
+        print(f"  {name:<44}{info['zif']:<18}program {info['program']}{tag}", file=sys.stderr)
+    if force:
+        print("\n--force given: continuing anyway. Treat every number below as suspect.\n", file=sys.stderr)
+        return
+    sys.exit(
+        f"\nRefusing: these definitions describe program {expected}, and the image(s) above do not "
+        f"match.\nAddresses move between programs, so every value would be read from the wrong "
+        f"bytes\nand would still look like a plausible number. Use an XDF for that program, or pass "
+        f"--force\nif you know what you are doing. `--identify` always works — it reads the ZIF, not "
+        f"the XDF.")
+
+
 def bank_of(p: dict) -> str:
     """The XDF's two ranges never overlap, so the address decides. Some nodes carry
     `bank` and some do not; deriving it keeps one rule instead of two."""
@@ -209,6 +256,15 @@ def fmt(v, limit=14):
 
 
 def main():
+    # `xdf_diff.py ... | head` closes stdout early, and Python's default is to turn that into a
+    # BrokenPipeError traceback on a run that actually succeeded. Piping a 2,500-row dump into
+    # head is the normal way to use this, so take the shell's convention instead.
+    try:
+        from signal import signal, SIGPIPE, SIG_DFL
+        signal(SIGPIPE, SIG_DFL)
+    except (ImportError, ValueError):
+        pass                                    # not POSIX, or not on the main thread
+
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("images", nargs="+", help="A.bin B.bin — or one image with --dump")
     ap.add_argument("--dump", action="store_true", help="decode one image instead of comparing two")
@@ -220,6 +276,8 @@ def main():
     ap.add_argument("--full", action="store_true", help="print whole tables, not a first slice")
     ap.add_argument("--json", help="write the differences as JSON")
     ap.add_argument("--graph", help="path to graph.json")
+    ap.add_argument("--force", action="store_true",
+                    help="decode even when the image's program is not the one the definitions describe")
     args = ap.parse_args()
 
     if args.identify:
@@ -246,8 +304,11 @@ def main():
         params = [p for p in params if rx.search(p["name"])]
     params.sort(key=lambda p: (p.get("addr") if p.get("addr") is not None else 0))
 
+    expected = graph_program(D)
+
     if args.dump:
         img = load_image(args.images[0])
+        check_programs(args.images[:1], [img], expected, args.force)
         for p in params:
             v = decode(img, p)
             print(f"{p['name']:<44} {bank_of(p):<6} 0x{p['addr']:04X}  {fmt(v, 999 if args.full else 14)}")
@@ -257,6 +318,7 @@ def main():
     if len(args.images) < 2:
         sys.exit("two images are needed to compare — or pass --dump for one")
     a, b = load_image(args.images[0]), load_image(args.images[1])
+    check_programs(args.images[:2], [a, b], expected, args.force)
     na, nb = (os.path.basename(x) for x in args.images[:2])
 
     diffs, same, per_cat = [], 0, {}
