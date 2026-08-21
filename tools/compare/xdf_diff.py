@@ -35,6 +35,7 @@ Usage
     xdf_diff.py A.bin B.bin [--cat REGEX] [--name REGEX] [--full] [--json OUT]
     xdf_diff.py A.bin B.bin --summary          # differing count per category
     xdf_diff.py --dump A.bin --name REGEX      # decode one image, no comparison
+    xdf_diff.py --identify A.bin [B.bin ...]   # which program is this? (no XDF involved)
 """
 from __future__ import annotations
 
@@ -66,6 +67,27 @@ def find_graph() -> str:
         if os.path.exists(cand):
             return cand
     sys.exit("graph.json not found — pass --graph PATH or set $MSS54_GRAPH")
+
+
+# The ZIF block. BMW stamps the hardware and program number here as plain ASCII, three times over
+# for redundancy, and the DS2 partial read includes it. Reading it needs no XDF, no parameter
+# definition and no interpretation — which makes it the first thing to check about any image, and
+# the only identification that cannot be wrong because a definition file had the address wrong.
+#
+#   211323000401PD31  ->  HW 21132300, program 0401 (CSL), version PD31
+#   211323002001JD59  ->  HW 21132300, program 2001 (standard M3), version JD59
+ZIF_OFFSET = 0xBFB8
+ZIF_LENGTH = 16
+VARIANTS = {"21132200": "MSS54", "21132300": "MSS54HP", "21132500": "MSS54HP"}
+
+
+def identify(img: bytes) -> dict:
+    """Hardware, program and version, straight out of the bytes."""
+    text = img[ZIF_OFFSET:ZIF_OFFSET + ZIF_LENGTH].decode("ascii", "replace")
+    hw, program, version = text[:8], text[8:12], text[12:]
+    return {"zif": text, "hw": hw, "program": program, "version": version,
+            "variant": VARIANTS.get(hw, "unknown"),
+            "plausible": hw.isdigit() and program.isdigit()}
 
 
 def bank_of(p: dict) -> str:
@@ -190,6 +212,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("images", nargs="+", help="A.bin B.bin — or one image with --dump")
     ap.add_argument("--dump", action="store_true", help="decode one image instead of comparing two")
+    ap.add_argument("--identify", action="store_true",
+                    help="print each image's hardware/program/version from its ZIF block and stop")
     ap.add_argument("--cat", help="only categories whose English or German name matches this regex")
     ap.add_argument("--name", help="only parameters whose name matches this regex")
     ap.add_argument("--summary", action="store_true", help="differing-parameter count per category")
@@ -197,6 +221,17 @@ def main():
     ap.add_argument("--json", help="write the differences as JSON")
     ap.add_argument("--graph", help="path to graph.json")
     args = ap.parse_args()
+
+    if args.identify:
+        # Before graph.json is even opened: this answers "what am I holding" for an image whose
+        # program the XDF may not describe at all.
+        print(f"{'image':<44}{'ZIF':<18}{'HW':<10}{'program':<9}{'version':<9}variant")
+        for path in args.images:
+            info = identify(load_image(path))
+            note = "" if info["plausible"] else "   <- no ZIF here; not an MSS54 calibration image?"
+            print(f"{os.path.basename(path)[:43]:<44}{info['zif']:<18}{info['hw']:<10}"
+                  f"{info['program']:<9}{info['version']:<9}{info['variant']}{note}")
+        return
 
     D = json.load(open(find_graph(), encoding="utf-8"))
     cats = {c["id"]: c for c in D["categories"] if isinstance(c, dict) and "id" in c}
