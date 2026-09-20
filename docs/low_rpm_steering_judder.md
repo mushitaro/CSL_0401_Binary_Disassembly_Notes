@@ -112,7 +112,11 @@ XDF 表示はこの `k` ではなく `1 − k` を出しているので、
   何も起きない。
 - Servotronic 系 14 パラメータは `K_SERVO_CTRL`（0xC16E）= 0 で不活性
   （`SERVO_MODE` は恒久的に 0）。舵が絡む症状で真っ先に疑う場所だが、何を書いても変わらない。
-- `K_MD_ASC_CONTROL`（0x91D9）= 0。トラクション側のトルク介入も不活性。
+- `K_MD_ASC_CONTROL`（0x91D9）= 0 は **MSR（DSC 由来のエンジンブレーキ低減）を有効にする**。
+  `md_dsc` @ `f:master:017e00` のガードは `(K_MD_ASC_CONTROL & 2) == 0` で、bit1 が **落ちている**
+  ことが「有効」を意味する。クランプ `K_MD_MSR_BEGR` = 500.0 Nm は実質無制限。
+  以前この行は「不活性」と書いていたが誤りで、ビットの極性を取り違えていた。
+  介入が起きないのは DSC 側が要求を出していないときだけで、DME 側の権限は開いている。
 
 ---
 
@@ -662,7 +666,8 @@ DS2 で分かるのは「どの状態遷移と同期しているか」であっ�
 遅角だけが増えて悪化しうる。舵角リザーブ側の対処は上記 3（`K_MD_RES_LRW_DELTA`）に留めること。
 
 **手を出してはいけない:** `K_LFR_V_MAX`、`K_SERVO_CTRL` と Servotronic 系 14 個（不活性）、
-`K_DYN_CONTROL` 一族（不活性）、`K_MD_ASC_CONTROL`（不活性）、`K_MD_RES_CONTROL`（触媒側専用）、
+`K_DYN_CONTROL` 一族（不活性）、`K_MD_ASC_CONTROL`（MSR 有効側。触ると DSC の介入量が変わる）、
+`K_MD_RES_CONTROL`（触媒側専用）、
 `K_MD_RES_LRW_V` / `_VHYS`、`KL_MD_RES_LRW` の x 軸（上記のとおり取り下げ）、
 `K_LFR_CONTROL`（対症療法）、`kl_aq_rel_rf_fakt`（軸の定義）、
 `KF_MD_LS_WE`（機構未確定）、`K_AVAN1_CONTROL`（効果不明）、`k_rf_hfm_cfg`、
