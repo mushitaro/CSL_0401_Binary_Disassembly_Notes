@@ -977,6 +977,9 @@ Session 954 の実測 `aq_rel_rf` は **0.28 – 0.88 %** — きれいにバル
 
 **1 だけで数値の正しさが確定する。** そこから 2 → 3。
 
+> 手順 1 の作業指示書（番地・既存コード・受け入れ条件）は
+> [`low_load_surge_handoff.md`](low_load_surge_handoff.md) に切り出した。
+
 ---
 
 ## 10. 確定できなかったこと
@@ -999,6 +1002,7 @@ Session 954 の実測 `aq_rel_rf` は **0.28 – 0.88 %** — きれいにバル
 
 ## 参照
 
+- 実装の引継ぎ：[`low_load_surge_handoff.md`](low_load_surge_handoff.md)
 - 速い方のガクガク（解決済み）：[`low_rpm_steering_judder.md`](low_rpm_steering_judder.md)
 - アイドルとティップイン全般：[`csl_conversion_idle_and_tipin.md`](csl_conversion_idle_and_tipin.md)
 - 軽量フライホイール：[`lightweight_flywheel_tuning.md`](lightweight_flywheel_tuning.md)
